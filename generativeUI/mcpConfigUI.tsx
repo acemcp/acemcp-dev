@@ -23,64 +23,62 @@ export default function MCPCard({ handelSubmit }: { handelSubmit: () => void }) 
         }
     };
 
-
-    console.log("mcpConfig", mcpConfig);
-
     const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         if (isValidConfig()) {
-            console.log("MCP Configuration:", mcpConfig);
-            handelSubmit(); // Call the parent submit handler
+            handelSubmit();
         } else {
             alert("Please upload a file or enter server link and API key.");
         }
     };
 
     return (
-        <Card className="w-[400px] p-6 mx-auto mt-10">
-            <CardHeader>
-                <CardTitle>MCP Configuration</CardTitle>
+        <Card className="w-full max-w-xl">
+            <CardHeader className="space-y-1">
+                <CardTitle className="text-base font-semibold">Connect MCP Server</CardTitle>
+                <p className="text-sm text-muted-foreground">Upload an OpenAPI spec or connect a hosted MCP endpoint.</p>
             </CardHeader>
 
-            <CardContent className="space-y-4">
-                {/* File Upload */}
+            <CardContent className="space-y-6">
                 <div className="space-y-2">
-                    <Label>Upload your OpenAPI spec (JSON/YAML)</Label>
+                    <Label className="text-sm">Upload OpenAPI spec</Label>
                     <Input type="file" onChange={handleFileChange} />
-                    {mcpConfig.file && <p className="text-sm text-muted-foreground">{mcpConfig.file.name}</p>}
+                    {mcpConfig.file && <p className="text-xs text-muted-foreground">{mcpConfig.file.name}</p>}
                 </div>
 
-                <Separator className="my-4" />
-
-                {/* OR Separator */}
-                <div className="text-center text-sm font-medium text-muted-foreground">
-                    OR
+                <div className="flex items-center justify-center gap-3 text-xs font-medium text-muted-foreground">
+                    <Separator className="flex-1" />
+                    <span>or</span>
+                    <Separator className="flex-1" />
                 </div>
 
-                <Separator className="my-4" />
+                <div className="space-y-4">
+                    <div className="space-y-1">
+                        <Label className="text-sm" htmlFor="mcp-server-link">MCP Server Link</Label>
+                        <Input
+                            id="mcp-server-link"
+                            placeholder="https://your-mcp-server.com"
+                            value={mcpConfig.serverLink}
+                            onChange={(e) => setServerLink(e.target.value)}
+                        />
+                    </div>
 
-                {/* MCP Server + API Key */}
-                <div className="space-y-2">
-                    <Label>MCP Server Link</Label>
-                    <Input
-                        placeholder="https://your-mcp-server.com"
-                        value={mcpConfig.serverLink}
-                        onChange={(e) => setServerLink(e.target.value)}
-                    />
-
-                    <Label>API Key (Optional)</Label>
-                    <Input
-                        placeholder="Enter your API key"
-                        type="password"
-                        value={mcpConfig.apiKey}
-                        onChange={(e) => setApiKey(e.target.value)}
-                    />
+                    <div className="space-y-1">
+                        <Label className="text-sm" htmlFor="mcp-api-key">API Key (optional)</Label>
+                        <Input
+                            id="mcp-api-key"
+                            placeholder="Enter your API key"
+                            type="password"
+                            value={mcpConfig.apiKey}
+                            onChange={(e) => setApiKey(e.target.value)}
+                        />
+                    </div>
                 </div>
             </CardContent>
 
             <CardFooter>
                 <Button className="w-full" onClick={(e) => handleSubmit(e)}>
-                    Submit
+                    Submit Configuration
                 </Button>
             </CardFooter>
         </Card>
