@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Sparkles,
   ArrowRight,
@@ -25,6 +26,7 @@ import {
 import { IconBrandYoutubeFilled } from "@tabler/icons-react";
 import createGlobe from "cobe";
 import { motion } from "motion/react";
+import { useSupabaseSession } from "@/components/providers/supabase-session-provider";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -214,6 +216,9 @@ export default function LandingPage() {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeStage, setActiveStage] = useState(0);
+  const { session, isLoading } = useSupabaseSession();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -224,8 +229,40 @@ export default function LandingPage() {
 
   const handleGenerate = () => {
     if (!prompt.trim()) return;
+
+    if (!session) {
+      const params = new URLSearchParams();
+      params.set("redirectTo", "/landing");
+      params.set("mode", "signin");
+      params.set("prompt", prompt);
+      router.push(`/authentication?${params.toString()}`);
+      return;
+    }
+
     setIsGenerating(true);
     window.setTimeout(() => setIsGenerating(false), 2000);
+  };
+
+  const handlePrimaryCta = () => {
+    if (session) {
+      router.push("/generate");
+      return;
+    }
+
+    const params = new URLSearchParams();
+    params.set("redirectTo", "/generate");
+    router.push(`/authentication?${params.toString()}`);
+  };
+
+  const handleSecondaryCta = () => {
+    if (session) {
+      router.push("/advanced-agentic-loop");
+      return;
+    }
+
+    const params = new URLSearchParams();
+    params.set("redirectTo", "/advanced-agentic-loop");
+    router.push(`/authentication?${params.toString()}`);
   };
 
   return (
@@ -261,14 +298,28 @@ export default function LandingPage() {
               >
                 Documentation
               </Button>
+              {session ? (
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push("/generate")}
+                  className="h-10 rounded-lg px-4 text-sm text-white/80 transition hover:text-white"
+                >
+                  Dashboard
+                </Button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push("/authentication?mode=signin&redirectTo=%2Flanding")}
+                  className="h-10 rounded-lg px-4 text-sm text-white/80 transition hover:text-white"
+                >
+                  Sign in
+                </Button>
+              )}
               <Button
-                variant="ghost"
-                className="h-10 rounded-lg px-4 text-sm text-white/80 transition hover:text-white"
+                onClick={handlePrimaryCta}
+                className="h-10 rounded-lg bg-white px-5 text-sm font-semibold text-slate-900 shadow-[0_24px_60px_-30px_rgba(59,130,246,0.85)] transition hover:bg-white/90"
               >
-                Sign in
-              </Button>
-              <Button className="h-10 rounded-lg bg-white px-5 text-sm font-semibold text-slate-900 shadow-[0_24px_60px_-30px_rgba(59,130,246,0.85)] transition hover:bg-white/90">
-                Get started
+                {session ? "Continue building" : "Get started"}
               </Button>
             </div>
           </div>
@@ -609,15 +660,19 @@ export default function LandingPage() {
                   Join teams shipping production AI agents with enterprise-grade infrastructure and security.
                 </p>
                 <div className="mt-8 flex flex-wrap justify-center gap-3">
-                  <Button className="h-auto rounded-lg bg-white px-6 py-3 text-sm font-semibold text-slate-900 shadow-[0_28px_80px_-50px_rgba(59,130,246,0.9)] transition hover:bg-white/90">
-                    Get started for free
+                  <Button
+                    onClick={handlePrimaryCta}
+                    className="h-auto rounded-lg bg-white px-6 py-3 text-sm font-semibold text-slate-900 shadow-[0_28px_80px_-50px_rgba(59,130,246,0.9)] transition hover:bg-white/90"
+                  >
+                    {session ? "Resume your agents" : "Get started for free"}
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                   <Button
+                    onClick={handleSecondaryCta}
                     variant="ghost"
                     className="h-auto rounded-lg border border-white/20 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-xl transition hover:border-white/30 hover:bg-white/15"
                   >
-                    Schedule a demo
+                    {session ? "Explore advanced flows" : "Schedule a demo"}
                   </Button>
                 </div>
               </div>
