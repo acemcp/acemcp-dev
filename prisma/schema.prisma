@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @db.Uuid
+  username    String   @unique
+  userRole    String   @default("Developer") 
+  status      String   @default("Active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sessions     Session[]
+  projects     Project[]
+  mcpConfigs   MCPConfig[]
+  voiceConfigs VoiceConfig[]
+}
+
+model Project {
+  id                String   @id @default(uuid()) @db.Uuid
+  projectConfigJson Json     @map("project_config_json") @db.JsonB
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  ownerId           String   @db.Uuid
+  owner             User     @relation(fields: [ownerId], references: [id])
+  sessions          Session[]
+}
+
+model Session {
+  id            String   @id @default(uuid()) @db.Uuid
+  startTime     DateTime @default(now())
+  endTime       DateTime?
+  uploadedFiles Json?    @map("uploaded_files_json") @db.JsonB 
+
+  userId        String   @db.Uuid
+  user          User     @relation(fields: [userId], references: [id])
+
+  projectId     String   @db.Uuid
+  project       Project  @relation(fields: [projectId], references: [id])
+
+  conversations Conversation[]
+  voiceConfigId String?  @db.Uuid
+  voiceConfig   VoiceConfig? @relation(fields: [voiceConfigId], references: [id])
+}
+
+model Conversation {
+  id          String   @id @default(uuid()) @db.Uuid
+  timestamp   DateTime @default(now())
+  role        String
+  content     String
+  sessionId   String   @db.Uuid
+  session     Session  @relation(fields: [sessionId], references: [id])
+  pool_calls  Json?    @db.JsonB
+}
+
+model MCPConfig {
+  id             String   @id @default(uuid()) @db.Uuid
+  configName     String   @unique
+  configuration  Json     @db.JsonB
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  userId         String   @db.Uuid
+  user           User     @relation(fields: [userId], references: [id])
+}
+
+model VoiceConfig {
+  id          String   @id @default(uuid()) @db.Uuid
+  configName  String
+  ttsSettings Json     @db.JsonB
+  createdAt   DateTime @default(now())
+  userId      String   @db.Uuid
+  user        User     @relation(fields: [userId], references: [id])
+  sessions    Session[]
+}
+
+model AnalyticEvent {
+  id         String   @id @default(uuid()) @db.Uuid
+  eventType  String
+  details    Json?    @db.JsonB
+  timestamp  DateTime @default(now())
+  userId     String   @db.Uuid
+}
