@@ -33,17 +33,21 @@ export default function MCPCard({ handelSubmit }: { handelSubmit: () => void }) 
     };
 
     return (
-        <Card className="w-full max-w-xl">
+        <Card className="w-full max-w-xl bg-black/95 border-white/10">
             <CardHeader className="space-y-1">
-                <CardTitle className="text-base font-semibold">Connect MCP Server</CardTitle>
-                <p className="text-sm text-muted-foreground">Upload an OpenAPI spec or connect a hosted MCP endpoint.</p>
+                <CardTitle className="text-base font-semibold text-white">Connect MCP Server</CardTitle>
+                <p className="text-sm text-white/60">Upload an OpenAPI spec or connect a hosted MCP endpoint.</p>
             </CardHeader>
 
             <CardContent className="space-y-6">
                 <div className="space-y-2">
-                    <Label className="text-sm">Upload OpenAPI spec</Label>
-                    <Input type="file" onChange={handleFileChange} />
-                    {mcpConfig.file && <p className="text-xs text-muted-foreground">{mcpConfig.file.name}</p>}
+                    <Label className="text-sm text-white">Upload OpenAPI spec</Label>
+                    <Input 
+                        type="file" 
+                        onChange={handleFileChange}
+                        className="bg-black/50 border-white/10 text-white file:bg-black file:text-white file:border-white/10 hover:file:border-white file:transition-colors"
+                    />
+                    {mcpConfig.file && <p className="text-xs text-white/60">{mcpConfig.file.name}</p>}
                 </div>
 
                 <div className="flex items-center justify-center gap-3 text-xs font-medium text-muted-foreground">
@@ -54,30 +58,35 @@ export default function MCPCard({ handelSubmit }: { handelSubmit: () => void }) 
 
                 <div className="space-y-4">
                     <div className="space-y-1">
-                        <Label className="text-sm" htmlFor="mcp-server-link">MCP Server Link</Label>
+                        <Label className="text-sm text-white" htmlFor="mcp-server-link">MCP Server Link</Label>
                         <Input
                             id="mcp-server-link"
                             placeholder="https://your-mcp-server.com"
                             value={mcpConfig.serverLink}
                             onChange={(e) => setServerLink(e.target.value)}
+                            className="bg-black/50 border-white/10 text-white placeholder:text-white/40 focus:border-white"
                         />
                     </div>
 
                     <div className="space-y-1">
-                        <Label className="text-sm" htmlFor="mcp-api-key">API Key (optional)</Label>
+                        <Label className="text-sm text-white" htmlFor="mcp-api-key">API Key (optional)</Label>
                         <Input
                             id="mcp-api-key"
                             placeholder="Enter your API key"
                             type="password"
                             value={mcpConfig.apiKey}
                             onChange={(e) => setApiKey(e.target.value)}
+                            className="bg-black/50 border-white/10 text-white placeholder:text-white/40 focus:border-white"
                         />
                     </div>
                 </div>
             </CardContent>
 
             <CardFooter>
-                <Button className="w-full" onClick={(e) => handleSubmit(e)}>
+                <Button 
+                    className="w-full bg-black text-white border border-white/10 hover:border-white transition-colors" 
+                    onClick={(e) => handleSubmit(e)}
+                >
                     Submit Configuration
                 </Button>
             </CardFooter>

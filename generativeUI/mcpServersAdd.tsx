@@ -60,14 +60,14 @@ export default function MCPSidebar() {
   return (
     <>
       <button
-        className="fixed top-4 left-4 bg-blue-500 text-white px-3 py-1 rounded z-50"
+        className="fixed top-4 left-4 bg-black text-white px-3 py-1 rounded z-50 border border-white/10 hover:border-white transition-colors"
         onClick={toggleSidebar}
       >
         {isOpen ? "Hide MCP Sidebar" : "Show MCP Sidebar"}
       </button>
 
       <aside
-        className={`fixed top-0 left-0 h-full w-80 bg-gray-100 shadow-lg p-4 transform transition-transform ${
+        className={`fixed top-0 left-0 h-full w-80 bg-black/95 shadow-lg p-4 transform transition-transform ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -91,13 +91,13 @@ export default function MCPSidebar() {
                   </div>
                   <div className="flex flex-col gap-1">
                     <button
-                      className="bg-green-500 text-white px-2 py-1 rounded text-sm"
+                      className="bg-black text-white px-2 py-1 rounded text-sm border border-white/10 hover:border-white transition-colors"
                       onClick={() => connectServer(s.id)}
                     >
                       Connect
                     </button>
                     <button
-                      className="bg-red-500 text-white px-2 py-1 rounded text-sm"
+                      className="bg-black text-white px-2 py-1 rounded text-sm border border-white/10 hover:border-white transition-colors"
                       onClick={() => removeServer(s.id)}
                     >
                       Remove
@@ -125,13 +125,13 @@ export default function MCPSidebar() {
               </div>
               <div className="flex flex-col gap-1">
                 <button
-                  className="bg-green-500 text-white px-2 py-1 rounded text-sm"
+                  className="bg-black text-white px-2 py-1 rounded text-sm border border-white/10 hover:border-white transition-colors"
                   onClick={() => connectServer(s.id)}
                 >
                   Connect
                 </button>
                 <button
-                  className="bg-red-500 text-white px-2 py-1 rounded text-sm"
+                  className="bg-black text-white px-2 py-1 rounded text-sm border border-white/10 hover:border-white transition-colors"
                   onClick={() => removeServer(s.id)}
                 >
                   Remove
@@ -142,7 +142,7 @@ export default function MCPSidebar() {
         </ul>
 
         <button
-          className="mt-4 w-full bg-blue-600 text-white px-3 py-2 rounded"
+          className="mt-4 w-full bg-black text-white px-3 py-2 rounded border border-white/10 hover:border-white transition-colors"
           onClick={deployServer}
         >
           Deploy New MCP Server

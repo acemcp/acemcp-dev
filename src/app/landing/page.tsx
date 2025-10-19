@@ -26,7 +26,7 @@ import {
 import { IconBrandYoutubeFilled } from "@tabler/icons-react";
 import createGlobe from "cobe";
 import { motion } from "motion/react";
-import { useSupabaseSession } from "@/components/providers/supabase-session-provider";
+import { useSupabaseAuth } from "@/providers/supabase-auth-provider";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -216,7 +216,7 @@ export default function LandingPage() {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeStage, setActiveStage] = useState(0);
-  const { session, isLoading } = useSupabaseSession();
+  const { session, isLoading, signOut } = useSupabaseAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -299,13 +299,22 @@ export default function LandingPage() {
                 Documentation
               </Button>
               {session ? (
-                <Button
-                  variant="ghost"
-                  onClick={() => router.push("/generate")}
-                  className="h-10 rounded-lg px-4 text-sm text-white/80 transition hover:text-white"
-                >
-                  Dashboard
-                </Button>
+                <>
+                  <Button
+                    variant="ghost"
+                    onClick={() => router.push("/generate")}
+                    className="h-10 rounded-lg px-4 text-sm text-white/80 transition hover:text-white"
+                  >
+                    Dashboard
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => signOut()}
+                    className="h-10 rounded-lg px-4 text-sm text-white/80 transition hover:text-white"
+                  >
+                    Sign out
+                  </Button>
+                </>
               ) : (
                 <Button
                   variant="ghost"
@@ -373,11 +382,11 @@ export default function LandingPage() {
                     <Button
                       onClick={handleGenerate}
                       disabled={isGenerating || !prompt.trim()}
-                      className="h-auto rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-[0_24px_60px_-30px_rgba(59,130,246,0.9)] transition hover:bg-white/90 disabled:opacity-50"
+                      className="h-auto rounded-lg border border-white/10 bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white disabled:opacity-50 disabled:hover:border-white/10"
                     >
                       {isGenerating ? (
                         <div className="flex items-center gap-2">
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-900/25 border-t-slate-900" />
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/25 border-t-white" />
                           Generating...
                         </div>
                       ) : (
@@ -398,7 +407,7 @@ export default function LandingPage() {
                   key={suggestion}
                   onClick={() => setPrompt(suggestion)}
                   type="button"
-                  className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/70 backdrop-blur-xl transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+                  className="rounded-full border border-white/10 bg-black px-4 py-2 text-sm text-white backdrop-blur-xl transition hover:border-white"
                 >
                   {suggestion}
                 </button>
@@ -662,15 +671,15 @@ export default function LandingPage() {
                 <div className="mt-8 flex flex-wrap justify-center gap-3">
                   <Button
                     onClick={handlePrimaryCta}
-                    className="h-auto rounded-lg bg-white px-6 py-3 text-sm font-semibold text-slate-900 shadow-[0_28px_80px_-50px_rgba(59,130,246,0.9)] transition hover:bg-white/90"
+                    className="h-auto rounded-lg border border-white/10 bg-black px-6 py-3 text-sm font-semibold text-white transition hover:border-white"
                   >
                     {session ? "Resume your agents" : "Get started for free"}
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                   <Button
                     onClick={handleSecondaryCta}
                     variant="ghost"
-                    className="h-auto rounded-lg border border-white/20 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-xl transition hover:border-white/30 hover:bg-white/15"
+                    className="h-auto rounded-lg border border-white/10 bg-black px-6 py-3 text-sm font-semibold text-white transition hover:border-white"
                   >
                     {session ? "Explore advanced flows" : "Schedule a demo"}
                   </Button>
