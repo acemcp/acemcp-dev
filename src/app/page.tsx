@@ -40,7 +40,7 @@ export default function Chat() {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const { messages, sendMessage, addToolResult } = useChat({
     transport: new DefaultChatTransport({
-      api: "https://workerdemo.rushikeshpatil8208.workers.dev/",
+      api: "https://acemcp-service.rushikeshpatil8208.workers.dev/",
     }),
   });
 
