@@ -14,18 +14,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 
-interface AgentConfigType {
-  Identity: string;
-  Instructions: string;
-  Tone: string;
-  Temperature: number;
-}
-
 // This component loads a config file from public (several fallback paths),
 // validates it's JSON (avoids parsing HTML 404 pages), shows editable fields,
 // and saves back via API or localStorage as a fallback.
 
-const DEFAULT_CONFIG: AgentConfigType = {
+const DEFAULT_CONFIG: any = {
   Identity:
     "KeyCron, an AI-powered eCommerce Agent designed to optimize the KeyCron app—a next-gen shopping platform blending personalization, real-time analytics, and conversational commerce.",
   Instructions:
@@ -35,10 +28,10 @@ const DEFAULT_CONFIG: AgentConfigType = {
 };
 
 export default function AgentConfig() {
-  const [config, setConfig] = useState<AgentConfigType | null>(null);
+  const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [savedMessage, setSavedMessage] = useState<string | null>(null);
+  const [error, setError] = useState(null);
+  const [savedMessage, setSavedMessage] = useState(null);
 
   // Try multiple public paths where config might live. This avoids 404 HTML parsing errors.
   const possiblePaths = [
@@ -133,8 +126,8 @@ export default function AgentConfig() {
     };
   }, []);
 
-  const handleChange = (key: keyof AgentConfigType, value: string | number) => {
-    setConfig((prev) => ({ ...(prev || DEFAULT_CONFIG), [key]: value }));
+  const handleChange = (key, value) => {
+    setConfig((prev) => ({ ...(prev || {}), [key]: value }));
   };
 
   // Save: first try API endpoint, fallback to localStorage
@@ -170,63 +163,60 @@ export default function AgentConfig() {
 
   if (loading && !config)
     return (
-      <Card className="w-full max-w-xl border-none bg-black/40 backdrop-blur-md">
-        <CardContent className="px-6 py-12 text-center text-gray-400">
-          Loading configuration...
+      <Card className="w-full max-w-xl border-none bg-transparent shadow-none">
+        <CardContent className="px-0 py-12 text-center text-muted-foreground">
+          Loading configuration…
         </CardContent>
       </Card>
     );
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">
-      <Card className="bg-black/40 backdrop-blur-md border border-white/10">
+      <Card>
         <CardHeader className="space-y-1">
-          <CardTitle className="text-xl font-semibold text-white">Agent Configuration</CardTitle>
-          <p className="text-sm text-gray-400">
+          <CardTitle className="text-xl font-semibold">Agent Configuration</CardTitle>
+          <p className="text-sm text-muted-foreground">
             Define the identity, instructions, and behaviour for this agent.
           </p>
         </CardHeader>
         <CardContent className="space-y-6">
           {error && (
-            <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+            <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
               ⚠️ {error}
             </div>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="identity" className="text-gray-200">Identity</Label>
+            <Label htmlFor="identity">Identity</Label>
             <Textarea
               id="identity"
               value={config?.Identity || ""}
               onChange={(e) => handleChange("Identity", e.target.value)}
               rows={3}
-              className="bg-black/20 border-white/10 text-white placeholder-gray-400 focus:border-white/20 focus:ring-white/20"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="instructions" className="text-gray-200">Instructions</Label>
+            <Label htmlFor="instructions">Instructions</Label>
             <Textarea
               id="instructions"
               value={config?.Instructions || ""}
               onChange={(e) => handleChange("Instructions", e.target.value)}
               rows={6}
-              className="bg-black/20 border-white/10 text-white placeholder-gray-400 focus:border-white/20 focus:ring-white/20"
             />
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="tone" className="text-gray-200">Tone</Label>
+              <Label htmlFor="tone">Tone</Label>
               <Input
                 id="tone"
                 value={config?.Tone || ""}
                 onChange={(e) => handleChange("Tone", e.target.value)}
-                className="bg-black/20 border-white/10 text-white placeholder-gray-400 focus:border-white/20 focus:ring-white/20"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="temperature" className="text-gray-200">Temperature</Label>
+              <Label htmlFor="temperature">Temperature</Label>
               <div className="flex items-center gap-3">
                 <Slider
                   id="temperature"
@@ -237,25 +227,19 @@ export default function AgentConfig() {
                   onValueChange={(val) =>
                     handleChange("Temperature", Number(val[0]))
                   }
-                  className="[&>span]:bg-white"
                 />
-                <span className="w-12 text-center text-sm font-semibold text-white">
+                <span className="w-12 text-center text-sm font-semibold">
                   {(config?.Temperature ?? 0.7).toFixed(2)}
                 </span>
               </div>
             </div>
           </div>
         </CardContent>
-        <CardFooter className="flex items-center justify-between gap-4 border-t border-white/10">
-          <div className="text-sm text-gray-400">
+        <CardFooter className="flex items-center justify-between gap-4">
+          <div className="text-sm text-muted-foreground">
             {savedMessage ? savedMessage : "Changes are auto-saved locally."}
           </div>
-          <Button 
-            onClick={handleSave}
-            className="bg-white text-black hover:bg-gray-200 transition-colors"
-          >
-            Save Configuration
-          </Button>
+          <Button onClick={handleSave}>Save Configuration</Button>
         </CardFooter>
       </Card>
     </div>
