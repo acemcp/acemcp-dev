@@ -45,8 +45,6 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -76,6 +74,8 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
 }
 
 .dark {
@@ -118,5 +118,52 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@keyframes gradientDrift {
+  0% {
+    transform: translate3d(-10%, -10%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(12%, 12%, 0) scale(1.1);
+  }
+  100% {
+    transform: translate3d(-10%, -10%, 0) scale(1);
+  }
+}
+
+@keyframes gradientOrbit {
+  0% {
+    transform: translate3d(0%, -5%, 0) rotate(-2deg);
+  }
+  50% {
+    transform: translate3d(5%, 5%, 0) rotate(2deg);
+  }
+  100% {
+    transform: translate3d(0%, -5%, 0) rotate(-2deg);
+  }
+}
+
+@keyframes gradientPulse {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.2);
+  }
+}
+
+@layer utilities {
+  .animate-gradient-drift {
+    animation: gradientDrift 22s ease-in-out infinite;
+  }
+  .animate-gradient-orbit {
+    animation: gradientOrbit 28s ease-in-out infinite;
+  }
+  .animate-gradient-pulse {
+    animation: gradientPulse 18s ease-in-out infinite;
   }
 }

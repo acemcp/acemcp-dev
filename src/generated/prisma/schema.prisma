@@ -5,20 +5,114 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js" // Specifies that Prisma Client for JavaScript should be generated.
+  output   = "../src/generated/prisma" // The output directory for the generated client.
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql" // Specifies the database provider.
+  url       = env("DATABASE_URL") // Connection URL for the database (loaded from environment variables).
+  directUrl = env("DIRECT_URL") // Direct connection URL for tasks like migrations (loaded from environment variables).
 }
 
+// Model for Users. Handles authentication and user profile information.
 model User {
-  id        String   @id @default(uuid()) // Corresponds to the id in auth.users
-  email     String?  @unique
-  name      String?
-  avatarUrl String?  @map("avatar_url") // Match Supabase's snake_case
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id            String    @id @default(uuid()) @db.Uuid // Unique identifier for the user, using UUIDs for consistency.
+  name          String? // The user's full name, optional.
+  email         String?   @unique // The user's email address, must be unique. Optional to support different login methods.
+  emailVerified DateTime? // Timestamp indicating when the user's email was verified.
+  image         String? // URL to the user's profile picture.
+  passwordHash  String? // Stores the hashed password for email/password authentication. NEVER store plaintext passwords.
+  createdAt     DateTime  @default(now()) // Timestamp for when the user account was created.
+  updatedAt     DateTime  @updatedAt // Timestamp for when the user account was last updated.
+
+  // --- Relationships ---
+  accounts      Account[] // Lists all linked OAuth accounts (Google, GitHub, etc.).
+  projects      Project[] // Lists all projects created by this user.
+  mcpConfigs    MCPConfig[] // Lists all MCP configurations created by this user.
+  conversations Conversation[] // Lists all conversations initiated by this user.
+}
+
+// Model for OAuth accounts, linking them to a User.
+// This allows a single user to log in via Google, GitHub, email, etc.
+model Account {
+  id                String  @id @default(uuid()) @db.Uuid // Unique identifier for the account link, using UUIDs for consistency.
+  userId            String  @db.Uuid // Foreign key linking to the User model.
+  type              String // The type of account, e.g., "oauth" or "credentials".
+  provider          String // The OAuth provider's name, e.g., "google", "github".
+  providerAccountId String // The user's ID as given by the OAuth provider.
+  refresh_token     String? @db.Text // The refresh token for the OAuth provider.
+  access_token      String? @db.Text // The access token for the OAuth provider.
+  expires_at        Int? // Expiry timestamp for the access token.
+  token_type        String? // The type of token, e.g., "Bearer".
+  scope             String? // The scope of permissions granted by the user.
+  id_token          String? @db.Text // The ID token from the OAuth provider.
+  session_state     String? // The session state from the OAuth provider.
+
+  // --- Relationships ---
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade) // Links this account to a single user. Deleting the user deletes their accounts.
+
+  @@unique([provider, providerAccountId]) // Ensures a user can only link one account per provider.
+}
+
+// Model for Projects. Each project is a container for configurations and conversations.
+model Project {
+  id             String    @id @default(uuid()) @db.Uuid // Unique identifier for the project, using UUIDs.
+  name           String // The name of the project.
+  projectDesc    String? // An optional, user-provided description for the project.
+  projectHistory Json?     @map("project_history_json") @db.JsonB // Optional JSON field to store a log of changes or events related to the project.
+  createdAt      DateTime  @default(now()) // Timestamp for when the project was created.
+  updatedAt      DateTime  @updatedAt // Timestamp for when the project was last updated.
+  deployedAt     DateTime? // Optional timestamp for when the project was last deployed.
+
+  // --- Relationships ---
+  ownerId        String           @db.Uuid // Foreign key for the user who owns the project.
+  owner          User             @relation(fields: [ownerId], references: [id]) // Links the project to its owner.
+  mcpConfigs     MCPConfig[] // A list of all MCP configurations associated with this project.
+  conversations  Conversation[] // A list of all conversations that belong to this project.
+  promptMetadata ProjectMetadata? // Links to the project's specific agent configuration.
+}
+
+// Model for the agent's core prompt configuration.
+model ProjectMetadata {
+  id           String  @id @db.Uuid // The primary key, which is also the foreign key to the Project.
+  identity     String? @db.Text // The persona of the AI agent, e.g., "You are a helpful math tutor".
+  instructions String? @db.Text // The specific instructions for the AI agent to follow.
+  tone         String? @db.Text // The desired tone for the AI agent's responses, e.g., "casual and technical".
+
+  // --- Relationships ---
+  // Establishes a one-to-one relationship where ProjectMetadata.id refers to Project.id.
+  project Project @relation(fields: [id], references: [id])
+}
+
+// Model for individual conversation turns or messages.
+model Conversation {
+  id          String   @id @default(uuid()) @db.Uuid // Unique identifier for the conversation message.
+  chatId      String // An identifier to group related messages into a single chat session.
+  timestamp   DateTime @default(now()) // Timestamp for when the message was created.
+  role        String // The role of the sender, e.g., "user" or "assistant".
+  content     String   @db.Text // The text content of the message.
+  temperature Float? // The temperature setting used for the model's response (e.g., 0.7).
+  metadata    Json?    @map("metadata_json") @db.JsonB // JSON field to store metadata like identity, instructions, and tone.
+  files       Json?    @map("files_json") @db.JsonB // BEST PRACTICE: Store file metadata here (e.g., URL from S3/GCS, filename, type) instead of storing files in the DB.
+
+  // --- Relationships ---
+  userId    String  @db.Uuid // Foreign key for the user who sent the message.
+  user      User    @relation(fields: [userId], references: [id]) // Links the message to the user.
+  projectId String  @db.Uuid // Foreign key for the project this conversation belongs to.
+  project   Project @relation(fields: [projectId], references: [id]) // Links the conversation to a project.
+}
+
+// Model for MCP (Model Configuration Profile) settings.
+model MCPConfig {
+  id         String @id @default(uuid()) @db.Uuid // Unique identifier for the MCP configuration.
+  mcpString  String // A string representing the MCP configuration.
+  authToken  String // The authentication token required for the MCP. Handle this securely.
+  configJson Json   @map("config_json") @db.JsonB // The main configuration stored in JSON format.
+
+  // --- Relationships ---
+  userId    String  @db.Uuid // Foreign key for the user who created this configuration.
+  user      User    @relation(fields: [userId], references: [id]) // Links the config to its creator.
+  projectId String  @db.Uuid // Foreign key for the project this configuration applies to.
+  project   Project @relation(fields: [projectId], references: [id]) // Links the config to a project.
 }

@@ -26,6 +26,13 @@ import { GlobeIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
@@ -45,14 +52,12 @@ const ChatInput = () => {
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const { messages, sendMessage, addToolResult, status } = useChat({
+  const { messages, sendMessage, addToolResult } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/chat",
     }),
   });
   const handleSubmit = (message: PromptInputMessage) => {
-    console.log("clciked");
-
     if (!message.text && !message.files?.length) {
       return;
     }
@@ -60,112 +65,94 @@ const ChatInput = () => {
     if (message.text) {
       sendMessage({ text: message.text });
     }
-    // TODO: handle file attachments if necessary
 
     setText("");
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 relative size-full rounded-lg border h-[600px]">
-      <div className="flex flex-col h-full">
-        <Conversation>
-          <ConversationContent>
-            {messages.map((message) => (
-              <Message from={message.role} key={message.id}>
-                <MessageContent>
-                  {message.parts.map((part, i) => {
-                    if (part.type === "text") {
-                      return (
-                        <Response key={`${message.id}-${i}`}>
-                          {part.text}
-                        </Response>
-                      );
-                    }
+    <Card className="mx-auto flex h-[620px] w-full max-w-5xl flex-col">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-lg font-semibold">Realtime Agent Console</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Monitor responses and provide additional instructions or artefacts.
+        </p>
+      </CardHeader>
+      <CardContent className="flex flex-1 flex-col gap-4 overflow-hidden">
+        <div className="flex flex-1 flex-col overflow-hidden rounded-xl border bg-muted/10">
+          <div className="flex flex-1 flex-col gap-4 p-4">
+            <Conversation>
+              <ConversationContent>
+                {messages.length === 0 ? (
+                  <div className="flex h-full w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-muted-foreground/30 bg-muted/20 p-8 text-center text-sm text-muted-foreground">
+                    <span className="font-medium">No messages yet</span>
+                    <span>Start the conversation to see agent activity.</span>
+                  </div>
+                ) : (
+                  messages.map((message) => (
+                    <Message from={message.role} key={message.id}>
+                      <MessageContent>
+                        {message.parts.map((part, i) => {
+                          if (part.type === "text") {
+                            return (
+                              <Response key={`${message.id}-${i}`}>
+                                {part.text}
+                              </Response>
+                            );
+                          }
 
-                    if (isToolUIPart(part)) {
-                      const toolName = getToolName(part);
-                      const toolCallId = part.toolCallId;
+                          if (isToolUIPart(part)) {
+                            const toolName = getToolName(part);
+                            const toolCallId = part.toolCallId;
 
-                      // render confirmation tool (client-side tool with user interaction)
-                      if (
-                        toolName === "gatherMcpInformation" &&
-                        part.state === "input-available"
-                      ) {
-                        return (
-                          <div key={toolCallId}>
-                            Gather MCP information:{" "}
-                            {(part.input as GatherMcpInformationInput)
-                              .fileName ||
-                              (part.input as GatherMcpInformationInput)
-                                .serverLink}
-                            ?
-                            <div>
-                              <MCPCard
-                                handelSubmit={async () => {
-                                  await addToolResult({
-                                    toolCallId,
-                                    tool: toolName,
-                                    output: "Yes, confirmed.",
-                                  });
-                                  // sendMessage({
-                                  //   text: "I have sumiited the details for mcp config ",
-                                  //   // Optional: additional data like files, metadata
-                                  // });
-
-                                  console.log(
-                                    "called me again what to do next"
-                                  );
-                                }}
-                              />
-                              {/* <button
-                          onClick={async () => {
-                            await addToolResult({
-                              toolCallId,
-                              tool: toolName,
-                              output: 'Yes, confirmed.',
-                            });
-                            sendMessage();
-                          }}
-                        >
-                          Yes
-                        </button> */}
-                              {/* <button
-                          onClick={async () => {
-                            await addToolResult({
-                              toolCallId,
-                              tool: toolName,
-                              output: 'No, denied.',
-                            });
-                            sendMessage();
-                          }}
-                        >
-                          No
-                        </button> */}
-                            </div>
-                          </div>
-                        );
-                      }
-                    }
-                  })}
-                </MessageContent>
-              </Message>
-            ))}
-          </ConversationContent>
-          <ConversationScrollButton />
-        </Conversation>
-
-        <PromptInput
-          onSubmit={handleSubmit}
-          className="mt-4"
-          globalDrop
-          multiple
-        >
+                            if (
+                              toolName === "gatherMcpInformation" &&
+                              part.state === "input-available"
+                            ) {
+                              return (
+                                <div key={toolCallId} className="space-y-3">
+                                  <p className="text-sm font-medium text-muted-foreground">
+                                    Gather MCP information:
+                                    {" "}
+                                    {(part.input as GatherMcpInformationInput)
+                                      .fileName ||
+                                      (part.input as GatherMcpInformationInput)
+                                        .serverLink}
+                                    ?
+                                  </p>
+                                  <MCPCard
+                                    handelSubmit={async () => {
+                                      await addToolResult({
+                                        toolCallId,
+                                        tool: toolName,
+                                        output: "Yes, confirmed.",
+                                      });
+                                    }}
+                                  />
+                                </div>
+                              );
+                            }
+                          }
+                          return null;
+                        })}
+                      </MessageContent>
+                    </Message>
+                  ))
+                )}
+              </ConversationContent>
+              <ConversationScrollButton />
+            </Conversation>
+          </div>
+        </div>
+      </CardContent>
+      <CardFooter className="flex flex-col gap-4 border-t bg-muted/5">
+        <PromptInput onSubmit={handleSubmit} globalDrop multiple className="w-full">
           <PromptInputBody>
             <PromptInputAttachments>
               {(attachment) => <PromptInputAttachment data={attachment} />}
             </PromptInputAttachments>
             <PromptInputTextarea
               onChange={(e) => setText(e.target.value)}
+              placeholder="Ask the agent or provide guidance..."
               ref={textareaRef}
               value={text}
             />
@@ -187,11 +174,11 @@ const ChatInput = () => {
                 <span>Search</span>
               </PromptInputButton>
             </PromptInputTools>
-            <PromptInputSubmit />
+            <PromptInputSubmit disabled={!text} />
           </PromptInputToolbar>
         </PromptInput>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 };
 

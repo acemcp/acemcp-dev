@@ -84,7 +84,7 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({ messages }) => {
     );
 
     return (
-        <div style={{ height: '100vh', width: '100%' }}>
+        <div className="h-full w-full">
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -92,6 +92,7 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({ messages }) => {
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 fitView
+                style={{ background: "transparent" }}
             />
         </div>
     );

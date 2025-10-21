@@ -122,16 +122,82 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
 
 exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
-  email: 'email',
   name: 'name',
-  avatarUrl: 'avatarUrl',
+  email: 'email',
+  emailVerified: 'emailVerified',
+  image: 'image',
+  passwordHash: 'passwordHash',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AccountScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  provider: 'provider',
+  providerAccountId: 'providerAccountId',
+  refresh_token: 'refresh_token',
+  access_token: 'access_token',
+  expires_at: 'expires_at',
+  token_type: 'token_type',
+  scope: 'scope',
+  id_token: 'id_token',
+  session_state: 'session_state'
+};
+
+exports.Prisma.ProjectScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  projectDesc: 'projectDesc',
+  projectHistory: 'projectHistory',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deployedAt: 'deployedAt',
+  ownerId: 'ownerId'
+};
+
+exports.Prisma.ProjectMetadataScalarFieldEnum = {
+  id: 'id',
+  identity: 'identity',
+  instructions: 'instructions',
+  tone: 'tone'
+};
+
+exports.Prisma.ConversationScalarFieldEnum = {
+  id: 'id',
+  chatId: 'chatId',
+  timestamp: 'timestamp',
+  role: 'role',
+  content: 'content',
+  temperature: 'temperature',
+  metadata: 'metadata',
+  files: 'files',
+  userId: 'userId',
+  projectId: 'projectId'
+};
+
+exports.Prisma.MCPConfigScalarFieldEnum = {
+  id: 'id',
+  mcpString: 'mcpString',
+  authToken: 'authToken',
+  configJson: 'configJson',
+  userId: 'userId',
+  projectId: 'projectId'
 };
 
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
+};
+
+exports.Prisma.JsonNullValueInput = {
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.QueryMode = {
@@ -144,9 +210,20 @@ exports.Prisma.NullsOrder = {
   last: 'last'
 };
 
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
+};
+
 
 exports.Prisma.ModelName = {
-  User: 'User'
+  User: 'User',
+  Account: 'Account',
+  Project: 'Project',
+  ProjectMetadata: 'ProjectMetadata',
+  Conversation: 'Conversation',
+  MCPConfig: 'MCPConfig'
 };
 
 /**
