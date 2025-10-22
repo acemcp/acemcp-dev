@@ -80,7 +80,6 @@ model ProjectMetadata {
   identity     String? @db.Text // The persona of the AI agent, e.g., "You are a helpful math tutor".
   instructions String? @db.Text // The specific instructions for the AI agent to follow.
   tone         String? @db.Text // The desired tone for the AI agent's responses, e.g., "casual and technical".
-
   // --- Relationships ---
   // Establishes a one-to-one relationship where ProjectMetadata.id refers to Project.id.
   project Project @relation(fields: [id], references: [id])
@@ -110,7 +109,7 @@ model MCPConfig {
   mcpString  String // A string representing the MCP configuration.
   authToken  String // The authentication token required for the MCP. Handle this securely.
   configJson Json   @map("config_json") @db.JsonB // The main configuration stored in JSON format.
-
+  
   // --- Relationships ---
   userId    String  @db.Uuid // Foreign key for the user who created this configuration.
   user      User    @relation(fields: [userId], references: [id]) // Links the config to its creator.

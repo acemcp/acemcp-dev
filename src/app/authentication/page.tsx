@@ -4,12 +4,12 @@ import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Github, Mail, Loader2 } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { useSupabaseAuth } from "@/providers/supabase-auth-provider";
 
 const DEFAULT_REDIRECT = "/landing";
 
@@ -90,12 +90,8 @@ export default function AuthenticationPage() {
 
     try {
       const supabase = getSupabaseBrowserClient();
-      const providerRedirect = `${redirectTo}${prompt ? `?prompt=${encodeURIComponent(prompt)}` : ""}`;
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "github",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback?redirectTo=${encodeURIComponent(providerRedirect)}`,
-        },
       });
 
       if (error) {

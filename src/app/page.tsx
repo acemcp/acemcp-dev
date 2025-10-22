@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useChat } from "@ai-sdk/react";
+import { useSupabaseAuth } from "@/providers/supabase-auth-provider";
 import {
   DefaultChatTransport,
   isToolUIPart,
@@ -23,6 +25,10 @@ import {
   Download,
   Plus,
   Play,
+  ChevronLeft,
+  ChevronRight,
+  Menu,
+  ChevronDown,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -42,7 +48,7 @@ type Tool = {
   };
 };
 
-type TabKey = "chat" | "workflow" | "create";
+type TabKey = "chat" | "workflow" | "workflow_builder";
 
 const navItems = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -65,10 +71,31 @@ const metrics = [
 const quickActions = ["Check Order", "Return Item", "Track Package", "Escalate"];
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const { user, isLoading: authLoading } = useSupabaseAuth();
+  
   const [input, setInput] = useState("");
   const [tools, setTools] = useState<Tool[]>([]);
   const [activeTab, setActiveTab] = useState<TabKey>("chat");
   const [isSyncingTools, setIsSyncingTools] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [selectedModel, setSelectedModel] = useState("GPT-4 Turbo");
+  const [showModelDropdown, setShowModelDropdown] = useState(false);
+
+  // Check authentication on mount
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/authentication?redirectTo=/");
+    }
+  }, [user, authLoading, router]);
+  
+  const modelConfigs = {
+    "GPT-4 Turbo": { temperature: 0.7, maxTokens: 4000, responseTime: "1.2s" },
+    "GPT-4": { temperature: 0.7, maxTokens: 8000, responseTime: "2.1s" },
+    "GPT-3.5 Turbo": { temperature: 0.9, maxTokens: 4000, responseTime: "0.8s" },
+    "Claude 3 Opus": { temperature: 0.7, maxTokens: 4096, responseTime: "1.5s" },
+    "Claude 3 Sonnet": { temperature: 0.7, maxTokens: 4096, responseTime: "1.0s" },
+  };
 
   const { messages, sendMessage, addToolResult } = useChat({
     transport: new DefaultChatTransport({
@@ -140,14 +167,29 @@ export default function DashboardPage() {
 
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-100">
-      <aside className="hidden w-68 flex-col border-r border-slate-800/60 bg-slate-950/80 px-4 py-6 backdrop-blur lg:flex">
-        <div className="flex items-center gap-3 rounded-2xl border border-slate-800/60 bg-slate-900/80 px-3 py-2">
-          <span className="inline-flex size-10 items-center justify-center rounded-2xl bg-blue-500/20 text-base font-semibold text-blue-300">
-            A
-          </span>
-          <span className="text-lg font-semibold text-slate-100">AcEMCP</span>
+      {/* Collapsible Sidebar */}
+      <aside className={cn(
+        "hidden flex-col border-r border-slate-800/60 bg-slate-950/80 backdrop-blur lg:flex transition-all duration-300 relative",
+        isSidebarCollapsed ? "w-20" : "w-68"
+      )}>
+        <div className="px-4 py-6">
+          <div className="flex items-center gap-3 rounded-2xl border border-slate-800/60 bg-slate-900/80 px-3 py-2">
+            <span className="inline-flex size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-base font-semibold text-white shadow-lg shadow-blue-500/40">
+              A
+            </span>
+            {!isSidebarCollapsed && (
+              <span className="text-lg font-semibold text-slate-100 bg-gradient-to-r from-blue-400 to-blue-200 bg-clip-text text-transparent">Akron</span>
+            )}
+          </div>
+          {/* Toggle Button */}
+          <button
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className="absolute -right-3 top-8 flex items-center justify-center size-6 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-300 hover:text-white hover:bg-blue-500/30 hover:shadow-lg hover:shadow-blue-500/50 hover:border-white/50 transition-all shadow-lg z-10"
+          >
+            {isSidebarCollapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
+          </button>
         </div>
-        <nav className="mt-8 space-y-1">
+        <nav className="mt-8 space-y-1 px-4">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = item.key === "playground";
@@ -157,15 +199,16 @@ export default function DashboardPage() {
                 className={cn(
                   "flex w-full items-center justify-between rounded-2xl px-3 py-2 text-sm font-medium transition",
                   isActive
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-500/40"
+                    ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/40"
                     : "text-slate-400 hover:bg-slate-900/80 hover:text-slate-100"
                 )}
+                title={isSidebarCollapsed ? item.label : undefined}
               >
                 <span className="flex items-center gap-3">
                   <Icon className="size-4" />
-                  {item.label}
+                  {!isSidebarCollapsed && item.label}
                 </span>
-                {item.badge ? (
+                {!isSidebarCollapsed && item.badge ? (
                   <span
                     className={cn(
                       "rounded-full px-2 py-0.5 text-xs",
@@ -179,22 +222,24 @@ export default function DashboardPage() {
             );
           })}
         </nav>
-        <div className="mt-auto rounded-2xl border border-slate-800/60 bg-slate-900/80 p-4 text-sm text-slate-300">
-          <p className="font-semibold text-slate-100">Need help?</p>
-          <p className="mt-1 text-slate-400">
-            Chat with AcEMCP concierge to optimize your agents.
-          </p>
-          <Button
-            variant="secondary"
-            size="sm"
-            className="mt-3 w-full rounded-xl bg-blue-500/20 text-blue-200 hover:bg-blue-500/30"
-          >
-            Chat with us
-          </Button>
-        </div>
+        {!isSidebarCollapsed && (
+          <div className="mt-auto mx-4 rounded-2xl border border-slate-800/60 bg-gradient-to-br from-slate-900/80 to-slate-900/60 p-4 text-sm text-slate-300 backdrop-blur">
+            <p className="font-semibold text-slate-100">Need help?</p>
+            <p className="mt-1 text-slate-400">
+              Chat with Akron concierge to optimize your agents.
+            </p>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="mt-3 w-full rounded-xl bg-blue-500/20 text-blue-200 hover:bg-blue-500/30 hover:shadow-lg hover:shadow-blue-500/50 hover:border hover:border-white/50 transition-all duration-300"
+            >
+              Chat with us
+            </Button>
+          </div>
+        )}
       </aside>
       <div className="flex flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-slate-800/60 bg-slate-950/80 px-6 py-4 backdrop-blur">
+        <header className="relative flex items-center justify-between border-b border-slate-800/60 bg-slate-950/80 px-6 py-4 backdrop-blur">
           <div>
             <div className="flex items-center gap-2 text-sm text-slate-400">
               <Link href="#" className="hover:text-slate-100">
@@ -223,30 +268,32 @@ export default function DashboardPage() {
               PR
             </span>
           </div>
-        </header>
-        <main className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6">
-          <div className="flex flex-wrap items-center gap-3 text-sm font-medium text-slate-400">
-            {(["chat", "workflow", "create"] as TabKey[]).map((tab) => (
+          {/* Floating Tab Buttons in Header */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 rounded-full border border-slate-800/60 bg-slate-900/90 p-1.5 backdrop-blur-xl shadow-2xl">
+            {(["chat", "workflow", "workflow_builder"] as TabKey[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={cn(
-                  "rounded-full px-5 py-2 transition",
+                  "rounded-full px-4 py-1.5 text-xs font-medium transition-all duration-300",
                   activeTab === tab
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-500/40"
-                    : "bg-slate-900/80 text-slate-300 hover:bg-slate-900"
+                    ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/50 border border-white/30"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-blue-500/20 hover:shadow-lg hover:shadow-blue-500/40 hover:border hover:border-white/40"
                 )}
               >
                 {tab === "chat"
                   ? "Chat Playground"
                   : tab === "workflow"
                     ? "Workflow View"
-                    : "Create Agent"}
+                    : "Workflow Builder"}
               </button>
             ))}
           </div>
+        </header>
+        <main className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6">
 
-          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {/* Metrics Section - Commented out as requested */}
+          {/* <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {metrics.map((metric) => (
               <div
                 key={metric.label}
@@ -257,44 +304,47 @@ export default function DashboardPage() {
                 <p className="mt-1 text-xs text-emerald-300">{metric.delta}</p>
               </div>
             ))}
-          </div>
+          </div> */}
 
           {activeTab === "chat" ? (
-            <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-              <section className="space-y-6">
-                <div className="rounded-[28px] border border-slate-800/60 bg-slate-950/80 p-6 shadow-2xl shadow-slate-950/60">
-                  <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/60 pb-4">
+            <div className="grid gap-4 lg:grid-cols-[420px_minmax(0,1fr)_340px] h-[calc(100vh-140px)]">
+              {/* Chat Interface Section */}
+              <section className="flex flex-col h-full">
+                <div className="flex flex-col h-full rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-950/90 to-slate-900/80 shadow-2xl shadow-slate-950/60 backdrop-blur overflow-hidden">
+                  {/* Header */}
+                  <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/60">
                     <div className="flex items-center gap-3">
-                      <span className="inline-flex size-12 items-center justify-center rounded-3xl bg-emerald-500/20 text-lg font-semibold text-emerald-300">
-                        CS
-                      </span>
+                      <div className="relative">
+                        <span className="inline-flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-bold text-white">
+                          A
+                        </span>
+                        <span className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full bg-emerald-400 border-2 border-slate-950"></span>
+                      </div>
                       <div>
-                        <h2 className="text-lg font-semibold text-slate-50">Customer Support Agent</h2>
-                        <p className="text-sm text-slate-400">GPT-4 • Sentiment Analysis • Escalation</p>
+                        <h2 className="text-base font-semibold text-slate-50">Akron AI</h2>
+                        <p className="text-xs text-slate-400">Active • {selectedModel}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="rounded-full border border-slate-800/60 px-4 py-2 text-sm text-slate-300">
-                        Tokens {tokensUsed} / 4,000
+                    <div className="flex items-center gap-2">
+                      <div className="rounded-full border border-slate-800/60 bg-slate-900/80 px-3 py-1 text-xs text-slate-300">
+                        {tokensUsed} / 4K
                       </div>
-                      <Button
-                        variant="outline"
-                        className="rounded-full border-slate-700 bg-slate-900/70 text-slate-200 hover:bg-slate-800"
-                      >
-                        <Download className="mr-2 size-4" /> Export Chat
-                      </Button>
-                      <Button className="rounded-full bg-blue-600 hover:bg-blue-500">
-                        <Plus className="mr-2 size-4" /> New Chat
+                      <Button size="sm" className="rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white h-7 px-3 text-xs shadow-lg shadow-blue-500/30 hover:shadow-blue-500/60 hover:border hover:border-white/50 transition-all duration-300">
+                        <Plus className="size-3" />
                       </Button>
                     </div>
                   </div>
-                  <div className="mt-6 h-[440px] space-y-4 overflow-y-auto pr-2">
+                  
+                  {/* Messages Area */}
+                  <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
                     {messages.length === 0 ? (
-                      <div className="flex h-full flex-col items-center justify-center rounded-3xl border border-dashed border-blue-500/40 bg-blue-500/10 p-8 text-center">
-                        <Sparkles className="size-8 text-blue-300" />
-                        <p className="mt-4 text-lg font-semibold text-slate-50">Start a conversation</p>
-                        <p className="mt-2 max-w-sm text-sm text-slate-300">
-                          Describe the workflow or task you want the agent to handle. Try one of the quick actions below.
+                      <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800/60 bg-slate-900/40 p-10 text-center">
+                        <div className="inline-flex p-4 rounded-xl bg-slate-800/50 mb-4">
+                          <Sparkles className="size-8 text-slate-400" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-slate-50 mb-2">Welcome to Akron AI</h3>
+                        <p className="max-w-sm text-sm text-slate-400 leading-relaxed">
+                          Start a conversation with your AI assistant. Describe workflows, ask questions, or explore MCP capabilities.
                         </p>
                       </div>
                     ) : (
@@ -308,14 +358,14 @@ export default function DashboardPage() {
                         >
                           <div
                             className={cn(
-                              "max-w-[78%] space-y-3 rounded-3xl px-5 py-4 text-sm leading-relaxed",
+                              "max-w-[85%] space-y-2 rounded-2xl px-4 py-3 text-sm leading-relaxed",
                               message.role === "user"
-                                ? "bg-blue-600 text-white shadow-lg shadow-blue-500/40"
-                                : "bg-slate-900/70 text-slate-200 shadow-lg shadow-slate-950/30"
+                                ? "bg-blue-600 text-white"
+                                : "bg-slate-900/80 border border-slate-800/60 text-slate-200"
                             )}
                           >
-                            <div className="text-xs uppercase tracking-wide text-slate-200/70">
-                              {message.role === "assistant" ? "Customer Support Agent" : "You"}
+                            <div className="text-xs font-medium text-slate-400">
+                              {message.role === "assistant" ? "Akron AI" : "You"}
                             </div>
                             {message.parts?.map((part, index) => {
                               if (part.type === "text") {
@@ -361,148 +411,120 @@ export default function DashboardPage() {
                       ))
                     )}
                   </div>
-                  <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-                    <Textarea
-                      value={input}
-                      onChange={(event) => setInput(event.target.value)}
-                      placeholder="Describe what the agent should do next..."
-                      className="min-h-[120px] rounded-3xl border border-slate-800/60 bg-slate-900/80 text-base text-slate-100 placeholder:text-slate-500"
-                    />
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div className="flex flex-wrap gap-2">
-                        {quickActions.map((action) => (
-                          <button
-                            key={action}
-                            type="button"
-                            onClick={() => setInput(action)}
-                            className="rounded-full border border-slate-800/60 bg-slate-900/80 px-4 py-1.5 text-sm text-slate-300 transition hover:border-blue-500/40 hover:text-blue-200"
-                          >
-                            {action}
-                          </button>
-                        ))}
-                      </div>
-                      <Button
-                        type="submit"
-                        className="rounded-full bg-blue-600 px-6 text-sm font-semibold hover:bg-blue-500"
+                  
+                  {/* Input Area */}
+                  <div className="px-4 pb-4 space-y-3">
+                    {/* Model Selection Dropdown */}
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setShowModelDropdown(!showModelDropdown)}
+                        className="flex items-center justify-between w-full px-3 py-2 text-xs rounded-lg border border-slate-800/60 bg-slate-900/80 text-slate-300 hover:bg-slate-800/80 transition-colors"
                       >
-                        Send Message
-                      </Button>
+                        <div className="flex items-center gap-2">
+                          <Bot className="size-3.5" />
+                          <span className="font-medium">{selectedModel}</span>
+                          <span className="text-slate-500">•</span>
+                          <span className="text-slate-500">Temp: {modelConfigs[selectedModel as keyof typeof modelConfigs].temperature}</span>
+                          <span className="text-slate-500">•</span>
+                          <span className="text-slate-500">Tokens: {modelConfigs[selectedModel as keyof typeof modelConfigs].maxTokens}</span>
+                        </div>
+                        <ChevronDown className={cn("size-3.5 transition-transform", showModelDropdown && "rotate-180")} />
+                      </button>
+                      
+                      {showModelDropdown && (
+                        <div className="absolute bottom-full left-0 right-0 mb-2 rounded-lg border border-slate-800/60 bg-slate-900 shadow-xl z-50 overflow-hidden">
+                          {Object.entries(modelConfigs).map(([model, config]) => (
+                            <button
+                              key={model}
+                              type="button"
+                              onClick={() => {
+                                setSelectedModel(model);
+                                setShowModelDropdown(false);
+                              }}
+                              className={cn(
+                                "w-full px-4 py-3 text-left hover:bg-slate-800/80 transition-colors border-b border-slate-800/60 last:border-b-0",
+                                selectedModel === model && "bg-slate-800/60"
+                              )}
+                            >
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-sm font-medium text-slate-200">{model}</span>
+                                {selectedModel === model && (
+                                  <span className="text-xs text-blue-400">✓ Selected</span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-3 text-xs text-slate-500">
+                                <span>Temp: {config.temperature}</span>
+                                <span>•</span>
+                                <span>Max Tokens: {config.maxTokens}</span>
+                                <span>•</span>
+                                <span>Response: {config.responseTime}</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  </form>
-                </div>
 
-                <div className="rounded-[28px] border border-slate-800/60 bg-slate-950/80 p-6 shadow-2xl shadow-slate-950/60">
-                  <div className="flex items-center justify-between">
+                    {/* Input Box */}
+                    <form onSubmit={handleSubmit}>
+                      <div className="relative flex items-center gap-2 rounded-lg border border-slate-800/60 bg-slate-900/80 px-4 py-3 shadow-sm">
+                        <Textarea
+                          value={input}
+                          onChange={(event) => setInput(event.target.value)}
+                          placeholder="Ask anything (Ctrl+L)"
+                          className="flex-1 bg-transparent border-none text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-0 resize-none min-h-[24px] max-h-[120px] p-0"
+                          rows={1}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              handleSubmit(e as any);
+                            }
+                          }}
+                        />
+                        <Button
+                          type="submit"
+                          size="sm"
+                          className="rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white h-8 w-8 p-0 flex items-center justify-center shadow-lg shadow-blue-500/30 hover:shadow-blue-500/60 hover:border hover:border-white/50 transition-all duration-300"
+                        >
+                          <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                          </svg>
+                        </Button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </section>
+
+              {/* Workflow View Section - Increased Size */}
+              <section className="flex flex-col h-full">
+                <div className="flex flex-col h-full rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-950/90 to-slate-900/80 shadow-2xl shadow-slate-950/60 backdrop-blur overflow-hidden">
+                  <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/60">
                     <div>
-                      <h3 className="text-lg font-semibold text-slate-50">Workflow Snapshot</h3>
-                      <p className="text-sm text-slate-400">
-                        Visualize the current orchestration path and active tools.
+                      <h3 className="text-base font-semibold text-slate-50">Workflow View</h3>
+                      <p className="text-xs text-slate-400">
+                        Visualize orchestration and active tools
                       </p>
                     </div>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="rounded-full border-slate-700 bg-slate-900/70 text-slate-200 hover:bg-slate-800"
+                      className="rounded-xl border-blue-500/30 bg-blue-500/10 text-blue-200 hover:bg-blue-500/20 text-xs h-7 px-3 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/50 hover:border-white/50 transition-all duration-300"
                     >
-                      Manage Nodes
+                      Manage
                     </Button>
                   </div>
-                  <div className="mt-4 h-[420px] overflow-hidden rounded-3xl border border-slate-800/60 bg-slate-900/70">
+                  <div className="flex-1 overflow-hidden rounded-b-3xl border-t border-slate-800/60 bg-slate-900/70">
                     <AgentPreview messages={messages} />
                   </div>
                 </div>
               </section>
 
-              <aside className="space-y-6">
-                <div className="rounded-[28px] border border-slate-800/60 bg-slate-950/80 p-6 shadow-2xl shadow-slate-950/60">
-                  <div className="flex items-center gap-3">
-                    <span className="inline-flex size-10 items-center justify-center rounded-3xl bg-emerald-500/20 text-base font-semibold text-emerald-300">
-                      CS
-                    </span>
-                    <div>
-                      <h3 className="text-base font-semibold text-slate-50">Agent Information</h3>
-                      <p className="text-xs text-slate-400">Customer Support Agent • GPT-4</p>
-                    </div>
-                  </div>
-                  <dl className="mt-5 space-y-3 text-sm text-slate-300">
-                    <div className="flex items-center justify-between">
-                      <dt>Model</dt>
-                      <dd className="font-medium text-slate-100">GPT-4 Turbo</dd>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <dt>Temperature</dt>
-                      <dd className="font-medium text-slate-100">0.7</dd>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <dt>Max Tokens</dt>
-                      <dd className="font-medium text-slate-100">4,000</dd>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <dt>Response Time</dt>
-                      <dd className="font-medium text-emerald-300">1.2s avg</dd>
-                    </div>
-                  </dl>
-                </div>
-
-                <div className="rounded-[28px] border border-slate-800/60 bg-slate-950/80 p-6 shadow-2xl shadow-slate-950/60">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-base font-semibold text-slate-50">Available MCP Tools</h3>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="rounded-full text-slate-300 hover:bg-slate-900"
-                      onClick={syncTools}
-                      disabled={isSyncingTools}
-                    >
-                      {isSyncingTools ? "Syncing..." : "Sync"}
-                    </Button>
-                  </div>
-                  <div className="mt-4 space-y-3">
-                    {(tools.length ? tools : []).map((tool) => (
-                      <div
-                        key={tool.name}
-                        className="rounded-3xl border border-slate-800/60 bg-slate-900/70 p-4"
-                      >
-                        <p className="font-medium text-slate-100">{tool.name}</p>
-                        <p className="mt-1 text-sm text-slate-400">{tool.description}</p>
-                        <p className="mt-2 text-xs text-slate-500">Type: {tool.type}</p>
-                      </div>
-                    ))}
-                    {tools.length === 0 ? (
-                      <div className="rounded-3xl border border-dashed border-slate-800/60 bg-slate-900/60 p-4 text-sm text-slate-400">
-                        No tools connected yet. Sync to fetch the latest MCP capabilities.
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-
-                <div className="rounded-[28px] border border-slate-800/60 bg-slate-950/80 p-6 shadow-2xl shadow-slate-950/60">
-                  <h3 className="text-base font-semibold text-slate-50">Session Statistics</h3>
-                  <div className="mt-4 space-y-3 text-sm text-slate-300">
-                    <div className="flex items-center justify-between">
-                      <span>Messages</span>
-                      <span className="font-semibold text-slate-100">{sessionStats.messages}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Tools Used</span>
-                      <span className="font-semibold text-slate-100">{sessionStats.tools}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Avg Response</span>
-                      <span className="font-semibold text-slate-100">{sessionStats.avgResponse}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Sentiment</span>
-                      <span className="font-semibold text-emerald-300">{sessionStats.sentiment}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Session Time</span>
-                      <span className="font-semibold text-slate-100">{sessionStats.duration}</span>
-                    </div>
-                  </div>
-                  <Button className="mt-5 w-full rounded-full bg-blue-600 hover:bg-blue-500">
-                    Export Conversation
-                  </Button>
+              {/* Agent Configuration Section */}
+              <aside className="flex flex-col h-full overflow-y-auto pr-1">
+                <div className="rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-950/90 to-slate-900/80 shadow-2xl shadow-slate-950/60 backdrop-blur p-6 h-full">
+                  <AgentConfig />
                 </div>
               </aside>
             </div>
@@ -521,11 +543,11 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-3">
                     <Button
                       variant="outline"
-                      className="rounded-full border-slate-700 bg-slate-900/70 text-slate-200 hover:bg-slate-800"
+                      className="rounded-full border-blue-500/30 bg-blue-500/10 text-blue-200 hover:bg-blue-500/20 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/50 hover:border-white/50 transition-all duration-300"
                     >
                       <Download className="mr-2 size-4" /> Export Workflow
                     </Button>
-                    <Button className="rounded-full bg-blue-600 hover:bg-blue-500">
+                    <Button className="rounded-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white shadow-lg shadow-blue-500/40 hover:shadow-blue-500/70 hover:border hover:border-white/50 transition-all duration-300">
                       <Play className="mr-2 size-4" /> Execute
                     </Button>
                   </div>
@@ -559,77 +581,17 @@ export default function DashboardPage() {
             </div>
           ) : null}
 
-          {activeTab === "create" ? (
-            <div className="mt-6 grid gap-6 lg:grid-cols-[280px,minmax(0,1fr)]">
-              <div className="rounded-3xl border border-slate-800/60 bg-slate-950/80 p-6 shadow-2xl shadow-slate-950/60">
-                <h3 className="text-base font-semibold text-slate-50">Create Your Agent</h3>
-                <p className="mt-1 text-sm text-slate-400">
-                  Follow these steps to configure an AI agent for your team.
+          {activeTab === "workflow_builder" ? (
+            <div className="flex items-center justify-center h-[calc(100vh-200px)]">
+              <div className="text-center max-w-md">
+                <div className="inline-flex p-6 rounded-3xl bg-gradient-to-br from-slate-900/80 to-slate-800/60 border border-slate-800/60 shadow-2xl mb-6">
+                  <GitBranch className="size-16 text-slate-400" />
+                </div>
+                <h2 className="text-3xl font-bold text-slate-50 mb-3">Workflow Builder</h2>
+                <p className="text-lg text-slate-400 mb-2">Coming Soon</p>
+                <p className="text-sm text-slate-500">
+                  Build complex AI workflows with drag-and-drop interface, conditional logic, and multi-agent orchestration.
                 </p>
-                <ol className="mt-5 space-y-4 text-sm text-slate-300">
-                  <li className="flex items-center gap-3">
-                    <span className="inline-flex size-7 items-center justify-center rounded-full bg-blue-600 text-xs font-semibold text-white">
-                      1
-                    </span>
-                    Basic Information
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="inline-flex size-7 items-center justify-center rounded-full bg-slate-900/70 text-xs font-semibold text-slate-400">
-                      2
-                    </span>
-                    Model Selection
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="inline-flex size-7 items-center justify-center rounded-full bg-slate-900/70 text-xs font-semibold text-slate-400">
-                      3
-                    </span>
-                    MCP Tools
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="inline-flex size-7 items-center justify-center rounded-full bg-slate-900/70 text-xs font-semibold text-slate-400">
-                      4
-                    </span>
-                    System Prompt
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="inline-flex size-7 items-center justify-center rounded-full bg-slate-900/70 text-xs font-semibold text-slate-400">
-                      5
-                    </span>
-                    Test & Deploy
-                  </li>
-                </ol>
-                <div className="mt-6 rounded-3xl border border-slate-800/60 bg-slate-900/70 p-4 text-sm text-slate-300">
-                  <p className="font-semibold text-slate-100">Need Help?</p>
-                  <p className="mt-2 text-slate-400">
-                    Check guides or schedule time with our expert team.
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="mt-3 w-full rounded-full border-slate-700 bg-slate-900/80 text-slate-200 hover:bg-slate-800"
-                  >
-                    View Guide
-                  </Button>
-                </div>
-              </div>
-              <div className="rounded-[28px] border border-slate-800/60 bg-slate-950/80 p-6 shadow-2xl shadow-slate-950/60">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-xl font-semibold text-slate-50">Let’s Create Your First AI Agent</h2>
-                    <p className="text-sm text-slate-400">
-                      Provide foundational details about your agent to get started.
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    className="rounded-full border-slate-700 bg-slate-900/70 text-slate-200 hover:bg-slate-800"
-                  >
-                    Save Draft
-                  </Button>
-                </div>
-                <div className="mt-6">
-                  <AgentConfig />
-                </div>
               </div>
             </div>
           ) : null}
