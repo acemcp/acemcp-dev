@@ -209,7 +209,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\sahil\\Downloads\\acemcp-dev\\src\\generated\\prisma",
+      "value": "C:\\Users\\priya\\OneDrive\\Desktop\\Priyanshu Admin\\Hustle\\AcEMCP\\acemcp-dev\\src\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -223,12 +223,11 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\sahil\\Downloads\\acemcp-dev\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\priya\\OneDrive\\Desktop\\Priyanshu Admin\\Hustle\\AcEMCP\\acemcp-dev\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": null,
-    "schemaEnvPath": "../../../.env"
+    "rootEnvPath": null
   },
   "relativePath": "../../../prisma",
   "clientVersion": "6.17.1",

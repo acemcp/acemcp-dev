@@ -232,15 +232,17 @@ export default function LandingPage() {
 
     if (!session) {
       const params = new URLSearchParams();
-      params.set("redirectTo", "/landing");
+      params.set("redirectTo", "/onboarding");
       params.set("mode", "signin");
       params.set("prompt", prompt);
       router.push(`/authentication?${params.toString()}`);
       return;
     }
 
-    setIsGenerating(true);
-    window.setTimeout(() => setIsGenerating(false), 2000);
+    // Authenticated user - redirect to onboarding with prompt
+    const params = new URLSearchParams();
+    params.set("prompt", prompt);
+    router.push(`/onboarding?${params.toString()}`);
   };
 
   const handlePrimaryCta = () => {
@@ -334,11 +336,11 @@ export default function LandingPage() {
           </div>
         </header>
 
-        <main className="mx-auto max-w-7xl px-2 py-20 lg:px-8 lg:py-28">
+        <main className="mx-auto max-w-7xl px-2 py-20 lg:px-8 lg:py-2">
           <div className="relative z-2 flex flex-col items-center text-center pt-4 md:pt-20">
             <div className="pointer-events-none absolute inset-x-0 -top-24 flex h-[520px] w-full items-center justify-center -z-10 md:-top-32">
               <div className="h-full w-full max-w-6xl scale-100 mix-blend-screen opacity-100">
-                <TextHoverEffect text="AceMCP" automatic duration={12} />
+                <TextHoverEffect text="Akron" automatic duration={12} />
               </div>
             </div>
             {/* <Badge className="flex items-center gap-2 border-white/10 bg-white/10 px-4 py-1.5 text-sm text-white/90 backdrop-blur-xl">
@@ -357,7 +359,7 @@ export default function LandingPage() {
               Describe your agent once. Get production-grade MCP servers with orchestration, monitoring, and enterprise security automatically.
             </p>
 
-            <div className="relative mt-12 w-full max-w-3xl">
+            <div className="relative mt-12 w-full max-w-5xl">
               <div className="absolute -inset-[1px] animate-[pulse_3s_ease-in-out_infinite] rounded-2xl bg-gradient-to-r from-sky-500 via-blue-500 to-cyan-500 opacity-75 blur-sm" />
               <div className="relative rounded-2xl border border-white/10 bg-black/50 p-1 shadow-2xl backdrop-blur-2xl">
                 <div className="flex flex-col gap-3 rounded-xl bg-gradient-to-br from-white/[0.07] to-white/[0.02] p-5">
@@ -371,7 +373,7 @@ export default function LandingPage() {
                       }
                     }}
                     placeholder="Describe your AI agent... e.g., 'Build a customer support agent that handles tickets, emails, and Slack messages with sentiment analysis'"
-                    className="min-h-[140px] resize-none border-0 bg-transparent text-base text-white/90 placeholder:text-white/45 focus:outline-none"
+                    className="min-h-[120px] resize-none border-0 bg-transparent text-base text-white/90 placeholder:text-white/45 focus:outline-none"
                   />
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-2 text-xs text-white/45">
@@ -445,7 +447,7 @@ export default function LandingPage() {
                 Everything you need to build AI agents
               </h2>
               <p className="mt-4 max-w-2xl text-lg text-white/65">
-                From natural language to production-ready infrastructure, AceMCP handles the entire agent lifecycle.
+                From natural language to production-ready infrastructure, Akron handles the entire agent lifecycle.
               </p>
             </div>
 
@@ -496,7 +498,7 @@ export default function LandingPage() {
                 </Badge>
                 <h3 className="text-3xl font-bold text-white">From prompt to production</h3>
                 <p className="text-white/65">
-                  Follow the real-time journey as AceMCP assembles, deploys, and optimizes your agent across the stack.
+                  Follow the real-time journey as Akron assembles, deploys, and optimizes your agent across the stack.
                 </p>
                 <div className="space-y-4">
                   {pipelineStages.map((stage, index) => {
@@ -593,7 +595,7 @@ export default function LandingPage() {
                 <Layers className="h-4 w-4" /> Outcomes
               </Badge>
               <h2 className="text-4xl font-bold text-white sm:text-5xl">
-                Modern teams rely on AceMCP
+                Modern teams rely on Akron
               </h2>
               <p className="mt-4 max-w-2xl text-lg text-white/65">
                 Product, support, and operations teams deliver faster cycles with human-in-the-loop control and measurable gains.
@@ -699,9 +701,9 @@ export default function LandingPage() {
                     <Zap className="h-4 w-4 text-white" strokeWidth={2.5} />
                   </div>
                 </div>
-                <span className="text-sm font-semibold text-white/85">AceMCP</span>
+                <span className="text-sm font-semibold text-white/85">Akron</span>
               </div>
-              <p className="text-sm text-white/45">© 2025 AceMCP. All rights reserved.</p>
+              <p className="text-sm text-white/45">© 2025 Akron. All rights reserved.</p>
               <div className="flex items-center gap-4">
                 <a href="#" className="text-white/45 transition-colors hover:text-white">
                   <Github className="h-5 w-5" />
