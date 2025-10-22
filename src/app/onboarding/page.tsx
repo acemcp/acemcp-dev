@@ -7,7 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Loader2,
@@ -37,8 +43,8 @@ const POPULAR_MCP_SERVERS = [
     configTemplate: {
       command: "npx",
       args: ["-y", "@modelcontextprotocol/server-github"],
-      env: { GITHUB_PERSONAL_ACCESS_TOKEN: "" }
-    }
+      env: { GITHUB_PERSONAL_ACCESS_TOKEN: "" },
+    },
   },
   {
     id: "slack",
@@ -49,8 +55,8 @@ const POPULAR_MCP_SERVERS = [
     configTemplate: {
       command: "npx",
       args: ["-y", "@modelcontextprotocol/server-slack"],
-      env: { SLACK_BOT_TOKEN: "", SLACK_TEAM_ID: "" }
-    }
+      env: { SLACK_BOT_TOKEN: "", SLACK_TEAM_ID: "" },
+    },
   },
   {
     id: "postgres",
@@ -61,8 +67,8 @@ const POPULAR_MCP_SERVERS = [
     configTemplate: {
       command: "npx",
       args: ["-y", "@modelcontextprotocol/server-postgres"],
-      env: { POSTGRES_CONNECTION_STRING: "" }
-    }
+      env: { POSTGRES_CONNECTION_STRING: "" },
+    },
   },
   {
     id: "gmail",
@@ -73,8 +79,8 @@ const POPULAR_MCP_SERVERS = [
     configTemplate: {
       command: "npx",
       args: ["-y", "@modelcontextprotocol/server-gmail"],
-      env: { GMAIL_CREDENTIALS: "" }
-    }
+      env: { GMAIL_CREDENTIALS: "" },
+    },
   },
   {
     id: "google-calendar",
@@ -85,8 +91,8 @@ const POPULAR_MCP_SERVERS = [
     configTemplate: {
       command: "npx",
       args: ["-y", "@modelcontextprotocol/server-google-calendar"],
-      env: { GOOGLE_CALENDAR_CREDENTIALS: "" }
-    }
+      env: { GOOGLE_CALENDAR_CREDENTIALS: "" },
+    },
   },
   {
     id: "notion",
@@ -97,8 +103,8 @@ const POPULAR_MCP_SERVERS = [
     configTemplate: {
       command: "npx",
       args: ["-y", "@modelcontextprotocol/server-notion"],
-      env: { NOTION_API_KEY: "" }
-    }
+      env: { NOTION_API_KEY: "" },
+    },
   },
   {
     id: "google-drive",
@@ -109,8 +115,8 @@ const POPULAR_MCP_SERVERS = [
     configTemplate: {
       command: "npx",
       args: ["-y", "@modelcontextprotocol/server-gdrive"],
-      env: { GOOGLE_DRIVE_CREDENTIALS: "" }
-    }
+      env: { GOOGLE_DRIVE_CREDENTIALS: "" },
+    },
   },
   {
     id: "custom",
@@ -121,9 +127,9 @@ const POPULAR_MCP_SERVERS = [
     configTemplate: {
       command: "",
       args: [],
-      env: {}
-    }
-  }
+      env: {},
+    },
+  },
 ];
 
 export default function OnboardingPage() {
@@ -141,10 +147,19 @@ export default function OnboardingPage() {
   const [identity, setIdentity] = useState("");
   const [instructions, setInstructions] = useState("");
   const [tone, setTone] = useState("");
-  
+
   // MCP Server selection
   const [selectedServers, setSelectedServers] = useState<string[]>([]);
   const [mcpConfigString, setMcpConfigString] = useState("");
+  const [customServers, setCustomServers] = useState<
+    Array<{ id: string; name: string; config: any }>
+  >([
+    {
+      id: "custom-1",
+      name: "Custom Server 1",
+      config: { command: "", args: [], env: {} },
+    },
+  ]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -186,7 +201,7 @@ export default function OnboardingPage() {
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         setProjectId(data.project.id);
         setStep(2);
@@ -219,7 +234,7 @@ export default function OnboardingPage() {
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         setStep(3);
       } else {
@@ -234,10 +249,37 @@ export default function OnboardingPage() {
   };
 
   const toggleServer = (serverId: string) => {
-    setSelectedServers(prev => 
-      prev.includes(serverId) 
-        ? prev.filter(id => id !== serverId)
+    setSelectedServers((prev) =>
+      prev.includes(serverId)
+        ? prev.filter((id) => id !== serverId)
         : [...prev, serverId]
+    );
+  };
+
+  const addCustomServer = () => {
+    const newId = `custom-${Date.now()}`;
+    setCustomServers((prev) => [
+      ...prev,
+      {
+        id: newId,
+        name: `Custom Server ${prev.length + 1}`,
+        config: { command: "", args: [], env: {} },
+      },
+    ]);
+  };
+
+  const removeCustomServer = (serverId: string) => {
+    setCustomServers((prev) => prev.filter((server) => server.id !== serverId));
+  };
+
+  const updateCustomServer = (
+    serverId: string,
+    updates: Partial<{ name: string; config: any }>
+  ) => {
+    setCustomServers((prev) =>
+      prev.map((server) =>
+        server.id === serverId ? { ...server, ...updates } : server
+      )
     );
   };
 
@@ -246,27 +288,46 @@ export default function OnboardingPage() {
 
     setIsLoading(true);
     try {
-      // Parse and save MCP config if provided
+      // Build MCP config from selected servers and custom servers
+      const mcpServers: any = {};
+
+      // Add selected popular servers
+      selectedServers.forEach((serverId) => {
+        const server = POPULAR_MCP_SERVERS.find((s) => s.id === serverId);
+        if (server && server.id !== "custom") {
+          mcpServers[serverId] = server.configTemplate;
+        }
+      });
+
+      // Add custom servers
+      customServers.forEach((server) => {
+        mcpServers[server.id] = server.config;
+      });
+
+      // Merge with manual MCP config if provided
+      let finalConfig = { mcpServers };
       if (mcpConfigString.trim()) {
         try {
-          const configJson = JSON.parse(mcpConfigString);
-          
-          await fetch("/api/mcp-config", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              projectId,
-              mcpString: mcpConfigString,
-              authToken: "",
-              configJson,
-            }),
-          });
+          const manualConfig = JSON.parse(mcpConfigString);
+          finalConfig = { ...finalConfig, ...manualConfig };
         } catch (parseError) {
           alert("Invalid MCP configuration JSON");
           setIsLoading(false);
           return;
         }
       }
+
+      // Save MCP config
+      await fetch("/api/mcp-config", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectId,
+          mcpString: JSON.stringify(finalConfig),
+          authToken: "",
+          configJson: finalConfig,
+        }),
+      });
 
       // Redirect to main dashboard
       router.push(`/?projectId=${projectId}`);
@@ -309,15 +370,25 @@ export default function OnboardingPage() {
           <div className="flex items-center gap-4">
             {[1, 2, 3].map((stepNum) => (
               <div key={stepNum} className="flex items-center gap-4">
-                <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all ${
-                  step >= stepNum 
-                    ? "border-blue-500 bg-blue-500 text-white" 
-                    : "border-slate-700 bg-slate-900 text-slate-500"
-                }`}>
-                  {step > stepNum ? <CheckCircle2 className="h-5 w-5" /> : stepNum}
+                <div
+                  className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all ${
+                    step >= stepNum
+                      ? "border-blue-500 bg-blue-500 text-white"
+                      : "border-slate-700 bg-slate-900 text-slate-500"
+                  }`}
+                >
+                  {step > stepNum ? (
+                    <CheckCircle2 className="h-5 w-5" />
+                  ) : (
+                    stepNum
+                  )}
                 </div>
                 {stepNum < 3 && (
-                  <div className={`w-16 h-0.5 ${step > stepNum ? "bg-blue-500" : "bg-slate-700"}`} />
+                  <div
+                    className={`w-16 h-0.5 ${
+                      step > stepNum ? "bg-blue-500" : "bg-slate-700"
+                    }`}
+                  />
                 )}
               </div>
             ))}
@@ -328,14 +399,18 @@ export default function OnboardingPage() {
         {step === 1 && (
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur">
             <CardHeader>
-              <CardTitle className="text-2xl text-white">Project Details</CardTitle>
+              <CardTitle className="text-2xl text-white">
+                Project Details
+              </CardTitle>
               <CardDescription className="text-slate-400">
                 Tell us about your AI agent project
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="projectName" className="text-slate-200">Project Name *</Label>
+                <Label htmlFor="projectName" className="text-slate-200">
+                  Project Name *
+                </Label>
                 <Input
                   id="projectName"
                   value={projectName}
@@ -346,7 +421,9 @@ export default function OnboardingPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="projectDescription" className="text-slate-200">Description</Label>
+                <Label htmlFor="projectDescription" className="text-slate-200">
+                  Description
+                </Label>
                 <Textarea
                   id="projectDescription"
                   value={projectDescription}
@@ -358,7 +435,9 @@ export default function OnboardingPage() {
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="identity" className="text-slate-200">Agent Identity</Label>
+                  <Label htmlFor="identity" className="text-slate-200">
+                    Agent Identity
+                  </Label>
                   <Input
                     id="identity"
                     value={identity}
@@ -369,7 +448,9 @@ export default function OnboardingPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="tone" className="text-slate-200">Tone</Label>
+                  <Label htmlFor="tone" className="text-slate-200">
+                    Tone
+                  </Label>
                   <Input
                     id="tone"
                     value={tone}
@@ -381,7 +462,9 @@ export default function OnboardingPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="instructions" className="text-slate-200">Instructions</Label>
+                <Label htmlFor="instructions" className="text-slate-200">
+                  Instructions
+                </Label>
                 <Textarea
                   id="instructions"
                   value={instructions}
@@ -416,7 +499,9 @@ export default function OnboardingPage() {
         {step === 2 && (
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur">
             <CardHeader>
-              <CardTitle className="text-2xl text-white">Review & Edit Metadata</CardTitle>
+              <CardTitle className="text-2xl text-white">
+                Review & Edit Metadata
+              </CardTitle>
               <CardDescription className="text-slate-400">
                 Fine-tune your project configuration
               </CardDescription>
@@ -512,47 +597,195 @@ export default function OnboardingPage() {
                   Select integrations to enhance your agent's capabilities
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {POPULAR_MCP_SERVERS.map((server) => {
-                    const Icon = server.icon;
-                    const isSelected = selectedServers.includes(server.id);
-                    
-                    return (
-                      <button
-                        key={server.id}
-                        onClick={() => toggleServer(server.id)}
-                        className={`text-left p-4 rounded-xl border-2 transition-all ${
-                          isSelected
-                            ? "border-blue-500 bg-blue-500/10"
-                            : "border-slate-700 bg-slate-950 hover:border-slate-600"
-                        }`}
-                      >
-                        <div className="flex items-start justify-between mb-3">
-                          <div className={`p-2 rounded-lg ${
-                            isSelected ? "bg-blue-500" : "bg-slate-800"
-                          }`}>
-                            <Icon className="h-5 w-5 text-white" />
+              <CardContent className="space-y-6">
+                {/* Three equal-width boxes */}
+                <div className="grid grid-cols-3 gap-4">
+                  {/* Box 1: Popular Integrations */}
+                  <div className="border border-slate-700 rounded-xl p-4 bg-slate-950">
+                    <h3 className="text-sm font-medium text-slate-200 mb-3">
+                      Popular Integrations
+                    </h3>
+                    <div className="grid grid-cols-3 gap-3">
+                      {POPULAR_MCP_SERVERS.filter(
+                        (server) => server.id !== "custom"
+                      ).map((server) => {
+                        const Icon = server.icon;
+                        const isSelected = selectedServers.includes(server.id);
+
+                        return (
+                          <div
+                            key={server.id}
+                            className="group relative"
+                            title={server.name}
+                          >
+                            <button
+                              onClick={() => toggleServer(server.id)}
+                              disabled
+                              className={`w-full p-4 rounded-xl border-2 transition-all cursor-not-allowed opacity-60 ${
+                                isSelected
+                                  ? "border-blue-500 bg-blue-500/10"
+                                  : "border-slate-700 bg-slate-900"
+                              }`}
+                            >
+                              <div className="flex items-center justify-center h-full">
+                                <div className="p-3 rounded-xl bg-slate-800 group-hover:bg-slate-700 transition-colors">
+                                  <Icon className="h-6 w-6 text-slate-400" />
+                                </div>
+                              </div>
+                            </button>
                           </div>
-                          {isSelected && (
-                            <CheckCircle2 className="h-5 w-5 text-blue-500" />
-                          )}
+                        );
+                      })}
+                    </div>
+                    <div className="mt-4 text-center">
+                      <span className="text-xs text-slate-500">
+                        Coming soon
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Box 2: Custom Server */}
+                  <div className="border border-slate-700 rounded-xl p-4 bg-slate-950 flex flex-col">
+                    <div className="flex-1 flex flex-col items-center justify-center space-y-4">
+                      <div className="p-4 rounded-xl bg-slate-800">
+                        <Code className="h-8 w-8 text-slate-400" />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-white font-medium mb-1">
+                          Custom Server
+                        </p>
+                        <p className="text-xs text-slate-400">
+                          Add a custom configuration
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Box 3: Add Another */}
+                  <div className="border-2 border-dashed border-slate-600 rounded-xl p-4 bg-slate-950 flex flex-col">
+                    <div className="flex-1 flex items-center justify-center">
+                      <button
+                        onClick={addCustomServer}
+                        className="w-full h-20 flex items-center justify-center hover:bg-blue-500/5 transition-all group"
+                      >
+                        <div className="text-center">
+                          <div className="w-12 h-12 flex items-center justify-center mx-auto mb-2">
+                            <span className="text-6xl text-slate-400 group-hover:text-blue-400">
+                              +
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-400 group-hover:text-blue-400 font-medium">
+                            Add Another
+                          </p>
                         </div>
-                        <h3 className="font-semibold text-white mb-1">{server.name}</h3>
-                        <p className="text-xs text-slate-400 mb-2">{server.description}</p>
-                        <Badge variant="outline" className="text-xs border-slate-700 text-slate-400">
-                          {server.category}
-                        </Badge>
                       </button>
-                    );
-                  })}
+                    </div>
+                  </div>
                 </div>
+
+                {/* Custom Server Configuration Forms */}
+                {customServers.map((server) => (
+                  <Card
+                    key={server.id}
+                    className="border-slate-700 bg-slate-950"
+                  >
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg text-white flex items-center justify-between">
+                        {server.name}
+                        {customServers.length > 1 && (
+                          <button
+                            onClick={() => removeCustomServer(server.id)}
+                            className="text-slate-400 hover:text-red-400"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-slate-200">Server Name</Label>
+                          <Input
+                            value={server.name}
+                            onChange={(e) =>
+                              updateCustomServer(server.id, {
+                                name: e.target.value,
+                              })
+                            }
+                            className="bg-slate-900 border-slate-700 text-white"
+                            placeholder="My Custom Server"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-slate-200">Command</Label>
+                          <Input
+                            value={server.config.command}
+                            onChange={(e) =>
+                              updateCustomServer(server.id, {
+                                config: {
+                                  ...server.config,
+                                  command: e.target.value,
+                                },
+                              })
+                            }
+                            className="bg-slate-900 border-slate-700 text-white"
+                            placeholder="npx"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-slate-200">
+                          Arguments (comma-separated)
+                        </Label>
+                        <Input
+                          value={server.config.args.join(", ")}
+                          onChange={(e) =>
+                            updateCustomServer(server.id, {
+                              config: {
+                                ...server.config,
+                                args: e.target.value
+                                  .split(",")
+                                  .map((s) => s.trim())
+                                  .filter(Boolean),
+                              },
+                            })
+                          }
+                          className="bg-slate-900 border-slate-700 text-white"
+                          placeholder="-y, @modelcontextprotocol/server-github"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-slate-200">
+                          Environment Variables (JSON)
+                        </Label>
+                        <Textarea
+                          value={JSON.stringify(server.config.env, null, 2)}
+                          onChange={(e) => {
+                            try {
+                              const env = JSON.parse(e.target.value);
+                              updateCustomServer(server.id, {
+                                config: { ...server.config, env },
+                              });
+                            } catch {
+                              // Invalid JSON, don't update
+                            }
+                          }}
+                          className="bg-slate-900 border-slate-700 text-white font-mono text-sm min-h-[80px]"
+                          placeholder='{"API_KEY": "your-key"}'
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </CardContent>
             </Card>
 
             <Card className="border-slate-800 bg-slate-900/50 backdrop-blur">
               <CardHeader>
-                <CardTitle className="text-xl text-white">MCP Server Configuration</CardTitle>
+                <CardTitle className="text-xl text-white">
+                  MCP Server Configuration
+                </CardTitle>
                 <CardDescription className="text-slate-400">
                   Paste your MCP servers config JSON (optional)
                 </CardDescription>
@@ -575,7 +808,8 @@ export default function OnboardingPage() {
                   className="bg-slate-950 border-slate-700 text-white font-mono text-sm min-h-[200px]"
                 />
                 <p className="text-xs text-slate-500">
-                  This configuration will be securely stored and used to connect your MCP servers.
+                  This configuration will be securely stored and used to connect
+                  your MCP servers.
                 </p>
               </CardContent>
             </Card>
