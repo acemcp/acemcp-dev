@@ -37,6 +37,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { TextHoverEffect } from "@/components/ui/text-hover-effect";
+import { useMCP } from "@/context";
+import axios from "axios";
 
 const suggestions = [
   "E-commerce agent with inventory automation",
@@ -213,9 +215,13 @@ const metricsPulse = [
 ];
 
 export default function LandingPage() {
+  const { promptMetadata, setPromptMetadata } = useMCP();
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeStage, setActiveStage] = useState(0);
+  const [identity, setIdentity] = useState("");
+  const [instructions, setInstructions] = useState("");
+  const [tone, setTone] = useState("");
   const { session, isLoading, signOut } = useSupabaseAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -227,9 +233,9 @@ export default function LandingPage() {
     return () => window.clearInterval(interval);
   }, []);
 
-  const handleGenerate = () => {
+const handleGenerate = async () => {
+    //call the api
     if (!prompt.trim()) return;
-
     if (!session) {
       const params = new URLSearchParams();
       params.set("redirectTo", "/onboarding");
@@ -238,12 +244,47 @@ export default function LandingPage() {
       router.push(`/authentication?${params.toString()}`);
       return;
     }
-
+    const CreateprojectResponse = await fetch("/api/project/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: " ",
+        description: " ",
+        prompt: searchParams.get("prompt"),
+        identity,
+        instructions,
+        tone,
+      }),
+    });
+    const data = await CreateprojectResponse.json();
+    console.log("data", data);
+    const { project: { id } } = data;
+    console.log("project id ", id);
+    const postData = {
+      text: prompt,
+      projectId: id
+    };
+    await axios.post('http://localhost:8787/template', postData).then(res => {
+      let { projectMetadata } = res.data
+      setPromptMetadata(projectMetadata[0])
+      console.log("res", res);
+    }).catch(err => {
+      console.log("err", err);
+    })
+    //project id
+    // const data = await response.json();
+    // console.log(data);
     // Authenticated user - redirect to onboarding with prompt
     const params = new URLSearchParams();
     params.set("prompt", prompt);
     router.push(`/onboarding?${params.toString()}`);
+
+    // router.push(`/onboarding?${params.toString()}`);
   };
+  
+  useEffect(() => {
+    console.log("promtMetadata", promptMetadata);
+  }, [promptMetadata])  
 
   const handlePrimaryCta = () => {
     if (session) {

@@ -62,7 +62,7 @@ model Project {
   projectDesc    String? // An optional, user-provided description for the project.
   projectHistory Json?     @map("project_history_json") @db.JsonB // Optional JSON field to store a log of changes or events related to the project.
   createdAt      DateTime  @default(now()) // Timestamp for when the project was created.
-  updatedAt      DateTime  @updatedAt // Timestamp for when the project was last updated.
+  updatedAt      DateTime  @default(now()) @updatedAt // Timestamp for when the project was last updated.
   deployedAt     DateTime? // Optional timestamp for when the project was last deployed.
 
   // --- Relationships ---
