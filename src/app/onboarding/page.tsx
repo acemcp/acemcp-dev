@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSupabaseAuth } from "@/providers/supabase-auth-provider";
 import { Button } from "@/components/ui/button";
@@ -134,9 +134,8 @@ const POPULAR_MCP_SERVERS = [
   },
 ];
 
-export default function OnboardingPage() {
+function OnboardingContent() {
   const { promptMetadata, setPromptMetadata } = useMCP();
-
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading: authLoading } = useSupabaseAuth();
@@ -822,5 +821,19 @@ export default function OnboardingPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        </div>
+      }
+    >
+      <OnboardingContent />
+    </Suspense>
   );
 }
