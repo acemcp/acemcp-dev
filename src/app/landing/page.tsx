@@ -22,6 +22,7 @@ import {
   BarChart3,
   Shield,
   Cloud,
+  Loader2,
 } from "lucide-react";
 import { IconBrandYoutubeFilled } from "@tabler/icons-react";
 import createGlobe from "cobe";
@@ -244,6 +245,7 @@ const handleGenerate = async () => {
       router.push(`/authentication?${params.toString()}`);
       return;
     }
+    setIsGenerating(true);
     const CreateprojectResponse = await fetch("/api/project/create", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -264,13 +266,15 @@ const handleGenerate = async () => {
       text: prompt,
       projectId: id
     };
-    await axios.post('http://localhost:8787/template', postData).then(res => {
+    await axios.post('https://acemcp-service.rushikeshpatil8208.workers.dev/template', postData).then(res => {
       let { projectMetadata } = res.data
       setPromptMetadata(projectMetadata[0])
       console.log("res", res);
     }).catch(err => {
       console.log("err", err);
-    })
+    }).finally(() => {
+      setIsGenerating(false);
+    });
     //project id
     // const data = await response.json();
     // console.log(data);
@@ -425,12 +429,12 @@ const handleGenerate = async () => {
                     <Button
                       onClick={handleGenerate}
                       disabled={isGenerating || !prompt.trim()}
-                      className="h-auto rounded-lg border border-white/10 bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white disabled:opacity-50 disabled:hover:border-white/10"
+                      className="h-auto rounded-lg border border-white/10 bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white hover:bg-black disabled:opacity-50 disabled:hover:border-white/10"
                     >
                       {isGenerating ? (
                         <div className="flex items-center gap-2">
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/25 border-t-white" />
                           Generating...
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">

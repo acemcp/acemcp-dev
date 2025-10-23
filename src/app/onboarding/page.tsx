@@ -479,8 +479,9 @@ export default function OnboardingPage() {
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Creating...
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+
                   </>
                 ) : (
                   <>
@@ -567,8 +568,8 @@ export default function OnboardingPage() {
                 >
                   {isLoading ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Saving...
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin " />
                     </>
                   ) : (
                     <>

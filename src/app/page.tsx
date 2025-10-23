@@ -99,7 +99,7 @@ export default function DashboardPage() {
 
   const { messages, sendMessage, addToolResult } = useChat({
     transport: new DefaultChatTransport({
-      api: "https://workerdemo.rushikeshpatil8208.workers.dev/",
+      api: "/api/mcp",
     }),
   });
 
