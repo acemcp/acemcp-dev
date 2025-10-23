@@ -19,7 +19,7 @@ datasource db {
 model User {
   id              String    @id @default(uuid()) @db.Uuid // Unique identifier for the user, using UUIDs for consistency.
   name            String? // The user's full name, optional.
-  email           String?   @unique // The user's email address, must be unique. Optional to support different login methods.
+  email           String?   // The user's email address, must be unique. Optional to support different login methods.
   emailVerified   DateTime? // Timestamp indicating when the user's email was verified.
   image           String? // URL to the user's profile picture.
   passwordHash    String? // Stores the hashed password for email/password authentication. NEVER store plaintext passwords.
@@ -105,10 +105,14 @@ model Conversation {
 
 // Model for MCP (Model Configuration Profile) settings.
 model MCPConfig {
-  id         String @id @default(uuid()) @db.Uuid // Unique identifier for the MCP configuration.
-  mcpString  String // A string representing the MCP configuration.
-  authToken  String // The authentication token required for the MCP. Handle this securely.
-  configJson Json   @map("config_json") @db.JsonB // The main configuration stored in JSON format.
+  id         String    @id @default(uuid()) @db.Uuid // Unique identifier for the MCP configuration.
+  serverUrl  String // The MCP server URL.
+  serverKey  String? // Optional server key for authentication.
+  authHeader String? // Optional authentication header name (e.g., "Authorization").
+  authToken  String? // The authentication token required for the MCP. Handle this securely.
+  configJson Json      @map("config_json") @db.JsonB // The main configuration stored in JSON format.
+  createdAt  DateTime  @default(now()) // Timestamp for when the config was created.
+  updatedAt  DateTime  @updatedAt @default(now()) // Timestamp for when the config was last updated.
   
   // --- Relationships ---
   userId    String  @db.Uuid // Foreign key for the user who created this configuration.

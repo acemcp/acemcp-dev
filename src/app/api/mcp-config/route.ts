@@ -20,9 +20,9 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { projectId, mcpString, authToken, configJson } = body;
+    const { projectId, serverUrl, authHeader, authToken, configJson } = body;
 
-    if (!projectId || !mcpString || !configJson) {
+    if (!projectId || !serverUrl || !configJson) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -44,8 +44,9 @@ export async function POST(req: Request) {
     // Create MCP config
     const mcpConfig = await prisma.mCPConfig.create({
       data: {
-        mcpString,
-        authToken: authToken || "",
+        serverUrl,
+        authHeader: authHeader || null,
+        authToken: authToken || null,
         configJson,
         userId: user.id,
         projectId,
@@ -56,7 +57,7 @@ export async function POST(req: Request) {
       success: true,
       mcpConfig: {
         id: mcpConfig.id,
-        mcpString: mcpConfig.mcpString,
+        serverUrl: mcpConfig.serverUrl,
       }
     });
 

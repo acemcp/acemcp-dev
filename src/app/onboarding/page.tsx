@@ -149,17 +149,15 @@ export default function OnboardingPage() {
   const [tone, setTone] = useState("");
 
   // MCP Server selection
-  const [selectedServers, setSelectedServers] = useState<string[]>([]);
-  const [mcpConfigString, setMcpConfigString] = useState("");
-  const [customServers, setCustomServers] = useState<
-    Array<{ id: string; name: string; config: any }>
-  >([
-    {
-      id: "custom-1",
-      name: "Custom Server 1",
-      config: { command: "", args: [], env: {} },
-    },
-  ]);
+  const [mcpServers, setMcpServers] = useState<
+    Array<{
+      id: string;
+      url: string;
+      authHeader: string;
+      authValue: string;
+      showAuth: boolean;
+    }>
+  >([]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -248,35 +246,34 @@ export default function OnboardingPage() {
     }
   };
 
-  const toggleServer = (serverId: string) => {
-    setSelectedServers((prev) =>
-      prev.includes(serverId)
-        ? prev.filter((id) => id !== serverId)
-        : [...prev, serverId]
-    );
-  };
-
-  const addCustomServer = () => {
-    const newId = `custom-${Date.now()}`;
-    setCustomServers((prev) => [
+  const addMcpServer = () => {
+    const newId = `mcp-${Date.now()}`;
+    setMcpServers((prev) => [
       ...prev,
       {
         id: newId,
-        name: `Custom Server ${prev.length + 1}`,
-        config: { command: "", args: [], env: {} },
+        url: "",
+        authHeader: "Authorization",
+        authValue: "",
+        showAuth: false,
       },
     ]);
   };
 
-  const removeCustomServer = (serverId: string) => {
-    setCustomServers((prev) => prev.filter((server) => server.id !== serverId));
+  const removeMcpServer = (serverId: string) => {
+    setMcpServers((prev) => prev.filter((server) => server.id !== serverId));
   };
 
-  const updateCustomServer = (
+  const updateMcpServer = (
     serverId: string,
-    updates: Partial<{ name: string; config: any }>
+    updates: Partial<{
+      url: string;
+      authHeader: string;
+      authValue: string;
+      showAuth: boolean;
+    }>
   ) => {
-    setCustomServers((prev) =>
+    setMcpServers((prev) =>
       prev.map((server) =>
         server.id === serverId ? { ...server, ...updates } : server
       )
@@ -286,48 +283,45 @@ export default function OnboardingPage() {
   const handleDeploy = async () => {
     if (!projectId) return;
 
+    // Validate that at least one MCP server is configured
+    if (mcpServers.length === 0) {
+      alert("Please add at least one MCP server");
+      return;
+    }
+
+    // Validate all servers have URLs
+    const invalidServers = mcpServers.filter((server) => !server.url.trim());
+    if (invalidServers.length > 0) {
+      alert("Please enter a URL for all MCP servers");
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // Build MCP config from selected servers and custom servers
-      const mcpServers: any = {};
+      // Save each MCP server configuration
+      for (const server of mcpServers) {
+        const configJson = {
+          url: server.url,
+          authentication: server.showAuth
+            ? {
+                headerName: server.authHeader,
+                headerValue: server.authValue,
+              }
+            : null,
+        };
 
-      // Add selected popular servers
-      selectedServers.forEach((serverId) => {
-        const server = POPULAR_MCP_SERVERS.find((s) => s.id === serverId);
-        if (server && server.id !== "custom") {
-          mcpServers[serverId] = server.configTemplate;
-        }
-      });
-
-      // Add custom servers
-      customServers.forEach((server) => {
-        mcpServers[server.id] = server.config;
-      });
-
-      // Merge with manual MCP config if provided
-      let finalConfig = { mcpServers };
-      if (mcpConfigString.trim()) {
-        try {
-          const manualConfig = JSON.parse(mcpConfigString);
-          finalConfig = { ...finalConfig, ...manualConfig };
-        } catch (parseError) {
-          alert("Invalid MCP configuration JSON");
-          setIsLoading(false);
-          return;
-        }
+        await fetch("/api/mcp-config", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            projectId,
+            serverUrl: server.url, // Store the URL in serverUrl column
+            authHeader: server.showAuth ? server.authHeader : null,
+            authToken: server.showAuth ? server.authValue : null,
+            configJson,
+          }),
+        });
       }
-
-      // Save MCP config
-      await fetch("/api/mcp-config", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          projectId,
-          mcpString: JSON.stringify(finalConfig),
-          authToken: "",
-          configJson: finalConfig,
-        }),
-      });
 
       // Redirect to main dashboard
       router.push(`/?projectId=${projectId}`);
@@ -397,7 +391,7 @@ export default function OnboardingPage() {
 
         {/* Step 1: Project Metadata */}
         {step === 1 && (
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur">
+          <Card className="border-blue-900/50 bg-gradient-to-br from-slate-900/90 via-blue-950/30 to-slate-900/90 backdrop-blur-xl shadow-2xl">
             <CardHeader>
               <CardTitle className="text-2xl text-white">
                 Project Details
@@ -497,7 +491,7 @@ export default function OnboardingPage() {
 
         {/* Step 2: Edit Metadata */}
         {step === 2 && (
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur">
+          <Card className="border-blue-900/50 bg-gradient-to-br from-slate-900/90 via-blue-950/30 to-slate-900/90 backdrop-blur-xl shadow-2xl">
             <CardHeader>
               <CardTitle className="text-2xl text-white">
                 Review & Edit Metadata
@@ -587,230 +581,210 @@ export default function OnboardingPage() {
         {/* Step 3: MCP Servers & Deploy */}
         {step === 3 && (
           <div className="space-y-6">
-            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur">
+            <Card className="border-blue-900/50 bg-gradient-to-br from-slate-900/90 via-blue-950/30 to-slate-900/90 backdrop-blur-xl shadow-2xl">
               <CardHeader>
                 <CardTitle className="text-2xl text-white flex items-center gap-2">
-                  <Server className="h-6 w-6" />
+                  <Server className="h-6 w-6 text-blue-400" />
                   Connect MCP Servers
                 </CardTitle>
                 <CardDescription className="text-slate-400">
-                  Select integrations to enhance your agent's capabilities
+                  Add MCP server URLs to enhance your agent's capabilities
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Three equal-width boxes */}
-                <div className="grid grid-cols-3 gap-4">
-                  {/* Box 1: Popular Integrations */}
-                  <div className="border border-slate-700 rounded-xl p-4 bg-slate-950">
-                    <h3 className="text-sm font-medium text-slate-200 mb-3">
-                      Popular Integrations
-                    </h3>
-                    <div className="grid grid-cols-3 gap-3">
-                      {POPULAR_MCP_SERVERS.filter(
-                        (server) => server.id !== "custom"
-                      ).map((server) => {
-                        const Icon = server.icon;
-                        const isSelected = selectedServers.includes(server.id);
-
-                        return (
-                          <div
-                            key={server.id}
-                            className="group relative"
-                            title={server.name}
-                          >
-                            <button
-                              onClick={() => toggleServer(server.id)}
-                              disabled
-                              className={`w-full p-4 rounded-xl border-2 transition-all cursor-not-allowed opacity-60 ${
-                                isSelected
-                                  ? "border-blue-500 bg-blue-500/10"
-                                  : "border-slate-700 bg-slate-900"
-                              }`}
-                            >
-                              <div className="flex items-center justify-center h-full">
-                                <div className="p-3 rounded-xl bg-slate-800 group-hover:bg-slate-700 transition-colors">
-                                  <Icon className="h-6 w-6 text-slate-400" />
-                                </div>
-                              </div>
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <div className="mt-4 text-center">
-                      <span className="text-xs text-slate-500">
-                        Coming soon
-                      </span>
-                    </div>
+                {/* Add MCP Server Button */}
+                {mcpServers.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-slate-400 mb-4">
+                      No MCP servers configured yet
+                    </p>
+                    <Button
+                      onClick={addMcpServer}
+                      variant="outline"
+                      className="border-blue-500/50 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 hover:border-blue-400"
+                    >
+                      <Server className="mr-2 h-4 w-4" />
+                      Add MCP Server
+                    </Button>
                   </div>
+                )}
 
-                  {/* Box 2: Custom Server */}
-                  <div className="border border-slate-700 rounded-xl p-4 bg-slate-950 flex flex-col">
-                    <div className="flex-1 flex flex-col items-center justify-center space-y-4">
-                      <div className="p-4 rounded-xl bg-slate-800">
-                        <Code className="h-8 w-8 text-slate-400" />
-                      </div>
-                      <div className="text-center">
-                        <p className="text-white font-medium mb-1">
-                          Custom Server
-                        </p>
-                        <p className="text-xs text-slate-400">
-                          Add a custom configuration
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Box 3: Add Another */}
-                  <div className="border-2 border-dashed border-slate-600 rounded-xl p-4 bg-slate-950 flex flex-col">
-                    <div className="flex-1 flex items-center justify-center">
-                      <button
-                        onClick={addCustomServer}
-                        className="w-full h-20 flex items-center justify-center hover:bg-blue-500/5 transition-all group"
-                      >
-                        <div className="text-center">
-                          <div className="w-12 h-12 flex items-center justify-center mx-auto mb-2">
-                            <span className="text-6xl text-slate-400 group-hover:text-blue-400">
-                              +
-                            </span>
-                          </div>
-                          <p className="text-xs text-slate-400 group-hover:text-blue-400 font-medium">
-                            Add Another
-                          </p>
-                        </div>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Custom Server Configuration Forms */}
-                {customServers.map((server) => (
+                {/* MCP Server Configuration Forms */}
+                {mcpServers.map((server, index) => (
                   <Card
                     key={server.id}
-                    className="border-slate-700 bg-slate-950"
+                    className="border-blue-800/30 bg-gradient-to-br from-slate-950/50 to-blue-950/20 backdrop-blur-sm"
                   >
                     <CardHeader className="pb-3">
                       <CardTitle className="text-lg text-white flex items-center justify-between">
-                        {server.name}
-                        {customServers.length > 1 && (
-                          <button
-                            onClick={() => removeCustomServer(server.id)}
-                            className="text-slate-400 hover:text-red-400"
-                          >
-                            ×
-                          </button>
-                        )}
+                        <span className="flex items-center gap-2">
+                          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-semibold text-sm">
+                            {index + 1}
+                          </div>
+                          MCP Server {index + 1}
+                        </span>
+                        <button
+                          onClick={() => removeMcpServer(server.id)}
+                          className="text-slate-400 hover:text-red-400 text-2xl leading-none"
+                          title="Remove server"
+                        >
+                          ×
+                        </button>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label className="text-slate-200">Server Name</Label>
+                      {/* Status Badge */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-slate-400">Status:</span>
+                        <Badge
+                          variant="outline"
+                          className="border-slate-600 text-slate-400"
+                        >
+                          Not Connected
+                        </Badge>
+                      </div>
+
+                      {/* Server URL Input */}
+                      <div className="space-y-2">
+                        <Label className="text-slate-200">MCP Server URL</Label>
+                        <div className="flex gap-2">
                           <Input
-                            value={server.name}
+                            value={server.url}
                             onChange={(e) =>
-                              updateCustomServer(server.id, {
-                                name: e.target.value,
+                              updateMcpServer(server.id, {
+                                url: e.target.value,
                               })
                             }
-                            className="bg-slate-900 border-slate-700 text-white"
-                            placeholder="My Custom Server"
+                            className="flex-1 bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
+                            placeholder="Enter MCP server URL"
                           />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-slate-200">Command</Label>
-                          <Input
-                            value={server.config.command}
-                            onChange={(e) =>
-                              updateCustomServer(server.id, {
-                                config: {
-                                  ...server.config,
-                                  command: e.target.value,
-                                },
-                              })
-                            }
-                            className="bg-slate-900 border-slate-700 text-white"
-                            placeholder="npx"
-                          />
+                          <Button
+                            className="bg-gradient-to-r from-pink-600 via-purple-600 to-orange-500 hover:from-pink-500 hover:via-purple-500 hover:to-orange-400 text-white font-semibold px-8"
+                            disabled={!server.url.trim()}
+                          >
+                            Connect
+                          </Button>
                         </div>
                       </div>
-                      <div className="space-y-2">
-                        <Label className="text-slate-200">
-                          Arguments (comma-separated)
-                        </Label>
-                        <Input
-                          value={server.config.args.join(", ")}
-                          onChange={(e) =>
-                            updateCustomServer(server.id, {
-                              config: {
-                                ...server.config,
-                                args: e.target.value
-                                  .split(",")
-                                  .map((s) => s.trim())
-                                  .filter(Boolean),
-                              },
+
+                      {/* Authentication Section (Collapsible) */}
+                      <div className="border border-slate-700/50 rounded-lg bg-slate-900/30">
+                        <button
+                          onClick={() =>
+                            updateMcpServer(server.id, {
+                              showAuth: !server.showAuth,
                             })
                           }
-                          className="bg-slate-900 border-slate-700 text-white"
-                          placeholder="-y, @modelcontextprotocol/server-github"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-slate-200">
-                          Environment Variables (JSON)
-                        </Label>
-                        <Textarea
-                          value={JSON.stringify(server.config.env, null, 2)}
-                          onChange={(e) => {
-                            try {
-                              const env = JSON.parse(e.target.value);
-                              updateCustomServer(server.id, {
-                                config: { ...server.config, env },
-                              });
-                            } catch {
-                              // Invalid JSON, don't update
-                            }
-                          }}
-                          className="bg-slate-900 border-slate-700 text-white font-mono text-sm min-h-[80px]"
-                          placeholder='{"API_KEY": "your-key"}'
-                        />
+                          className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-slate-800/30 transition-colors rounded-lg"
+                        >
+                          <div className="flex items-center gap-2">
+                            <svg
+                              className="h-5 w-5 text-slate-400"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                              />
+                            </svg>
+                            <span className="text-slate-200 font-medium">
+                              Authentication (Optional)
+                            </span>
+                          </div>
+                          <svg
+                            className={`h-5 w-5 text-slate-400 transition-transform ${
+                              server.showAuth ? "rotate-180" : ""
+                            }`}
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
+                        </button>
+
+                        {server.showAuth && (
+                          <div className="px-4 pb-4 space-y-4">
+                            <div className="space-y-2">
+                              <Label className="text-slate-200">Header Name</Label>
+                              <Input
+                                value={server.authHeader}
+                                onChange={(e) =>
+                                  updateMcpServer(server.id, {
+                                    authHeader: e.target.value,
+                                  })
+                                }
+                                className="bg-slate-900/50 border-slate-700 text-white"
+                                placeholder="Authorization"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-slate-200">Bearer Value</Label>
+                              <div className="relative">
+                                <Input
+                                  type="password"
+                                  value={server.authValue}
+                                  onChange={(e) =>
+                                    updateMcpServer(server.id, {
+                                      authValue: e.target.value,
+                                    })
+                                  }
+                                  className="bg-slate-900/50 border-slate-700 text-white pr-10"
+                                  placeholder="Enter header value (API key, token, etc.)"
+                                />
+                                <button
+                                  type="button"
+                                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300"
+                                >
+                                  <svg
+                                    className="h-5 w-5"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                    />
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                    />
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
                 ))}
-              </CardContent>
-            </Card>
 
-            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur">
-              <CardHeader>
-                <CardTitle className="text-xl text-white">
-                  MCP Server Configuration
-                </CardTitle>
-                <CardDescription className="text-slate-400">
-                  Paste your MCP servers config JSON (optional)
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Textarea
-                  value={mcpConfigString}
-                  onChange={(e) => setMcpConfigString(e.target.value)}
-                  placeholder={`{
-  "mcpServers": {
-    "github": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "your-token"
-      }
-    }
-  }
-}`}
-                  className="bg-slate-950 border-slate-700 text-white font-mono text-sm min-h-[200px]"
-                />
-                <p className="text-xs text-slate-500">
-                  This configuration will be securely stored and used to connect
-                  your MCP servers.
-                </p>
+                {/* Add Another Server Button */}
+                {mcpServers.length > 0 && (
+                  <Button
+                    onClick={addMcpServer}
+                    variant="outline"
+                    className="w-full border-dashed border-blue-500/50 bg-blue-500/5 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400"
+                  >
+                    <Server className="mr-2 h-4 w-4" />
+                    Add Another MCP Server
+                  </Button>
+                )}
               </CardContent>
             </Card>
 
