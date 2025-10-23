@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Github, Mail, Loader2 } from "lucide-react";
@@ -13,7 +13,7 @@ import { useSupabaseAuth } from "@/providers/supabase-auth-provider";
 
 const DEFAULT_REDIRECT = "/landing";
 
-export default function AuthenticationPage() {
+function AuthenticationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -21,27 +21,23 @@ export default function AuthenticationPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
   const redirectTo = searchParams.get("redirectTo") ?? DEFAULT_REDIRECT;
   const prompt = searchParams.get("prompt") ?? "";
 
+  // Check if user is already authenticated
+  const { user } = useSupabaseAuth();
+
   useEffect(() => {
-    const supabase = getSupabaseBrowserClient();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session && event === "SIGNED_IN") {
-        const params = new URLSearchParams();
-        if (prompt) {
-          params.set("prompt", prompt);
-        }
-        router.replace(`${redirectTo}${params.toString() ? `?${params.toString()}` : ""}`);
-      }
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, [prompt, redirectTo, router]);
+    if (user && !authLoading) {
+      // User is already authenticated, redirect to callback to handle routing
+      const params = new URLSearchParams();
+      if (redirectTo) params.set("redirectTo", redirectTo);
+      if (prompt) params.set("prompt", prompt);
+      router.replace(`/auth/callback${params.toString() ? `?${params.toString()}` : ""}`);
+    }
+  }, [user, authLoading, redirectTo, prompt, router]);
 
   const handleEmailAuth = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -90,13 +86,25 @@ export default function AuthenticationPage() {
 
     try {
       const supabase = getSupabaseBrowserClient();
+      
+      // Build callback URL with redirectTo and prompt parameters
+      const callbackParams = new URLSearchParams();
+      if (redirectTo) callbackParams.set("redirectTo", redirectTo);
+      if (prompt) callbackParams.set("prompt", prompt);
+      
+      const callbackUrl = `${window.location.origin}/auth/callback${callbackParams.toString() ? `?${callbackParams.toString()}` : ""}`;
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "github",
+        options: {
+          redirectTo: callbackUrl,
+        },
       });
 
       if (error) {
         throw error;
       }
+      // Don't set isLoading to false here as user will be redirected
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Unable to sign in with GitHub.");
       setIsLoading(false);
@@ -199,5 +207,19 @@ export default function AuthenticationPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function AuthenticationPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        </div>
+      }
+    >
+      <AuthenticationContent />
+    </Suspense>
   );
 }

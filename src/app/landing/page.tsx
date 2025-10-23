@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Sparkles,
@@ -212,7 +212,7 @@ const metricsPulse = [
   { label: "Regions", value: "14" },
 ];
 
-export default function LandingPage() {
+function LandingContent() {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeStage, setActiveStage] = useState(0);
@@ -717,5 +717,19 @@ export default function LandingPage() {
         </footer>
       </div>
     </div>
+  );
+}
+
+export default function LandingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-black">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-white/25 border-t-white" />
+        </div>
+      }
+    >
+      <LandingContent />
+    </Suspense>
   );
 }
