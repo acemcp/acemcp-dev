@@ -31,6 +31,8 @@ import {
   ArrowRight,
   Server,
 } from "lucide-react";
+import { useMCP } from "@/context";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 // Popular MCP Servers from the ecosystem
 const POPULAR_MCP_SERVERS = [
@@ -133,9 +135,12 @@ const POPULAR_MCP_SERVERS = [
 ];
 
 function OnboardingContent() {
+  const { promptMetadata, setPromptMetadata } = useMCP();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading: authLoading } = useSupabaseAuth();
+  const supabase = getSupabaseBrowserClient();
+  
   
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -165,6 +170,15 @@ function OnboardingContent() {
     }
   }, [user, authLoading, router]);
 
+    useEffect(() => {
+    if(promptMetadata) {
+      setIdentity(promptMetadata.identity || "");
+      setInstructions(promptMetadata.instructions || "");
+      setTone(promptMetadata.tone || "");
+    }
+  }, [promptMetadata]);
+
+  console.log("promptMetadata", promptMetadata);
   useEffect(() => {
     // Get initial prompt from URL if available
     const prompt = searchParams.get("prompt");
@@ -172,6 +186,17 @@ function OnboardingContent() {
       setProjectDescription(prompt);
     }
   }, [searchParams]);
+
+    // const { data, error } = await supabase
+    //   .from('ProjectMetadata')
+    //   .upsert({ id: promptMetadata.projectId, name: promptMetadata.projectName, description: promptMetadata.projectDescription})
+    //   .select()
+
+    // if (error || !data) {
+    //   console.error("Supabase insert error:", error);
+    //   return c.json({ error: error?.message || "Failed to insert metadata" }, 500);
+    // }
+
 
   const handleCreateProject = async () => {
     if (!projectName.trim()) {
@@ -185,65 +210,43 @@ function OnboardingContent() {
       await fetch("/api/user/sync", { method: "POST" });
 
       // Create project
-      const response = await fetch("/api/project/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: projectName,
-          description: projectDescription,
-          prompt: searchParams.get("prompt"),
-          identity,
-          instructions,
-          tone,
-        }),
-      });
+      // const response = await fetch("/api/project/create", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({
+      //     name: projectName,
+      //     description: projectDescription,
+      //     prompt: searchParams.get("prompt"),
+      //     identity,
+      //     instructions,
+      //     tone,
+      //   }),
+      // });
 
-      const data = await response.json();
+    // const data1 = await response.json();
+    const userDetails = await supabase.auth.getUser();
+    const ownerId = userDetails.data.user?.id;
+    const { data, error } = await supabase
+      .from('Project')
+      .upsert({ id: promptMetadata?.id, name: projectName, projectDesc: projectDescription, updatedAt: new Date().toISOString(), ownerId: ownerId })
+      .eq("id", promptMetadata?.id)
+      .select()
 
-      if (data.success) {
-        setProjectId(data.project.id);
-        setStep(2);
-      } else {
-        alert(data.error || "Failed to create project");
-      }
+    if (error || !data) {
+      console.error("Supabase insert error:", error);
+    }
+    setStep(2);
+
     } catch (error) {
-      console.error("Error creating project:", error);
-      alert("Failed to create project");
+      console.error("Error Updating project:", error);
+      alert("Failed to Update project");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleUpdateMetadata = async () => {
-    if (!projectId) return;
-
-    setIsLoading(true);
-    try {
-      const response = await fetch(`/api/project/${projectId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: projectName,
-          description: projectDescription,
-          identity,
-          instructions,
-          tone,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setStep(3);
-      } else {
-        alert(data.error || "Failed to update metadata");
-      }
-    } catch (error) {
-      console.error("Error updating metadata:", error);
-      alert("Failed to update metadata");
-    } finally {
-      setIsLoading(false);
-    }
+    setStep(3);
   };
 
   const addMcpServer = () => {
@@ -281,7 +284,7 @@ function OnboardingContent() {
   };
 
   const handleDeploy = async () => {
-    if (!projectId) return;
+    // if (!projectId) return;
 
     // Validate that at least one MCP server is configured
     if (mcpServers.length === 0) {
@@ -314,7 +317,7 @@ function OnboardingContent() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            projectId,
+            projectId: promptMetadata?.id,
             serverUrl: server.url, // Store the URL in serverUrl column
             authHeader: server.showAuth ? server.authHeader : null,
             authToken: server.showAuth ? server.authValue : null,
@@ -324,7 +327,7 @@ function OnboardingContent() {
       }
 
       // Redirect to main dashboard
-      router.push(`/?projectId=${projectId}`);
+      router.push(`/?projectId=${promptMetadata?.id}`);
     } catch (error) {
       console.error("Error deploying:", error);
       alert("Failed to deploy");
