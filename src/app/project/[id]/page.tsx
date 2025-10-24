@@ -29,15 +29,22 @@ import {
   ChevronRight,
   Menu,
   ChevronDown,
+  Loader2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
-import MCPCard from "../../generativeUI/mcpConfigUI";
-import AgentPreview from "../../generativeUI/AgentPreview";
-import AgentConfig from "../../generativeUI/agnetConfig";
+import MCPCard from "../../../../generativeUI/mcpConfigUI";
+import AgentPreview from "../../../../generativeUI/AgentPreview";
+import AgentConfig from "../../../../generativeUI/agnetConfig";
+
+interface ProjectPageProps {
+  params: {
+    id: string;
+  };
+}
 
 type Tool = {
   name: string;
@@ -70,9 +77,10 @@ const metrics = [
 
 const quickActions = ["Check Order", "Return Item", "Track Package", "Escalate"];
 
-export default function DashboardPage() {
+export default function ProjectPage({ params }: ProjectPageProps) {
   const router = useRouter();
   const { user, isLoading: authLoading } = useSupabaseAuth();
+  const projectId = params.id;
   
   const [input, setInput] = useState("");
   const [tools, setTools] = useState<Tool[]>([]);
@@ -81,40 +89,43 @@ export default function DashboardPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [selectedModel, setSelectedModel] = useState("GPT-4 Turbo");
   const [showModelDropdown, setShowModelDropdown] = useState(false);
-  const [isRedirecting, setIsRedirecting] = useState(true);
+  const [isValidating, setIsValidating] = useState(true);
 
-  // Redirect to user's project or landing page
+  // Validate project access
   useEffect(() => {
-    const redirectToProject = async () => {
+    const validateProject = async () => {
       if (authLoading) return;
       
       if (!user) {
-        router.push("/authentication?redirectTo=/");
+        router.push(`/authentication?redirectTo=/project/${projectId}`);
+        return;
+      }
+
+      if (!projectId) {
+        router.push("/landing");
         return;
       }
 
       try {
-        // Fetch user's projects
-        const response = await fetch("/api/user/projects");
+        // Validate project exists and user has access
+        const response = await fetch(`/api/project/${projectId}`);
         const data = await response.json();
         
-        if (data.success && data.projects && data.projects.length > 0) {
-          // Redirect to the most recent project
-          const latestProject = data.projects[0];
-          router.push(`/project/${latestProject.id}`);
-        } else {
-          // No projects found, redirect to landing
+        if (!response.ok || !data.success) {
+          // Project not found or no access, redirect to landing
           router.push("/landing");
+          return;
         }
+        
+        setIsValidating(false);
       } catch (error) {
-        console.error("Error fetching projects:", error);
-        // On error, redirect to landing
+        console.error("Error validating project:", error);
         router.push("/landing");
       }
     };
 
-    redirectToProject();
-  }, [user, authLoading, router]);
+    validateProject();
+  }, [user, authLoading, projectId, router]);
   
   const modelConfigs = {
     "GPT-4 Turbo": { temperature: 0.7, maxTokens: 4000, responseTime: "1.2s" },
@@ -191,6 +202,15 @@ export default function DashboardPage() {
     sentiment: "Positive",
     duration: "4m 23s",
   };
+
+  // Show loading while validating
+  if (authLoading || isValidating) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-100">
@@ -331,27 +351,10 @@ export default function DashboardPage() {
           </div>
         </header>
         <main className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6">
-
-          {/* Metrics Section - Commented out as requested */}
-          {/* <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {metrics.map((metric) => (
-              <div
-                key={metric.label}
-                className="rounded-3xl border border-slate-800/60 bg-slate-900/80 p-5 shadow-lg shadow-slate-950/40"
-              >
-                <p className="text-sm font-medium text-slate-400">{metric.label}</p>
-                <p className="mt-2 text-2xl font-semibold text-slate-50">{metric.value}</p>
-                <p className="mt-1 text-xs text-emerald-300">{metric.delta}</p>
-              </div>
-            ))}
-          </div> */}
-
           {activeTab === "chat" ? (
             <div className="grid gap-4 lg:grid-cols-[420px_minmax(0,1fr)_340px] h-[calc(100vh-140px)]">
-              {/* Chat Interface Section */}
               <section className="flex flex-col h-full">
                 <div className="flex flex-col h-full rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-950/90 to-slate-900/80 shadow-2xl shadow-slate-950/60 backdrop-blur overflow-hidden">
-                  {/* Header */}
                   <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/60">
                     <div className="flex items-center gap-3">
                       <div className="relative">
@@ -374,8 +377,6 @@ export default function DashboardPage() {
                       </Button>
                     </div>
                   </div>
-                  
-                  {/* Messages Area */}
                   <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
                     {messages.length === 0 ? (
                       <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800/60 bg-slate-900/40 p-10 text-center">
@@ -384,7 +385,7 @@ export default function DashboardPage() {
                         </div>
                         <h3 className="text-lg font-semibold text-slate-50 mb-2">Welcome to Akron AI</h3>
                         <p className="max-w-sm text-sm text-slate-400 leading-relaxed">
-                          Start a conversation with your AI assistant. Describe workflows, ask questions, or explore MCP capabilities.
+                          Start a conversation with your AI assistant.
                         </p>
                       </div>
                     ) : (
@@ -414,31 +415,14 @@ export default function DashboardPage() {
                               if (isToolUIPart(part)) {
                                 const toolName = getToolName(part);
                                 const toolCallId = part.toolCallId;
-                                if (
-                                  toolName === "gatherMcpInformation" &&
-                                  part.state === "input-available"
-                                ) {
+                                if (toolName === "gatherMcpInformation" && part.state === "input-available") {
                                   return (
-                                    <div
-                                      key={toolCallId}
-                                      className="rounded-2xl border border-blue-500/30 bg-slate-900/80 p-4 text-slate-200"
-                                    >
-                                      <p className="text-sm font-medium text-slate-100">
-                                        Provide MCP configuration
-                                      </p>
-                                      <p className="mt-1 text-xs text-slate-400">
-                                        Upload OpenAPI spec or connect an existing server.
-                                      </p>
+                                    <div key={toolCallId} className="rounded-2xl border border-blue-500/30 bg-slate-900/80 p-4 text-slate-200">
+                                      <p className="text-sm font-medium text-slate-100">Provide MCP configuration</p>
                                       <div className="mt-4">
-                                        <MCPCard
-                                          handelSubmit={async () => {
-                                            await addToolResult({
-                                              toolCallId,
-                                              tool: toolName,
-                                              output: "Submitted MCP configuration",
-                                            });
-                                          }}
-                                        />
+                                        <MCPCard handelSubmit={async () => {
+                                          await addToolResult({ toolCallId, tool: toolName, output: "Submitted MCP configuration" });
+                                        }} />
                                       </div>
                                     </div>
                                   );
@@ -451,188 +435,57 @@ export default function DashboardPage() {
                       ))
                     )}
                   </div>
-                  
-                  {/* Input Area */}
                   <div className="px-4 pb-4 space-y-3">
-                    {/* Model Selection Dropdown */}
                     <div className="relative">
-                      <button
-                        type="button"
-                        onClick={() => setShowModelDropdown(!showModelDropdown)}
-                        className="flex items-center justify-between w-full px-3 py-2 text-xs rounded-lg border border-slate-800/60 bg-slate-900/80 text-slate-300 hover:bg-slate-800/80 transition-colors"
-                      >
+                      <button type="button" onClick={() => setShowModelDropdown(!showModelDropdown)} className="flex items-center justify-between w-full px-3 py-2 text-xs rounded-lg border border-slate-800/60 bg-slate-900/80 text-slate-300 hover:bg-slate-800/80 transition-colors">
                         <div className="flex items-center gap-2">
                           <Bot className="size-3.5" />
                           <span className="font-medium">{selectedModel}</span>
-                          <span className="text-slate-500">•</span>
-                          <span className="text-slate-500">Temp: {modelConfigs[selectedModel as keyof typeof modelConfigs].temperature}</span>
-                          <span className="text-slate-500">•</span>
-                          <span className="text-slate-500">Tokens: {modelConfigs[selectedModel as keyof typeof modelConfigs].maxTokens}</span>
                         </div>
                         <ChevronDown className={cn("size-3.5 transition-transform", showModelDropdown && "rotate-180")} />
                       </button>
-                      
                       {showModelDropdown && (
                         <div className="absolute bottom-full left-0 right-0 mb-2 rounded-lg border border-slate-800/60 bg-slate-900 shadow-xl z-50 overflow-hidden">
                           {Object.entries(modelConfigs).map(([model, config]) => (
-                            <button
-                              key={model}
-                               type="button"
-                              onClick={() => {
-                                setSelectedModel(model);
-                                setShowModelDropdown(false);
-                              }}
-                              className={cn(
-                                "w-full px-4 py-3 text-left hover:bg-slate-800/80 transition-colors border-b border-slate-800/60 last:border-b-0",
-                                selectedModel === model && "bg-slate-800/60"
-                              )}
-                            >
+                            <button key={model} type="button" onClick={() => { setSelectedModel(model); setShowModelDropdown(false); }} className={cn("w-full px-4 py-3 text-left hover:bg-slate-800/80 transition-colors border-b border-slate-800/60 last:border-b-0", selectedModel === model && "bg-slate-800/60")}>
                               <div className="flex items-center justify-between mb-1">
                                 <span className="text-sm font-medium text-slate-200">{model}</span>
-                                {selectedModel === model && (
-                                  <span className="text-xs text-blue-400">✓ Selected</span>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-3 text-xs text-slate-500">
-                                <span>Temp: {config.temperature}</span>
-                                <span>•</span>
-                                <span>Max Tokens: {config.maxTokens}</span>
-                                <span>•</span>
-                                <span>Response: {config.responseTime}</span>
+                                {selectedModel === model && (<span className="text-xs text-blue-400">✓ Selected</span>)}
                               </div>
                             </button>
                           ))}
                         </div>
                       )}
                     </div>
-
-                    {/* Input Box */}
                     <form onSubmit={handleSubmit}>
                       <div className="relative flex items-center gap-2 rounded-lg border border-slate-800/60 bg-slate-900/80 px-4 py-3 shadow-sm">
-                        <Textarea
-                          value={input}
-                          onChange={(event) => setInput(event.target.value)}
-                          placeholder="Ask anything (Ctrl+L)"
-                          className="flex-1 bg-transparent border-none text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-0 resize-none min-h-[24px] max-h-[120px] p-0"
-                          rows={1}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                              e.preventDefault();
-                              handleSubmit(e as any);
-                            }
-                          }}
-                        />
-                        <Button
-                          type="submit"
-                          size="sm"
-                          className="rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white h-8 w-8 p-0 flex items-center justify-center shadow-lg shadow-blue-500/30 hover:shadow-blue-500/60 hover:border hover:border-white/50 transition-all duration-300"
-                        >
-                          <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                          </svg>
+                        <Textarea value={input} onChange={(event) => setInput(event.target.value)} placeholder="Ask anything" className="flex-1 bg-transparent border-none text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-0 resize-none min-h-[24px] max-h-[120px] p-0" rows={1} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(e as any); } }} />
+                        <Button type="submit" size="sm" className="rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white h-8 w-8 p-0 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                          <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
                         </Button>
                       </div>
                     </form>
                   </div>
                 </div>
               </section>
-
-              {/* Workflow View Section - Increased Size */}
               <section className="flex flex-col h-full">
                 <div className="flex flex-col h-full rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-950/90 to-slate-900/80 shadow-2xl shadow-slate-950/60 backdrop-blur overflow-hidden">
                   <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/60">
                     <div>
                       <h3 className="text-base font-semibold text-slate-50">Agent View</h3>
-                      <p className="text-xs text-slate-400">
-                        Visualize orchestration and active tools
-                      </p>
+                      <p className="text-xs text-slate-400">Visualize orchestration</p>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="rounded-xl border-blue-500/30 bg-blue-500/10 text-blue-200 hover:bg-blue-500/20 text-xs h-7 px-3 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/50 hover:border-white/50 transition-all duration-300"
-                    >
-                      Manage
-                    </Button>
                   </div>
                   <div className="flex-1 overflow-hidden rounded-b-3xl border-t border-slate-800/60 bg-slate-900/70">
                     <AgentPreview messages={messages} />
                   </div>
                 </div>
               </section>
-
-              {/* Agent Configuration Section */}
               <aside className="flex flex-col h-full overflow-y-auto pr-1">
                 <div className="rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-950/90 to-slate-900/80 shadow-2xl shadow-slate-950/60 backdrop-blur p-6 h-full">
                   <AgentConfig />
                 </div>
               </aside>
-            </div>
-          ) : null}
-
-          {activeTab === "workflow" ? (
-            <div className="mt-6 space-y-6">
-              <div className="rounded-[28px] border border-slate-800/60 bg-slate-950/80 p-6 shadow-2xl shadow-slate-950/60">
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  <div>
-                    <h2 className="text-xl font-semibold text-slate-50">Customer Support Workflow</h2>
-                    <p className="text-sm text-slate-400">
-                      Monitor orchestration steps, execution timers, and branching decisions.
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Button
-                      variant="outline"
-                      className="rounded-full border-blue-500/30 bg-blue-500/10 text-blue-200 hover:bg-blue-500/20 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/50 hover:border-white/50 transition-all duration-300"
-                    >
-                      <Download className="mr-2 size-4" /> Export Workflow
-                    </Button>
-                    <Button className="rounded-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white shadow-lg shadow-blue-500/40 hover:shadow-blue-500/70 hover:border hover:border-white/50 transition-all duration-300">
-                      <Play className="mr-2 size-4" /> Execute
-                    </Button>
-                  </div>
-                </div>
-                <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  <div className="rounded-3xl border border-emerald-500/40 bg-emerald-500/10 p-4 text-sm text-emerald-200">
-                    <p className="font-semibold">Current Step</p>
-                    <p className="mt-1 text-lg text-emerald-100">Sentiment Analysis</p>
-                    <p className="mt-2 text-xs text-emerald-300">Processing step 26 of 29</p>
-                  </div>
-                  <div className="rounded-3xl border border-slate-800/60 bg-slate-900/70 p-4 text-sm text-slate-300">
-                    <p className="font-semibold text-slate-100">Active Nodes</p>
-                    <p className="mt-1 text-lg text-slate-100">5</p>
-                    <p className="mt-2 text-xs text-slate-400">3 optimized • 2 ready</p>
-                  </div>
-                  <div className="rounded-3xl border border-slate-800/60 bg-slate-900/70 p-4 text-sm text-slate-300">
-                    <p className="font-semibold text-slate-100">Success Rate</p>
-                    <p className="mt-1 text-lg text-slate-100">94.2%</p>
-                    <p className="mt-2 text-xs text-emerald-300">Stable</p>
-                  </div>
-                  <div className="rounded-3xl border border-slate-800/60 bg-slate-900/70 p-4 text-sm text-slate-300">
-                    <p className="font-semibold text-slate-100">MCP Servers</p>
-                    <p className="mt-1 text-lg text-slate-100">4 connected</p>
-                    <p className="mt-2 text-xs text-slate-400">OpenAI GPT-4, Sentiment API, Vector DB, Slack</p>
-                  </div>
-                </div>
-                <div className="mt-6 h-[520px] overflow-hidden rounded-3xl border border-slate-800/60 bg-slate-900/70">
-                  <AgentPreview messages={messages} />
-                </div>
-              </div>
-            </div>
-          ) : null}
-
-          {activeTab === "workflow_builder" ? (
-            <div className="flex items-center justify-center h-[calc(100vh-200px)]">
-              <div className="text-center max-w-md">
-                <div className="inline-flex p-6 rounded-3xl bg-gradient-to-br from-slate-900/80 to-slate-800/60 border border-slate-800/60 shadow-2xl mb-6">
-                  <GitBranch className="size-16 text-slate-400" />
-                </div>
-                <h2 className="text-3xl font-bold text-slate-50 mb-3">Workflow Builder</h2>
-                <p className="text-lg text-slate-400 mb-2">Coming Soon</p>
-                <p className="text-sm text-slate-500">
-                  Build complex AI workflows with drag-and-drop interface, conditional logic, and multi-agent orchestration.
-                </p>
-              </div>
             </div>
           ) : null}
         </main>
