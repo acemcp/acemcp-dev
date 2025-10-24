@@ -206,7 +206,7 @@ export default function AgentConfig() {
             />
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-1">
             <div className="space-y-2">
               <Label htmlFor="tone">Tone</Label>
               <Input
@@ -235,11 +235,11 @@ export default function AgentConfig() {
             </div>
           </div>
         </CardContent>
-        <CardFooter className="flex items-center justify-between gap-4">
-          <div className="text-sm text-muted-foreground">
+        <CardFooter className="flex flex-col w-full items-center gap-3">
+          <div className="text-sm text-muted-foreground self-start">
             {savedMessage ? savedMessage : "Changes are auto-saved locally."}
           </div>
-          <Button onClick={handleSave}>Save Configuration</Button>
+          <Button className="items-center" onClick={handleSave}>Save Configuration</Button>
         </CardFooter>
       </Card>
     </div>

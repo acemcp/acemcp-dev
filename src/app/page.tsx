@@ -251,16 +251,6 @@ export default function DashboardPage() {
             <h1 className="mt-1 text-2xl font-semibold text-slate-50">Chat Playground</h1>
           </div>
           <div className="flex items-center gap-4">
-            <div className="hidden items-center gap-2 rounded-full border border-slate-800/60 bg-slate-900/70 px-3 py-1.5 text-sm text-slate-400 md:flex">
-              <Search className="size-4" />
-              <input
-                className="bg-transparent text-slate-200 outline-none placeholder:text-slate-500"
-                placeholder="Search agents, runs, MCP"
-              />
-            </div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/20 px-4 py-1.5 text-sm font-medium text-emerald-300">
-              <span className="size-2 rounded-full bg-emerald-400" /> MCP Connected
-            </span>
             <button className="rounded-full border border-slate-800/60 p-2 text-slate-400 transition hover:bg-slate-900/80 hover:text-slate-100">
               <Bell className="size-4" />
             </button>
