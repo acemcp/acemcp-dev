@@ -264,9 +264,22 @@ export default function DashboardPage() {
             <button className="rounded-full border border-slate-800/60 p-2 text-slate-400 transition hover:bg-slate-900/80 hover:text-slate-100">
               <Bell className="size-4" />
             </button>
-            <span className="inline-flex size-9 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
-              PR
-            </span>
+            <button 
+              onClick={() => router.push("/profile")}
+              className="inline-flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-blue-500 text-sm font-semibold text-white transition hover:from-blue-500 hover:to-blue-400 hover:shadow-lg hover:shadow-blue-500/50 cursor-pointer"
+              title="View Profile"
+            >
+              {user?.user_metadata?.full_name || user?.user_metadata?.name
+                ? (user.user_metadata.full_name || user.user_metadata.name)
+                    .split(" ")
+                    .map((n: string) => n[0])
+                    .join("")
+                    .toUpperCase()
+                    .slice(0, 2)
+                : user?.email
+                ? user.email.substring(0, 2).toUpperCase()
+                : "U"}
+            </button>
           </div>
           {/* Floating Tab Buttons in Header */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 rounded-full border border-slate-800/60 bg-slate-900/90 p-1.5 backdrop-blur-xl shadow-2xl">
@@ -437,7 +450,7 @@ export default function DashboardPage() {
                           {Object.entries(modelConfigs).map(([model, config]) => (
                             <button
                               key={model}
-                              type="button"
+                               type="button"
                               onClick={() => {
                                 setSelectedModel(model);
                                 setShowModelDropdown(false);
@@ -502,7 +515,7 @@ export default function DashboardPage() {
                 <div className="flex flex-col h-full rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-950/90 to-slate-900/80 shadow-2xl shadow-slate-950/60 backdrop-blur overflow-hidden">
                   <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/60">
                     <div>
-                      <h3 className="text-base font-semibold text-slate-50">Workflow View</h3>
+                      <h3 className="text-base font-semibold text-slate-50">Agent View</h3>
                       <p className="text-xs text-slate-400">
                         Visualize orchestration and active tools
                       </p>

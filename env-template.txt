@@ -1,7 +1,9 @@
 # Copy this to BOTH .env and .env.local files and fill in your actual values
 
 # Supabase Configuration
+# Your Supabase project URL (already configured)
 NEXT_PUBLIC_SUPABASE_URL=https://sfaqwyumdxebchjxyyyv.supabase.co
+# Get this from: Supabase Dashboard → Settings → API → Project API keys → anon/public
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 
 # Database Configuration - USING POOLED CONNECTION (IPv4 compatible)
@@ -9,3 +11,9 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 # IMPORTANT: Use the POOLED connection for BOTH URLs to avoid IPv6 connectivity issues
 DATABASE_URL=postgresql://postgres.sfaqwyumdxebchjxyyyv:[YOUR_PASSWORD]@aws-1-us-east-2.pooler.supabase.com:6543/postgres
 DIRECT_URL=postgresql://postgres.sfaqwyumdxebchjxyyyv:[YOUR_PASSWORD]@aws-1-us-east-2.pooler.supabase.com:6543/postgres
+
+# GitHub OAuth Configuration (for local development)
+# Get these from: https://github.com/settings/developers
+# Callback URL should be: http://127.0.0.1:54321/auth/v1/callback
+SUPABASE_AUTH_EXTERNAL_GITHUB_CLIENT_ID=your_github_oauth_client_id
+SUPABASE_AUTH_EXTERNAL_GITHUB_SECRET=your_github_oauth_client_secret

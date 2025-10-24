@@ -18,11 +18,14 @@ const mistral = createMistral({
 let mcpClient: any = null;
 let tools: any = null;
 
+
+
 async function getMCPClient() {
   if (!mcpClient) {
     mcpClient = await createMCPClient({
       transport: new StreamableHTTPClientTransport(
         new URL("http://localhost:2025/mcp")
+
       ),
     });
     tools = await mcpClient.tools();

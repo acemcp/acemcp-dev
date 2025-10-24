@@ -21,7 +21,6 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const { projectId, serverUrl, authHeader, authToken, configJson } = body;
-    console.log("Received projectId:", projectId);
 
     if (!projectId || !serverUrl || !configJson) {
       return NextResponse.json(

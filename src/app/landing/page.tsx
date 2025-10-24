@@ -233,12 +233,22 @@ function LandingContent() {
     return () => window.clearInterval(interval);
   }, []);
 
+  // Populate prompt from URL when user returns from authentication
+  useEffect(() => {
+    const urlPrompt = searchParams.get('prompt');
+    if (urlPrompt && !prompt) {
+      setPrompt(urlPrompt);
+    }
+  }, [searchParams]);
+
 const handleGenerate = async () => {
     //call the api
     if (!prompt.trim()) return;
     if (!session) {
+      // Not authenticated - redirect to authentication page
+      // After auth, user will come back to landing page with the prompt
       const params = new URLSearchParams();
-      params.set("redirectTo", "/onboarding");
+      params.set("redirectTo", "/landing");
       params.set("mode", "signin");
       params.set("prompt", prompt);
       router.push(`/authentication?${params.toString()}`);
@@ -264,7 +274,7 @@ const handleGenerate = async () => {
       text: prompt,
       projectId: id
     };
-    await axios.post('http://localhost:8787/template', postData).then(res => {
+    await axios.post('https://acemcp-service.rushikeshpatil8208.workers.dev/template', postData).then(res => {
       let { projectMetadata } = res.data
       setPromptMetadata(projectMetadata[0])
       console.log("res", res);

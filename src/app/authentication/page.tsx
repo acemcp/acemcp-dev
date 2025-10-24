@@ -21,13 +21,12 @@ function AuthenticationContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
 
   const redirectTo = searchParams.get("redirectTo") ?? DEFAULT_REDIRECT;
   const prompt = searchParams.get("prompt") ?? "";
 
   // Check if user is already authenticated
-  const { user } = useSupabaseAuth();
+  const { user, isLoading: authLoading } = useSupabaseAuth();
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -50,14 +49,14 @@ function AuthenticationContent() {
       const mode = searchParams.get("mode") === "signup" ? "signup" : "signin";
 
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             data: {
               username: email,
             },
-            emailRedirectTo: `${window.location.origin}/authentication?redirectTo=${encodeURIComponent(redirectTo)}${prompt ? `&prompt=${encodeURIComponent(prompt)}` : ""}`,
+            emailRedirectTo: `${window.location.origin}/auth/callback${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""}${prompt ? `&prompt=${encodeURIComponent(prompt)}` : ""}`,
           },
         });
 
@@ -65,11 +64,28 @@ function AuthenticationContent() {
           throw error;
         }
 
-        setSuccessMessage("Check your email to confirm your account.");
+        // Check if email confirmation is required
+        if (data?.user && !data.session) {
+          setSuccessMessage("Check your email to confirm your account.");
+        } else if (data?.session) {
+          // Auto-confirmed, redirect to callback
+          const params = new URLSearchParams();
+          if (redirectTo) params.set("redirectTo", redirectTo);
+          if (prompt) params.set("prompt", prompt);
+          router.push(`/auth/callback${params.toString() ? `?${params.toString()}` : ""}`);
+        }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
           throw error;
+        }
+        
+        // Successful sign-in, redirect to callback
+        if (data?.session) {
+          const params = new URLSearchParams();
+          if (redirectTo) params.set("redirectTo", redirectTo);
+          if (prompt) params.set("prompt", prompt);
+          router.push(`/auth/callback${params.toString() ? `?${params.toString()}` : ""}`);
         }
       }
     } catch (error) {
