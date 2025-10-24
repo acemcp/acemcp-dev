@@ -21,25 +21,24 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check if user exists in Prisma
-    let prismaUser = await prisma.user.findUnique({
+    // Upsert user (create if doesn't exist, update if exists)
+    const prismaUser = await prisma.user.upsert({
       where: { id: user.id },
+      update: {
+        email: user.email,
+        name: user.user_metadata?.full_name || user.user_metadata?.name || null,
+        image: user.user_metadata?.avatar_url || null,
+        emailVerified: user.email_confirmed_at ? new Date(user.email_confirmed_at) : null,
+      },
+      create: {
+        id: user.id,
+        email: user.email,
+        name: user.user_metadata?.full_name || user.user_metadata?.name || null,
+        image: user.user_metadata?.avatar_url || null,
+        emailVerified: user.email_confirmed_at ? new Date(user.email_confirmed_at) : null,
+      },
       include: { accounts: true }
     });
-
-    // Create user if doesn't exist
-    if (!prismaUser) {
-      prismaUser = await prisma.user.create({
-        data: {
-          id: user.id,
-          email: user.email,
-          name: user.user_metadata?.full_name || user.user_metadata?.name || null,
-          image: user.user_metadata?.avatar_url || null,
-          emailVerified: user.email_confirmed_at ? new Date(user.email_confirmed_at) : null,
-        },
-        include: { accounts: true }
-      });
-    }
 
     // Handle OAuth account linking
     if (user.app_metadata?.provider && user.app_metadata?.provider !== 'email') {

@@ -179,9 +179,13 @@ exports.Prisma.ConversationScalarFieldEnum = {
 
 exports.Prisma.MCPConfigScalarFieldEnum = {
   id: 'id',
-  mcpString: 'mcpString',
+  serverUrl: 'serverUrl',
+  serverKey: 'serverKey',
+  authHeader: 'authHeader',
   authToken: 'authToken',
   configJson: 'configJson',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
   userId: 'userId',
   projectId: 'projectId'
 };

@@ -7176,25 +7176,37 @@ export namespace Prisma {
 
   export type MCPConfigMinAggregateOutputType = {
     id: string | null
-    mcpString: string | null
+    serverUrl: string | null
+    serverKey: string | null
+    authHeader: string | null
     authToken: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
     userId: string | null
     projectId: string | null
   }
 
   export type MCPConfigMaxAggregateOutputType = {
     id: string | null
-    mcpString: string | null
+    serverUrl: string | null
+    serverKey: string | null
+    authHeader: string | null
     authToken: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
     userId: string | null
     projectId: string | null
   }
 
   export type MCPConfigCountAggregateOutputType = {
     id: number
-    mcpString: number
+    serverUrl: number
+    serverKey: number
+    authHeader: number
     authToken: number
     configJson: number
+    createdAt: number
+    updatedAt: number
     userId: number
     projectId: number
     _all: number
@@ -7203,25 +7215,37 @@ export namespace Prisma {
 
   export type MCPConfigMinAggregateInputType = {
     id?: true
-    mcpString?: true
+    serverUrl?: true
+    serverKey?: true
+    authHeader?: true
     authToken?: true
+    createdAt?: true
+    updatedAt?: true
     userId?: true
     projectId?: true
   }
 
   export type MCPConfigMaxAggregateInputType = {
     id?: true
-    mcpString?: true
+    serverUrl?: true
+    serverKey?: true
+    authHeader?: true
     authToken?: true
+    createdAt?: true
+    updatedAt?: true
     userId?: true
     projectId?: true
   }
 
   export type MCPConfigCountAggregateInputType = {
     id?: true
-    mcpString?: true
+    serverUrl?: true
+    serverKey?: true
+    authHeader?: true
     authToken?: true
     configJson?: true
+    createdAt?: true
+    updatedAt?: true
     userId?: true
     projectId?: true
     _all?: true
@@ -7301,9 +7325,13 @@ export namespace Prisma {
 
   export type MCPConfigGroupByOutputType = {
     id: string
-    mcpString: string
-    authToken: string
+    serverUrl: string
+    serverKey: string | null
+    authHeader: string | null
+    authToken: string | null
     configJson: JsonValue
+    createdAt: Date
+    updatedAt: Date
     userId: string
     projectId: string
     _count: MCPConfigCountAggregateOutputType | null
@@ -7327,9 +7355,13 @@ export namespace Prisma {
 
   export type MCPConfigSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    mcpString?: boolean
+    serverUrl?: boolean
+    serverKey?: boolean
+    authHeader?: boolean
     authToken?: boolean
     configJson?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
     userId?: boolean
     projectId?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -7338,9 +7370,13 @@ export namespace Prisma {
 
   export type MCPConfigSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    mcpString?: boolean
+    serverUrl?: boolean
+    serverKey?: boolean
+    authHeader?: boolean
     authToken?: boolean
     configJson?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
     userId?: boolean
     projectId?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -7349,9 +7385,13 @@ export namespace Prisma {
 
   export type MCPConfigSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    mcpString?: boolean
+    serverUrl?: boolean
+    serverKey?: boolean
+    authHeader?: boolean
     authToken?: boolean
     configJson?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
     userId?: boolean
     projectId?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -7360,14 +7400,18 @@ export namespace Prisma {
 
   export type MCPConfigSelectScalar = {
     id?: boolean
-    mcpString?: boolean
+    serverUrl?: boolean
+    serverKey?: boolean
+    authHeader?: boolean
     authToken?: boolean
     configJson?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
     userId?: boolean
     projectId?: boolean
   }
 
-  export type MCPConfigOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mcpString" | "authToken" | "configJson" | "userId" | "projectId", ExtArgs["result"]["mCPConfig"]>
+  export type MCPConfigOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "serverUrl" | "serverKey" | "authHeader" | "authToken" | "configJson" | "createdAt" | "updatedAt" | "userId" | "projectId", ExtArgs["result"]["mCPConfig"]>
   export type MCPConfigInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     project?: boolean | ProjectDefaultArgs<ExtArgs>
@@ -7389,9 +7433,13 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
-      mcpString: string
-      authToken: string
+      serverUrl: string
+      serverKey: string | null
+      authHeader: string | null
+      authToken: string | null
       configJson: Prisma.JsonValue
+      createdAt: Date
+      updatedAt: Date
       userId: string
       projectId: string
     }, ExtArgs["result"]["mCPConfig"]>
@@ -7820,9 +7868,13 @@ export namespace Prisma {
    */
   interface MCPConfigFieldRefs {
     readonly id: FieldRef<"MCPConfig", 'String'>
-    readonly mcpString: FieldRef<"MCPConfig", 'String'>
+    readonly serverUrl: FieldRef<"MCPConfig", 'String'>
+    readonly serverKey: FieldRef<"MCPConfig", 'String'>
+    readonly authHeader: FieldRef<"MCPConfig", 'String'>
     readonly authToken: FieldRef<"MCPConfig", 'String'>
     readonly configJson: FieldRef<"MCPConfig", 'Json'>
+    readonly createdAt: FieldRef<"MCPConfig", 'DateTime'>
+    readonly updatedAt: FieldRef<"MCPConfig", 'DateTime'>
     readonly userId: FieldRef<"MCPConfig", 'String'>
     readonly projectId: FieldRef<"MCPConfig", 'String'>
   }
@@ -8327,9 +8379,13 @@ export namespace Prisma {
 
   export const MCPConfigScalarFieldEnum: {
     id: 'id',
-    mcpString: 'mcpString',
+    serverUrl: 'serverUrl',
+    serverKey: 'serverKey',
+    authHeader: 'authHeader',
     authToken: 'authToken',
     configJson: 'configJson',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
     userId: 'userId',
     projectId: 'projectId'
   };
@@ -8498,11 +8554,11 @@ export namespace Prisma {
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    email?: string
     AND?: UserWhereInput | UserWhereInput[]
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
     name?: StringNullableFilter<"User"> | string | null
+    email?: StringNullableFilter<"User"> | string | null
     emailVerified?: DateTimeNullableFilter<"User"> | Date | string | null
     image?: StringNullableFilter<"User"> | string | null
     passwordHash?: StringNullableFilter<"User"> | string | null
@@ -8512,7 +8568,7 @@ export namespace Prisma {
     projects?: ProjectListRelationFilter
     mcpConfigs?: MCPConfigListRelationFilter
     conversations?: ConversationListRelationFilter
-  }, "id" | "email">
+  }, "id">
 
   export type UserOrderByWithAggregationInput = {
     id?: SortOrder
@@ -8854,9 +8910,13 @@ export namespace Prisma {
     OR?: MCPConfigWhereInput[]
     NOT?: MCPConfigWhereInput | MCPConfigWhereInput[]
     id?: UuidFilter<"MCPConfig"> | string
-    mcpString?: StringFilter<"MCPConfig"> | string
-    authToken?: StringFilter<"MCPConfig"> | string
+    serverUrl?: StringFilter<"MCPConfig"> | string
+    serverKey?: StringNullableFilter<"MCPConfig"> | string | null
+    authHeader?: StringNullableFilter<"MCPConfig"> | string | null
+    authToken?: StringNullableFilter<"MCPConfig"> | string | null
     configJson?: JsonFilter<"MCPConfig">
+    createdAt?: DateTimeFilter<"MCPConfig"> | Date | string
+    updatedAt?: DateTimeFilter<"MCPConfig"> | Date | string
     userId?: UuidFilter<"MCPConfig"> | string
     projectId?: UuidFilter<"MCPConfig"> | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -8865,9 +8925,13 @@ export namespace Prisma {
 
   export type MCPConfigOrderByWithRelationInput = {
     id?: SortOrder
-    mcpString?: SortOrder
-    authToken?: SortOrder
+    serverUrl?: SortOrder
+    serverKey?: SortOrderInput | SortOrder
+    authHeader?: SortOrderInput | SortOrder
+    authToken?: SortOrderInput | SortOrder
     configJson?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
     userId?: SortOrder
     projectId?: SortOrder
     user?: UserOrderByWithRelationInput
@@ -8879,9 +8943,13 @@ export namespace Prisma {
     AND?: MCPConfigWhereInput | MCPConfigWhereInput[]
     OR?: MCPConfigWhereInput[]
     NOT?: MCPConfigWhereInput | MCPConfigWhereInput[]
-    mcpString?: StringFilter<"MCPConfig"> | string
-    authToken?: StringFilter<"MCPConfig"> | string
+    serverUrl?: StringFilter<"MCPConfig"> | string
+    serverKey?: StringNullableFilter<"MCPConfig"> | string | null
+    authHeader?: StringNullableFilter<"MCPConfig"> | string | null
+    authToken?: StringNullableFilter<"MCPConfig"> | string | null
     configJson?: JsonFilter<"MCPConfig">
+    createdAt?: DateTimeFilter<"MCPConfig"> | Date | string
+    updatedAt?: DateTimeFilter<"MCPConfig"> | Date | string
     userId?: UuidFilter<"MCPConfig"> | string
     projectId?: UuidFilter<"MCPConfig"> | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -8890,9 +8958,13 @@ export namespace Prisma {
 
   export type MCPConfigOrderByWithAggregationInput = {
     id?: SortOrder
-    mcpString?: SortOrder
-    authToken?: SortOrder
+    serverUrl?: SortOrder
+    serverKey?: SortOrderInput | SortOrder
+    authHeader?: SortOrderInput | SortOrder
+    authToken?: SortOrderInput | SortOrder
     configJson?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
     userId?: SortOrder
     projectId?: SortOrder
     _count?: MCPConfigCountOrderByAggregateInput
@@ -8905,9 +8977,13 @@ export namespace Prisma {
     OR?: MCPConfigScalarWhereWithAggregatesInput[]
     NOT?: MCPConfigScalarWhereWithAggregatesInput | MCPConfigScalarWhereWithAggregatesInput[]
     id?: UuidWithAggregatesFilter<"MCPConfig"> | string
-    mcpString?: StringWithAggregatesFilter<"MCPConfig"> | string
-    authToken?: StringWithAggregatesFilter<"MCPConfig"> | string
+    serverUrl?: StringWithAggregatesFilter<"MCPConfig"> | string
+    serverKey?: StringNullableWithAggregatesFilter<"MCPConfig"> | string | null
+    authHeader?: StringNullableWithAggregatesFilter<"MCPConfig"> | string | null
+    authToken?: StringNullableWithAggregatesFilter<"MCPConfig"> | string | null
     configJson?: JsonWithAggregatesFilter<"MCPConfig">
+    createdAt?: DateTimeWithAggregatesFilter<"MCPConfig"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"MCPConfig"> | Date | string
     userId?: UuidWithAggregatesFilter<"MCPConfig"> | string
     projectId?: UuidWithAggregatesFilter<"MCPConfig"> | string
   }
@@ -9336,61 +9412,89 @@ export namespace Prisma {
 
   export type MCPConfigCreateInput = {
     id?: string
-    mcpString: string
-    authToken: string
+    serverUrl: string
+    serverKey?: string | null
+    authHeader?: string | null
+    authToken?: string | null
     configJson: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
     user: UserCreateNestedOneWithoutMcpConfigsInput
     project: ProjectCreateNestedOneWithoutMcpConfigsInput
   }
 
   export type MCPConfigUncheckedCreateInput = {
     id?: string
-    mcpString: string
-    authToken: string
+    serverUrl: string
+    serverKey?: string | null
+    authHeader?: string | null
+    authToken?: string | null
     configJson: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
     userId: string
     projectId: string
   }
 
   export type MCPConfigUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    mcpString?: StringFieldUpdateOperationsInput | string
-    authToken?: StringFieldUpdateOperationsInput | string
+    serverUrl?: StringFieldUpdateOperationsInput | string
+    serverKey?: NullableStringFieldUpdateOperationsInput | string | null
+    authHeader?: NullableStringFieldUpdateOperationsInput | string | null
+    authToken?: NullableStringFieldUpdateOperationsInput | string | null
     configJson?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutMcpConfigsNestedInput
     project?: ProjectUpdateOneRequiredWithoutMcpConfigsNestedInput
   }
 
   export type MCPConfigUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    mcpString?: StringFieldUpdateOperationsInput | string
-    authToken?: StringFieldUpdateOperationsInput | string
+    serverUrl?: StringFieldUpdateOperationsInput | string
+    serverKey?: NullableStringFieldUpdateOperationsInput | string | null
+    authHeader?: NullableStringFieldUpdateOperationsInput | string | null
+    authToken?: NullableStringFieldUpdateOperationsInput | string | null
     configJson?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     userId?: StringFieldUpdateOperationsInput | string
     projectId?: StringFieldUpdateOperationsInput | string
   }
 
   export type MCPConfigCreateManyInput = {
     id?: string
-    mcpString: string
-    authToken: string
+    serverUrl: string
+    serverKey?: string | null
+    authHeader?: string | null
+    authToken?: string | null
     configJson: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
     userId: string
     projectId: string
   }
 
   export type MCPConfigUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    mcpString?: StringFieldUpdateOperationsInput | string
-    authToken?: StringFieldUpdateOperationsInput | string
+    serverUrl?: StringFieldUpdateOperationsInput | string
+    serverKey?: NullableStringFieldUpdateOperationsInput | string | null
+    authHeader?: NullableStringFieldUpdateOperationsInput | string | null
+    authToken?: NullableStringFieldUpdateOperationsInput | string | null
     configJson?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type MCPConfigUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    mcpString?: StringFieldUpdateOperationsInput | string
-    authToken?: StringFieldUpdateOperationsInput | string
+    serverUrl?: StringFieldUpdateOperationsInput | string
+    serverKey?: NullableStringFieldUpdateOperationsInput | string | null
+    authHeader?: NullableStringFieldUpdateOperationsInput | string | null
+    authToken?: NullableStringFieldUpdateOperationsInput | string | null
     configJson?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     userId?: StringFieldUpdateOperationsInput | string
     projectId?: StringFieldUpdateOperationsInput | string
   }
@@ -9912,25 +10016,37 @@ export namespace Prisma {
 
   export type MCPConfigCountOrderByAggregateInput = {
     id?: SortOrder
-    mcpString?: SortOrder
+    serverUrl?: SortOrder
+    serverKey?: SortOrder
+    authHeader?: SortOrder
     authToken?: SortOrder
     configJson?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
     userId?: SortOrder
     projectId?: SortOrder
   }
 
   export type MCPConfigMaxOrderByAggregateInput = {
     id?: SortOrder
-    mcpString?: SortOrder
+    serverUrl?: SortOrder
+    serverKey?: SortOrder
+    authHeader?: SortOrder
     authToken?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
     userId?: SortOrder
     projectId?: SortOrder
   }
 
   export type MCPConfigMinOrderByAggregateInput = {
     id?: SortOrder
-    mcpString?: SortOrder
+    serverUrl?: SortOrder
+    serverKey?: SortOrder
+    authHeader?: SortOrder
     authToken?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
     userId?: SortOrder
     projectId?: SortOrder
   }
@@ -10699,17 +10815,25 @@ export namespace Prisma {
 
   export type MCPConfigCreateWithoutUserInput = {
     id?: string
-    mcpString: string
-    authToken: string
+    serverUrl: string
+    serverKey?: string | null
+    authHeader?: string | null
+    authToken?: string | null
     configJson: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
     project: ProjectCreateNestedOneWithoutMcpConfigsInput
   }
 
   export type MCPConfigUncheckedCreateWithoutUserInput = {
     id?: string
-    mcpString: string
-    authToken: string
+    serverUrl: string
+    serverKey?: string | null
+    authHeader?: string | null
+    authToken?: string | null
     configJson: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
     projectId: string
   }
 
@@ -10842,9 +10966,13 @@ export namespace Prisma {
     OR?: MCPConfigScalarWhereInput[]
     NOT?: MCPConfigScalarWhereInput | MCPConfigScalarWhereInput[]
     id?: UuidFilter<"MCPConfig"> | string
-    mcpString?: StringFilter<"MCPConfig"> | string
-    authToken?: StringFilter<"MCPConfig"> | string
+    serverUrl?: StringFilter<"MCPConfig"> | string
+    serverKey?: StringNullableFilter<"MCPConfig"> | string | null
+    authHeader?: StringNullableFilter<"MCPConfig"> | string | null
+    authToken?: StringNullableFilter<"MCPConfig"> | string | null
     configJson?: JsonFilter<"MCPConfig">
+    createdAt?: DateTimeFilter<"MCPConfig"> | Date | string
+    updatedAt?: DateTimeFilter<"MCPConfig"> | Date | string
     userId?: UuidFilter<"MCPConfig"> | string
     projectId?: UuidFilter<"MCPConfig"> | string
   }
@@ -10988,17 +11116,25 @@ export namespace Prisma {
 
   export type MCPConfigCreateWithoutProjectInput = {
     id?: string
-    mcpString: string
-    authToken: string
+    serverUrl: string
+    serverKey?: string | null
+    authHeader?: string | null
+    authToken?: string | null
     configJson: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
     user: UserCreateNestedOneWithoutMcpConfigsInput
   }
 
   export type MCPConfigUncheckedCreateWithoutProjectInput = {
     id?: string
-    mcpString: string
-    authToken: string
+    serverUrl: string
+    serverKey?: string | null
+    authHeader?: string | null
+    authToken?: string | null
     configJson: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
     userId: string
   }
 
@@ -11531,9 +11667,13 @@ export namespace Prisma {
 
   export type MCPConfigCreateManyUserInput = {
     id?: string
-    mcpString: string
-    authToken: string
+    serverUrl: string
+    serverKey?: string | null
+    authHeader?: string | null
+    authToken?: string | null
     configJson: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
     projectId: string
   }
 
@@ -11629,25 +11769,37 @@ export namespace Prisma {
 
   export type MCPConfigUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    mcpString?: StringFieldUpdateOperationsInput | string
-    authToken?: StringFieldUpdateOperationsInput | string
+    serverUrl?: StringFieldUpdateOperationsInput | string
+    serverKey?: NullableStringFieldUpdateOperationsInput | string | null
+    authHeader?: NullableStringFieldUpdateOperationsInput | string | null
+    authToken?: NullableStringFieldUpdateOperationsInput | string | null
     configJson?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     project?: ProjectUpdateOneRequiredWithoutMcpConfigsNestedInput
   }
 
   export type MCPConfigUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    mcpString?: StringFieldUpdateOperationsInput | string
-    authToken?: StringFieldUpdateOperationsInput | string
+    serverUrl?: StringFieldUpdateOperationsInput | string
+    serverKey?: NullableStringFieldUpdateOperationsInput | string | null
+    authHeader?: NullableStringFieldUpdateOperationsInput | string | null
+    authToken?: NullableStringFieldUpdateOperationsInput | string | null
     configJson?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projectId?: StringFieldUpdateOperationsInput | string
   }
 
   export type MCPConfigUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    mcpString?: StringFieldUpdateOperationsInput | string
-    authToken?: StringFieldUpdateOperationsInput | string
+    serverUrl?: StringFieldUpdateOperationsInput | string
+    serverKey?: NullableStringFieldUpdateOperationsInput | string | null
+    authHeader?: NullableStringFieldUpdateOperationsInput | string | null
+    authToken?: NullableStringFieldUpdateOperationsInput | string | null
     configJson?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     projectId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -11689,9 +11841,13 @@ export namespace Prisma {
 
   export type MCPConfigCreateManyProjectInput = {
     id?: string
-    mcpString: string
-    authToken: string
+    serverUrl: string
+    serverKey?: string | null
+    authHeader?: string | null
+    authToken?: string | null
     configJson: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
     userId: string
   }
 
@@ -11709,25 +11865,37 @@ export namespace Prisma {
 
   export type MCPConfigUpdateWithoutProjectInput = {
     id?: StringFieldUpdateOperationsInput | string
-    mcpString?: StringFieldUpdateOperationsInput | string
-    authToken?: StringFieldUpdateOperationsInput | string
+    serverUrl?: StringFieldUpdateOperationsInput | string
+    serverKey?: NullableStringFieldUpdateOperationsInput | string | null
+    authHeader?: NullableStringFieldUpdateOperationsInput | string | null
+    authToken?: NullableStringFieldUpdateOperationsInput | string | null
     configJson?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutMcpConfigsNestedInput
   }
 
   export type MCPConfigUncheckedUpdateWithoutProjectInput = {
     id?: StringFieldUpdateOperationsInput | string
-    mcpString?: StringFieldUpdateOperationsInput | string
-    authToken?: StringFieldUpdateOperationsInput | string
+    serverUrl?: StringFieldUpdateOperationsInput | string
+    serverKey?: NullableStringFieldUpdateOperationsInput | string | null
+    authHeader?: NullableStringFieldUpdateOperationsInput | string | null
+    authToken?: NullableStringFieldUpdateOperationsInput | string | null
     configJson?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     userId?: StringFieldUpdateOperationsInput | string
   }
 
   export type MCPConfigUncheckedUpdateManyWithoutProjectInput = {
     id?: StringFieldUpdateOperationsInput | string
-    mcpString?: StringFieldUpdateOperationsInput | string
-    authToken?: StringFieldUpdateOperationsInput | string
+    serverUrl?: StringFieldUpdateOperationsInput | string
+    serverKey?: NullableStringFieldUpdateOperationsInput | string | null
+    authHeader?: NullableStringFieldUpdateOperationsInput | string | null
+    authToken?: NullableStringFieldUpdateOperationsInput | string | null
     configJson?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     userId?: StringFieldUpdateOperationsInput | string
   }
 

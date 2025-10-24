@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Sparkles,
@@ -22,6 +22,7 @@ import {
   BarChart3,
   Shield,
   Cloud,
+  Loader2,
 } from "lucide-react";
 import { IconBrandYoutubeFilled } from "@tabler/icons-react";
 import createGlobe from "cobe";
@@ -37,6 +38,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { TextHoverEffect } from "@/components/ui/text-hover-effect";
+import { useMCP } from "@/context";
+import axios from "axios";
 
 const suggestions = [
   "E-commerce agent with inventory automation",
@@ -212,10 +215,14 @@ const metricsPulse = [
   { label: "Regions", value: "14" },
 ];
 
-export default function LandingPage() {
+function LandingContent() {
+  const { promptMetadata, setPromptMetadata } = useMCP();
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeStage, setActiveStage] = useState(0);
+  const [identity, setIdentity] = useState("");
+  const [instructions, setInstructions] = useState("");
+  const [tone, setTone] = useState("");
   const { session, isLoading, signOut } = useSupabaseAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -227,23 +234,71 @@ export default function LandingPage() {
     return () => window.clearInterval(interval);
   }, []);
 
-  const handleGenerate = () => {
-    if (!prompt.trim()) return;
+  // Populate prompt from URL when user returns from authentication
+  useEffect(() => {
+    const urlPrompt = searchParams.get('prompt');
+    if (urlPrompt && !prompt) {
+      setPrompt(urlPrompt);
+    }
+  }, [searchParams]);
 
+const handleGenerate = async () => {
+    //call the api
+    if (!prompt.trim()) return;
     if (!session) {
+      // Not authenticated - redirect to authentication page
+      // After auth, user will come back to landing page with the prompt
       const params = new URLSearchParams();
-      params.set("redirectTo", "/onboarding");
+      params.set("redirectTo", "/landing");
       params.set("mode", "signin");
       params.set("prompt", prompt);
       router.push(`/authentication?${params.toString()}`);
       return;
     }
-
+    setIsGenerating(true);
+    const CreateprojectResponse = await fetch("/api/project/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: " ",
+        description: " ",
+        prompt: searchParams.get("prompt"),
+        identity,
+        instructions,
+        tone,
+      }),
+    });
+    const data = await CreateprojectResponse.json();
+    console.log("data", data);
+    const { project: { id } } = data;
+    console.log("project id ", id);
+    const postData = {
+      text: prompt,
+      projectId: id
+    };
+    await axios.post('https://acemcp-service.rushikeshpatil8208.workers.dev/template', postData).then(res => {
+      let { projectMetadata } = res.data
+      setPromptMetadata(projectMetadata[0])
+      console.log("res", res);
+    }).catch(err => {
+      console.log("err", err);
+    }).finally(() => {
+      setIsGenerating(false);
+    });
+    //project id
+    // const data = await response.json();
+    // console.log(data);
     // Authenticated user - redirect to onboarding with prompt
     const params = new URLSearchParams();
     params.set("prompt", prompt);
     router.push(`/onboarding?${params.toString()}`);
+
+    // router.push(`/onboarding?${params.toString()}`);
   };
+  
+  useEffect(() => {
+    console.log("promtMetadata", promptMetadata);
+  }, [promptMetadata])  
 
   const handlePrimaryCta = () => {
     if (session) {
@@ -304,7 +359,7 @@ export default function LandingPage() {
                 <>
                   <Button
                     variant="ghost"
-                    onClick={() => router.push("/generate")}
+                    onClick={() => router.push("/")}
                     className="h-10 rounded-lg px-4 text-sm text-white/80 transition hover:text-white"
                   >
                     Dashboard
@@ -384,12 +439,12 @@ export default function LandingPage() {
                     <Button
                       onClick={handleGenerate}
                       disabled={isGenerating || !prompt.trim()}
-                      className="h-auto rounded-lg border border-white/10 bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white disabled:opacity-50 disabled:hover:border-white/10"
+                      className="h-auto rounded-lg border border-white/10 bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white hover:bg-black disabled:opacity-50 disabled:hover:border-white/10"
                     >
                       {isGenerating ? (
                         <div className="flex items-center gap-2">
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/25 border-t-white" />
                           Generating...
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
@@ -717,5 +772,19 @@ export default function LandingPage() {
         </footer>
       </div>
     </div>
+  );
+}
+
+export default function LandingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-black">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-white/25 border-t-white" />
+        </div>
+      }
+    >
+      <LandingContent />
+    </Suspense>
   );
 }

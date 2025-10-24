@@ -1,3 +1,99 @@
+# AcEMCP - AI Agent Platform
+
+## Quick Start
+
+### Prerequisites
+- Node.js 18+ installed
+- Supabase account (or local Supabase setup)
+- PostgreSQL database
+
+### Setup
+
+1. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+2. **Configure environment variables**
+   - Copy `env-template.txt` to `.env.local`
+   - Fill in your Supabase credentials
+   - (Optional) Add GitHub OAuth credentials for social login
+
+3. **Setup database**
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   ```
+
+4. **Start development server**
+   ```bash
+   npm run dev
+   ```
+
+5. **Start Supabase (if using local)**
+   ```bash
+   npx supabase start
+   ```
+
+## Authentication Setup
+
+### Email/Password Authentication
+
+The application supports email/password authentication out of the box. Configuration is in `supabase/config.toml`:
+
+```toml
+[auth.email]
+enable_confirmations = false  # Set to true to require email verification
+```
+
+### GitHub OAuth (Optional)
+
+To enable GitHub sign-in:
+
+1. **Create GitHub OAuth App**
+   - Go to https://github.com/settings/developers
+   - Click "New OAuth App"
+   - Set callback URL to: `http://127.0.0.1:54321/auth/v1/callback` (local) or `https://your-project.supabase.co/auth/v1/callback` (production)
+
+2. **Add credentials to `.env.local`**
+   ```bash
+   SUPABASE_AUTH_EXTERNAL_GITHUB_CLIENT_ID=your_client_id
+   SUPABASE_AUTH_EXTERNAL_GITHUB_SECRET=your_client_secret
+   ```
+
+3. **Restart Supabase**
+   ```bash
+   npx supabase stop
+   npx supabase start
+   ```
+
+### Authentication Flow
+
+1. User lands on `/landing` and enters a prompt
+2. If not authenticated, redirected to `/authentication` with prompt preserved
+3. User signs up or signs in (email/password or GitHub)
+4. After authentication, redirected to `/auth/callback`
+5. Callback syncs user to database
+6. User is redirected back to `/landing` with their original prompt
+7. User can now generate their agent with the prompt
+
+### Troubleshooting Authentication
+
+**Issue: "Unauthorized" error**
+- Check `.env.local` has correct Supabase credentials
+- Restart dev server
+
+**Issue: GitHub sign-in doesn't work**
+- Verify callback URL in GitHub OAuth app settings
+- Check environment variables are set
+- Restart Supabase
+
+**Issue: Email confirmation not working**
+- Check `enable_confirmations` setting in `supabase/config.toml`
+- Verify `site_url` matches your development URL
+
+---
+
 # Understanding OpenTelemetry in Simple Terms (The Restaurant Analogy)
 
 Imagine your application is a busy restaurant. You want to know how well it's running. OpenTelemetry is a system that helps you watch everything without getting in the way of the chefs.

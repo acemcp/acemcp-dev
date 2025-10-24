@@ -21,6 +21,8 @@ interface MCPContextType {
   configureMCP: (config: Partial<MCPConfig>) => void;
   clearConfig: () => void;
   isValidConfig: () => boolean;
+  promptMetadata: { [key: string]: any } | undefined;
+  setPromptMetadata: (metadata: any) => void;
 }
 
 // Create Context
@@ -35,6 +37,8 @@ export function MCPProvider({ children }: { children: ReactNode }) {
     isConfigured: false,
     configType: null,
   });
+
+  const [promptMetadata, setPromptMetadata] = useState();
 
   console.log("mcpConfig", mcpConfig);
   
@@ -123,6 +127,8 @@ export function MCPProvider({ children }: { children: ReactNode }) {
     configureMCP,
     clearConfig,
     isValidConfig,
+    promptMetadata,
+    setPromptMetadata,
   };
 
   return (

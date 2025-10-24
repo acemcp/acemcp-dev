@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import prisma from "@/lib/prisma";
 
+
 /**
  * GET /api/project/[id]
  * Retrieves project details with metadata
  */
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await getSupabaseServerClient();
@@ -22,8 +23,11 @@ export async function GET(
       );
     }
 
+    // Await params before accessing properties
+    const { id } = await params;
+
     const project = await prisma.project.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         promptMetadata: true,
         mcpConfigs: true,
@@ -75,7 +79,7 @@ export async function GET(
  */
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await getSupabaseServerClient();
@@ -92,9 +96,12 @@ export async function PATCH(
     const body = await req.json();
     const { name, description, identity, instructions, tone } = body;
 
+    // Await params before accessing properties
+    const { id } = await params;
+
     // Verify ownership
     const existingProject = await prisma.project.findUnique({
-      where: { id: params.id }
+      where: { id }
     });
 
     if (!existingProject) {
@@ -113,7 +120,7 @@ export async function PATCH(
 
     // Update project
     const project = await prisma.project.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(name && { name }),
         ...(description !== undefined && { projectDesc: description }),
