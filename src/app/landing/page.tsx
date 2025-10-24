@@ -359,7 +359,7 @@ const handleGenerate = async () => {
                 <>
                   <Button
                     variant="ghost"
-                    onClick={() => router.push("/generate")}
+                    onClick={() => router.push("/")}
                     className="h-10 rounded-lg px-4 text-sm text-white/80 transition hover:text-white"
                   >
                     Dashboard
