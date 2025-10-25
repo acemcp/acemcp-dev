@@ -326,8 +326,13 @@ function OnboardingContent() {
         });
       }
 
-      // Redirect to main dashboard
-      router.push(`/?projectId=${promptMetadata?.id}`);
+      // Redirect to project dashboard
+      if (promptMetadata?.id) {
+        router.push(`/project/${promptMetadata.id}`);
+      } else {
+        // Fallback to landing if no project ID
+        router.push("/landing");
+      }
     } catch (error) {
       console.error("Error deploying:", error);
       alert("Failed to deploy");

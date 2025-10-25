@@ -27,6 +27,7 @@ import {
   MessageSquare,
   CheckCircle2,
   AlertCircle,
+  LogOut,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -475,7 +476,7 @@ export default function ProfilePage() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => router.push(`/?projectId=${project.id}`)}
+                          onClick={() => router.push(`/project/${project.id}`)}
                           className="text-blue-400 hover:text-blue-300"
                         >
                           View
@@ -494,7 +495,18 @@ export default function ProfilePage() {
                   Irreversible actions that affect your account
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-3">
+                <Button
+                  onClick={async () => {
+                    await signOut();
+                    router.push("/landing");
+                  }}
+                  variant="outline"
+                  className="w-full border-slate-700 bg-slate-950 text-white hover:bg-slate-800"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Log Out
+                </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button
