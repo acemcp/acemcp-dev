@@ -111,9 +111,6 @@ export default function AgentConfig() {
       // If none succeeded, fallback to default config and show warning
       if (mounted) {
         setConfig(DEFAULT_CONFIG);
-        setError(
-          `Failed to load config from public paths. Using default config. Last error: ${lastError?.message || "unknown"}`
-        );
       }
 
       setLoading(false);
