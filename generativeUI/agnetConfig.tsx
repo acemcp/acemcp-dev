@@ -168,8 +168,8 @@ export default function AgentConfig() {
     );
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6">
-      <Card>
+    <div className="mx-auto w-full h-full max-w-3xl space-y-6">
+      <Card className="h-full">
         <CardHeader className="space-y-1">
           <CardTitle className="text-xl font-semibold">Agent Configuration</CardTitle>
           <p className="text-sm text-muted-foreground">

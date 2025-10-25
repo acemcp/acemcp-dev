@@ -82,7 +82,7 @@ export default function DashboardPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [selectedModel, setSelectedModel] = useState("GPT-4 Turbo");
   const [showModelDropdown, setShowModelDropdown] = useState(false);
-  const [isAgentSidebarOpen, setIsAgentSidebarOpen] = useState(true);
+  const [isWorkflowViewOpen, setIsWorkflowViewOpen] = useState(true);
 
   // Check authentication on mount
   useEffect(() => {
@@ -340,13 +340,13 @@ export default function DashboardPage() {
             <div
               className={cn(
                 "grid gap-4 h-[calc(100vh-140px)] transition-[grid-template-columns] duration-500 ease-in-out",
-                isAgentSidebarOpen
-                  ? "lg:grid-cols-[420px_minmax(0,1fr)_340px]"
-                  : "lg:grid-cols-[420px_minmax(0,1fr)]"
+                isWorkflowViewOpen
+                  ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_360px]" // 3 columns (default)
+                  : "lg:grid-cols-[minmax(0,1.2fr)_0.5fr]" // 2 columns (chat + config)
               )}
             >
               {/* Chat Interface Section */}
-              <section className="flex flex-col h-full">
+              <section className="flex flex-col h-full transition-all duration-500 ease-in-out">
                 <div className="flex flex-col h-full rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-950/90 to-slate-900/80 shadow-2xl shadow-slate-950/60 backdrop-blur overflow-hidden">
                   {/* Header */}
                   <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/60">
@@ -382,16 +382,16 @@ export default function DashboardPage() {
                       <Button
                         size="sm"
                         onClick={() =>
-                          setIsAgentSidebarOpen(!isAgentSidebarOpen)
+                          setIsWorkflowViewOpen(!isWorkflowViewOpen)
                         }
                         className="rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-300 hover:text-white hover:bg-blue-500/30 hover:shadow-lg hover:shadow-blue-500/50 hover:border-white/50 transition-all duration-300 h-7 w-7 p-0 flex items-center justify-center"
                         title={
-                          isAgentSidebarOpen
-                            ? "Collapse Agent Config"
-                            : "Open Agent Config"
+                          isWorkflowViewOpen
+                            ? "Collapse Workflow View"
+                            : "Expand Workflow View"
                         }
                       >
-                        {isAgentSidebarOpen ? (
+                        {isWorkflowViewOpen ? (
                           <ChevronRight className="size-3.5" />
                         ) : (
                           <ChevronLeft className="size-3.5" />
@@ -610,38 +610,41 @@ export default function DashboardPage() {
                 </div>
               </section>
               {/* Workflow View Section - Increased Size */}
-              <section className="flex flex-col h-full">
-                <div className="flex flex-col h-full rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-950/90 to-slate-900/80 shadow-2xl shadow-slate-950/60 backdrop-blur overflow-hidden">
-                  <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/60">
-                    <div>
-                      <h3 className="text-base font-semibold text-slate-50">
-                        Agent View
-                      </h3>
-                      <p className="text-xs text-slate-400">
-                        Visualize orchestration and active tools
-                      </p>
+              {isWorkflowViewOpen && (
+                <section className="flex flex-col h-full transition-all duration-500 ease-in-out">
+                  <div className="flex flex-col h-full rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-950/90 to-slate-900/80 shadow-2xl shadow-slate-950/60 backdrop-blur overflow-hidden">
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/60">
+                      <div>
+                        <h3 className="text-base font-semibold text-slate-50">
+                          Agent View
+                        </h3>
+                        <p className="text-xs text-slate-400">
+                          Visualize orchestration and active tools
+                        </p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-xl border-blue-500/30 bg-blue-500/10 text-blue-200 hover:bg-blue-500/20 text-xs h-7 px-3 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/50 hover:border-white/50 transition-all duration-300"
+                      >
+                        Manage
+                      </Button>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="rounded-xl border-blue-500/30 bg-blue-500/10 text-blue-200 hover:bg-blue-500/20 text-xs h-7 px-3 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/50 hover:border-white/50 transition-all duration-300"
-                    >
-                      Manage
-                    </Button>
+                    <div className="flex-1 overflow-hidden rounded-b-3xl border-t border-slate-800/60 bg-slate-900/70">
+                      <AgentPreview messages={messages} />
+                    </div>
                   </div>
-                  <div className="flex-1 overflow-hidden rounded-b-3xl border-t border-slate-800/60 bg-slate-900/70">
-                    <AgentPreview messages={messages} />
-                  </div>
-                </div>
-              </section>
-              {/* Agent Configuration Section */}
-              {isAgentSidebarOpen && (
-                <aside className="flex flex-col h-full overflow-y-auto pr-1 transition-all duration-500">
-                  <div className="rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-950/90 to-slate-900/80 shadow-2xl shadow-slate-950/60 backdrop-blur p-6 h-full">
-                    <AgentConfig />
-                  </div>
-                </aside>
+                </section>
               )}
+              {/* Agent Configuration Section */}
+              {/* {isAgentSidebarOpen && ( */}
+              <aside className="flex flex-col flex-1 h-full transition-all duration-500 ease-in-out">
+                <div className="flex flex-col flex-1 rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-950/90 to-slate-900/80 shadow-2xl shadow-slate-950/60 backdrop-blur p-6 overflow-y-auto">
+                  <AgentConfig />
+                </div>
+              </aside>
+
+              {/* )} */}
             </div>
           ) : null}
 
