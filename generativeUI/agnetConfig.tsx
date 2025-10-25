@@ -111,9 +111,6 @@ export default function AgentConfig() {
       // If none succeeded, fallback to default config and show warning
       if (mounted) {
         setConfig(DEFAULT_CONFIG);
-        setError(
-          `Failed to load config from public paths. Using default config. Last error: ${lastError?.message || "unknown"}`
-        );
       }
 
       setLoading(false);
@@ -171,8 +168,8 @@ export default function AgentConfig() {
     );
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6">
-      <Card>
+    <div className="mx-auto w-full h-full max-w-3xl space-y-6">
+      <Card className="h-full">
         <CardHeader className="space-y-1">
           <CardTitle className="text-xl font-semibold">Agent Configuration</CardTitle>
           <p className="text-sm text-muted-foreground">
@@ -206,7 +203,7 @@ export default function AgentConfig() {
             />
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-1">
             <div className="space-y-2">
               <Label htmlFor="tone">Tone</Label>
               <Input
@@ -235,11 +232,11 @@ export default function AgentConfig() {
             </div>
           </div>
         </CardContent>
-        <CardFooter className="flex items-center justify-between gap-4">
-          <div className="text-sm text-muted-foreground">
+        <CardFooter className="flex flex-col w-full items-center gap-3">
+          <div className="text-sm text-muted-foreground self-start">
             {savedMessage ? savedMessage : "Changes are auto-saved locally."}
           </div>
-          <Button onClick={handleSave}>Save Configuration</Button>
+          <Button className="items-center" onClick={handleSave}>Save Configuration</Button>
         </CardFooter>
       </Card>
     </div>
