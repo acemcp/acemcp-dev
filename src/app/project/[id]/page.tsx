@@ -1,5 +1,5 @@
 "use client";
-
+import * as React from "react";  // ✅ add this
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -77,11 +77,11 @@ const metrics = [
 
 const quickActions = ["Check Order", "Return Item", "Track Package", "Escalate"];
 
-export default function ProjectPage({ params }: ProjectPageProps) {
+export default function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { user, isLoading: authLoading } = useSupabaseAuth();
-  const projectId = params.id;
-  
+  const { id: projectId } = React.use(params);
+
   const [input, setInput] = useState("");
   const [tools, setTools] = useState<Tool[]>([]);
   const [activeTab, setActiveTab] = useState<TabKey>("chat");
