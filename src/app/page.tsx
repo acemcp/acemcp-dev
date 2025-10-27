@@ -15,26 +15,20 @@ import {
   BarChart3,
   ShoppingBag,
   Settings,
-  Sparkles,
-  Bell,
-  Search,
-  Download,
-  Plus,
-  Play,
   ChevronLeft,
   ChevronRight,
-  Menu,
-  ChevronDown,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
-import MCPCard from "../../generativeUI/mcpConfigUI";
-import AgentPreview from "../../generativeUI/AgentPreview";
-import AgentConfig from "../../generativeUI/agnetConfig";
-import InputDemo from "../../generativeUI/InputDemo";
+// Shared dashboard components
+import {
+  ChatPlaygroundLayout,
+  DashboardHeader,
+  WorkflowTab,
+  WorkflowBuilderTab,
+} from "@/features/dashboard";
 
 type Tool = {
   name: string;
@@ -76,13 +70,8 @@ export default function DashboardPage() {
   const router = useRouter();
   const { user, isLoading: authLoading } = useSupabaseAuth();
 
-  const [input, setInput] = useState("");
-  const [tools, setTools] = useState<Tool[]>([]);
   const [activeTab, setActiveTab] = useState<TabKey>("chat");
-  const [isSyncingTools, setIsSyncingTools] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [selectedModel, setSelectedModel] = useState("GPT-4 Turbo");
-  const [showModelDropdown, setShowModelDropdown] = useState(false);
   const [isWorkflowViewOpen, setIsWorkflowViewOpen] = useState(true);
   const [isRedirecting, setIsRedirecting] = useState(true);
 
@@ -119,78 +108,11 @@ export default function DashboardPage() {
     redirectToProject();
   }, [user, authLoading, router]);
 
-  const modelConfigs = {
-    "GPT-4 Turbo": { temperature: 0.7, maxTokens: 4000, responseTime: "1.2s" },
-    "GPT-4": { temperature: 0.7, maxTokens: 8000, responseTime: "2.1s" },
-    "GPT-3.5 Turbo": {
-      temperature: 0.9,
-      maxTokens: 4000,
-      responseTime: "0.8s",
-    },
-    "Claude 3 Opus": {
-      temperature: 0.7,
-      maxTokens: 4096,
-      responseTime: "1.5s",
-    },
-    "Claude 3 Sonnet": {
-      temperature: 0.7,
-      maxTokens: 4096,
-      responseTime: "1.0s",
-    },
-  };
-
-  const { messages, sendMessage, addToolResult } = useChat({
+  const { messages } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/mcp",
     }),
   });
-
-  const tokensUsed = useMemo(() => {
-    let total = 0;
-    messages.forEach((message) => {
-      message.parts?.forEach((part) => {
-        if (part.type === "text") {
-          total += Math.max(1, Math.ceil(part.text.length / 4));
-        }
-      });
-    });
-    return total;
-  }, [messages]);
-
-  const toolCalls = useMemo(() => {
-    let total = 0;
-    messages.forEach((message) => {
-      message.parts?.forEach((part) => {
-        if (isToolUIPart(part)) {
-          total += 1;
-        }
-      });
-    });
-    return total;
-  }, [messages]);
-
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!input.trim()) {
-      return;
-    }
-    sendMessage({ text: input.trim() });
-    setInput("");
-  };
-
-  const syncTools = async () => {
-    try {
-      setIsSyncingTools(true);
-      const response = await fetch("/api/mcp");
-      const payload = await response.json();
-      const normalized = Array.isArray(payload) ? payload : [payload];
-      setTools(normalized);
-    } catch (error) {
-      console.error("Failed to sync tools", error);
-    } finally {
-      setIsSyncingTools(false);
-    }
-  };
 
   const breadcrumb =
     activeTab === "chat"
@@ -198,14 +120,6 @@ export default function DashboardPage() {
       : activeTab === "workflow"
       ? "Workflow View"
       : "Create Agent";
-
-  const sessionStats = {
-    messages: messages.length,
-    tools: toolCalls,
-    avgResponse: "1.4s",
-    sentiment: "Positive",
-    duration: "4m 23s",
-  };
 
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-100">
@@ -291,64 +205,12 @@ export default function DashboardPage() {
         )}
       </aside>
       <div className="flex flex-1 flex-col">
-        <header className="relative flex items-center justify-between border-b border-slate-800/60 bg-slate-950/80 px-6 py-4 backdrop-blur">
-          <div>
-            <div className="flex items-center gap-2 text-sm text-slate-400">
-              <Link href="#" className="hover:text-slate-100">
-                Dashboard
-              </Link>
-              <Play className="size-3 text-slate-600" />
-              <span className="font-medium text-slate-100">{breadcrumb}</span>
-            </div>
-            <h1 className="mt-1 text-2xl font-semibold text-slate-50">
-              Chat Playground
-            </h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <button className="rounded-full border border-slate-800/60 p-2 text-slate-400 transition hover:bg-slate-900/80 hover:text-slate-100">
-              <Bell className="size-4" />
-            </button>
-            <button
-              onClick={() => router.push("/profile")}
-              className="inline-flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-blue-500 text-sm font-semibold text-white transition hover:from-blue-500 hover:to-blue-400 hover:shadow-lg hover:shadow-blue-500/50 cursor-pointer"
-              title="View Profile"
-            >
-              {user?.user_metadata?.full_name || user?.user_metadata?.name
-                ? (user.user_metadata.full_name || user.user_metadata.name)
-                    .split(" ")
-                    .map((n: string) => n[0])
-                    .join("")
-                    .toUpperCase()
-                    .slice(0, 2)
-                : user?.email
-                ? user.email.substring(0, 2).toUpperCase()
-                : "U"}
-            </button>
-          </div>
-          {/* Floating Tab Buttons in Header */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 rounded-full border border-slate-800/60 bg-slate-900/90 p-1.5 backdrop-blur-xl shadow-2xl">
-            {(["chat", "workflow", "workflow_builder"] as TabKey[]).map(
-              (tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={cn(
-                    "rounded-full px-4 py-1.5 text-xs font-medium transition-all duration-300",
-                    activeTab === tab
-                      ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/50 border border-white/30"
-                      : "text-slate-400 hover:text-slate-200 hover:bg-blue-500/20 hover:shadow-lg hover:shadow-blue-500/40 hover:border hover:border-white/40"
-                  )}
-                >
-                  {tab === "chat"
-                    ? "Chat Playground"
-                    : tab === "workflow"
-                    ? "Workflow View"
-                    : "Workflow Builder"}
-                </button>
-              )
-            )}
-          </div>
-        </header>
+        <DashboardHeader
+          user={user}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          breadcrumb={breadcrumb}
+        />
         <main className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6">
           {/* Metrics Section - Commented out as requested */}
           {/* <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -364,173 +226,17 @@ export default function DashboardPage() {
             ))}
           </div> */}
 
-          {activeTab === "chat" ? (
-            <div
-              className={cn(
-                "grid gap-4 h-[calc(100vh-140px)] transition-[grid-template-columns] duration-500 ease-in-out",
-                isWorkflowViewOpen
-                  ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_380px]" // 3 columns (default)
-                  : "lg:grid-cols-[minmax(0,1.2fr)_0.5fr]" // 2 columns (chat + config)
-              )}
-            >
-              {/* Chat Interface Section */}
-              <section className="flex flex-col h-full transition-all duration-500 ease-in-out">
-                <div className="flex flex-col h-full rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-950/90 to-slate-900/80 shadow-2xl shadow-slate-950/60 backdrop-blur overflow-hidden">
-                  {/* Header */}
-                  <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/60">
-                    <div>
-                      <h3 className="text-base font-semibold text-slate-50">
-                        Chat
-                      </h3>
-                      <p className="text-xs text-slate-400">
-                        Converse with your agent
-                      </p>
-                    </div>
+          {activeTab === "chat" && (
+            <ChatPlaygroundLayout
+              messages={messages}
+              isWorkflowViewOpen={isWorkflowViewOpen}
+              onToggleWorkflowView={() => setIsWorkflowViewOpen(!isWorkflowViewOpen)}
+            />
+          )}
 
-                    {/* Sidebar toggle button — already wired to Workflow View */}
-                    <Button
-                      size="sm"
-                      onClick={() => setIsWorkflowViewOpen(!isWorkflowViewOpen)}
-                      className="rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-300 hover:text-white hover:bg-blue-500/30 hover:shadow-lg hover:shadow-blue-500/50 hover:border-white/50 transition-all duration-300 h-7 w-7 p-0 flex items-center justify-center"
-                      title={
-                        isWorkflowViewOpen
-                          ? "Collapse Workflow View"
-                          : "Expand Workflow View"
-                      }
-                    >
-                      {isWorkflowViewOpen ? (
-                        <ChevronRight className="size-3.5" />
-                      ) : (
-                        <ChevronLeft className="size-3.5" />
-                      )}
-                    </Button>
-                  </div>
+          {activeTab === "workflow" && <WorkflowTab messages={messages} />}
 
-                  {/* Main chat content area */}
-                  <div className="flex flex-col flex-1 overflow-hidden">
-                    <InputDemo /> {/* <— The PromptInput-based chat UI */}
-                  </div>
-                </div>
-              </section>
-
-              {/* Workflow View Section - Increased Size */}
-              {isWorkflowViewOpen && (
-                <section className="flex flex-col h-full transition-all duration-700 ease-in-out">
-                  <div className="flex flex-col h-full rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-950/90 to-slate-900/80 shadow-2xl shadow-slate-950/60 backdrop-blur overflow-hidden">
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/60">
-                      <div>
-                        <h3 className="text-base font-semibold text-slate-50">
-                          Agent View
-                        </h3>
-                        <p className="text-xs text-slate-400">
-                          Visualize orchestration and active tools
-                        </p>
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="rounded-xl border-blue-500/30 bg-blue-500/10 text-blue-200 hover:bg-blue-500/20 text-xs h-7 px-3 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/50 hover:border-white/50 transition-all duration-300"
-                      >
-                        Manage
-                      </Button>
-                    </div>
-                    <div className="flex-1 overflow-hidden rounded-b-3xl border-t border-slate-800/60 bg-slate-900/70">
-                      <AgentPreview messages={messages} />
-                    </div>
-                  </div>
-                </section>
-              )}
-              {/* Agent Configuration Section */}
-              {/* {isAgentSidebarOpen && ( */}
-              <aside className="flex flex-col flex-1 h-full transition-all duration-700 ease-in-out">
-                <div className="flex flex-col flex-1 rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-950/90 to-slate-900/80 shadow-2xl shadow-slate-950/60 backdrop-blur p-6 overflow-y-auto">
-                  <AgentConfig />
-                </div>
-              </aside>
-
-              {/* )} */}
-            </div>
-          ) : null}
-
-          {activeTab === "workflow" ? (
-            <div className="mt-6 space-y-6">
-              <div className="rounded-[28px] border border-slate-800/60 bg-slate-950/80 p-6 shadow-2xl shadow-slate-950/60">
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  <div>
-                    <h2 className="text-xl font-semibold text-slate-50">
-                      Customer Support Workflow
-                    </h2>
-                    <p className="text-sm text-slate-400">
-                      Monitor orchestration steps, execution timers, and
-                      branching decisions.
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Button
-                      variant="outline"
-                      className="rounded-full border-blue-500/30 bg-blue-500/10 text-blue-200 hover:bg-blue-500/20 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/50 hover:border-white/50 transition-all duration-300"
-                    >
-                      <Download className="mr-2 size-4" /> Export Workflow
-                    </Button>
-                    <Button className="rounded-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white shadow-lg shadow-blue-500/40 hover:shadow-blue-500/70 hover:border hover:border-white/50 transition-all duration-300">
-                      <Play className="mr-2 size-4" /> Execute
-                    </Button>
-                  </div>
-                </div>
-                <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  <div className="rounded-3xl border border-emerald-500/40 bg-emerald-500/10 p-4 text-sm text-emerald-200">
-                    <p className="font-semibold">Current Step</p>
-                    <p className="mt-1 text-lg text-emerald-100">
-                      Sentiment Analysis
-                    </p>
-                    <p className="mt-2 text-xs text-emerald-300">
-                      Processing step 26 of 29
-                    </p>
-                  </div>
-                  <div className="rounded-3xl border border-slate-800/60 bg-slate-900/70 p-4 text-sm text-slate-300">
-                    <p className="font-semibold text-slate-100">Active Nodes</p>
-                    <p className="mt-1 text-lg text-slate-100">5</p>
-                    <p className="mt-2 text-xs text-slate-400">
-                      3 optimized • 2 ready
-                    </p>
-                  </div>
-                  <div className="rounded-3xl border border-slate-800/60 bg-slate-900/70 p-4 text-sm text-slate-300">
-                    <p className="font-semibold text-slate-100">Success Rate</p>
-                    <p className="mt-1 text-lg text-slate-100">94.2%</p>
-                    <p className="mt-2 text-xs text-emerald-300">Stable</p>
-                  </div>
-                  <div className="rounded-3xl border border-slate-800/60 bg-slate-900/70 p-4 text-sm text-slate-300">
-                    <p className="font-semibold text-slate-100">MCP Servers</p>
-                    <p className="mt-1 text-lg text-slate-100">4 connected</p>
-                    <p className="mt-2 text-xs text-slate-400">
-                      OpenAI GPT-4, Sentiment API, Vector DB, Slack
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-6 h-[520px] overflow-hidden rounded-3xl border border-slate-800/60 bg-slate-900/70">
-                  <AgentPreview messages={messages} />
-                </div>
-              </div>
-            </div>
-          ) : null}
-
-          {activeTab === "workflow_builder" ? (
-            <div className="flex items-center justify-center h-[calc(100vh-200px)]">
-              <div className="text-center max-w-md">
-                <div className="inline-flex p-6 rounded-3xl bg-gradient-to-br from-slate-900/80 to-slate-800/60 border border-slate-800/60 shadow-2xl mb-6">
-                  <GitBranch className="size-16 text-slate-400" />
-                </div>
-                <h2 className="text-3xl font-bold text-slate-50 mb-3">
-                  Workflow Builder
-                </h2>
-                <p className="text-lg text-slate-400 mb-2">Coming Soon</p>
-                <p className="text-sm text-slate-500">
-                  Build complex AI workflows with drag-and-drop interface,
-                  conditional logic, and multi-agent orchestration.
-                </p>
-              </div>
-            </div>
-          ) : null}
+          {activeTab === "workflow_builder" && <WorkflowBuilderTab />}
         </main>
       </div>
     </div>

@@ -9,34 +9,32 @@ import { useState } from "react";
 
 export default function Chat() {
   const [input, setInput] = useState("");
-  const { messages, sendMessage, addToolResult } =
-    useChat >
-    {
-      transport: new DefaultChatTransport({
-        api: "/api/chat",
-      }),
+  const { messages, sendMessage, addToolResult } = useChat({
+    transport: new DefaultChatTransport({
+      api: "/api/chat",
+    }),
 
-      sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
 
-      // run client-side tools that are automatically executed:
-      async onToolCall({ toolCall }) {
-        if (toolCall.toolName === "getLocation") {
-          const cities = [
-            "New York",
-            "Los Angeles",
-            "Chicago",
-            "San Francisco",
-          ];
+    // run client-side tools that are automatically executed:
+    async onToolCall({ toolCall }) {
+      if (toolCall.toolName === "getLocation") {
+        const cities = [
+          "New York",
+          "Los Angeles",
+          "Chicago",
+          "San Francisco",
+        ];
 
-          // No await - avoids potential deadlocks
-          addToolResult({
-            tool: "getLocation",
-            toolCallId: toolCall.toolCallId,
-            output: cities[Math.floor(Math.random() * cities.length)],
-          });
-        }
-      },
-    };
+        // No await - avoids potential deadlocks
+        addToolResult({
+          tool: "getLocation",
+          toolCallId: toolCall.toolCallId,
+          output: cities[Math.floor(Math.random() * cities.length)],
+        });
+      }
+    },
+  });
 
   return (
     <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch gap-4">

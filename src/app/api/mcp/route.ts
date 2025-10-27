@@ -2,11 +2,11 @@ import {
   StreamTextResult,
   UIMessage,
   convertToModelMessages,
-  experimental_createMCPClient as createMCPClient,
   hasToolCall,
   stepCountIs,
   streamText,
 } from "ai";
+import { experimental_createMCPClient as createMCPClient } from "@ai-sdk/mcp";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { createMistral } from "@ai-sdk/mistral";
 
@@ -24,8 +24,7 @@ async function getMCPClient() {
   if (!mcpClient) {
     mcpClient = await createMCPClient({
       transport: new StreamableHTTPClientTransport(
-        new URL("http://localhost:2025/mcp")
-
+        new URL("https://mcp-hono.rushikeshpatil8208.workers.dev/mcp")
       ),
     });
     tools = await mcpClient.tools();
