@@ -1,247 +1,376 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { useSupabaseAuth } from "@/providers/supabase-auth-provider";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardContent,
-  CardFooter,
+  CardDescription,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import {
+  Loader2,
+  Save,
+  RefreshCw,
+  Sparkles,
+  Bot,
+  MessageSquare,
+  Thermometer,
+  CheckCircle2,
+  AlertCircle,
+  Settings,
+} from "lucide-react";
 
-// This component loads a config file from public (several fallback paths),
-// validates it's JSON (avoids parsing HTML 404 pages), shows editable fields,
-// and saves back via API or localStorage as a fallback.
+interface ProjectMetadata {
+  identity: string | null;
+  instructions: string | null;
+  tone: string | null;
+}
 
-const DEFAULT_CONFIG: any = {
-  Identity:
-    "KeyCron, an AI-powered eCommerce Agent designed to optimize the KeyCron app—a next-gen shopping platform blending personalization, real-time analytics, and conversational commerce.",
-  Instructions:
-    "Follow a hierarchical decision framework to fulfill the role: 1. Intent Detection: Parse user inputs to classify intent. 2. Response Strategy: Tailor responses based on intent type. 3. Personalization Engine: Merge collaborative and content-based filtering for real-time adjustments. 4. Conversion Optimization: Use micro-interactions, dynamic pricing, and post-purchase triggers. 5. Data Feedback Loop: Log interactions to update user profiles, inventory predictions, and A/B test results.",
-  Tone: "Friendly, tech-savvy, empathetic, and value-driven, with a focus on speed and personalization.",
-  Temperature: 0.7,
+interface ProjectData {
+  id: string;
+  name: string;
+  description: string | null;
+  metadata: ProjectMetadata | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const DEFAULT_CONFIG = {
+  identity: "",
+  instructions: "",
+  tone: "",
+  temperature: 0.7,
 };
 
 export default function AgentConfig() {
-  const [config, setConfig] = useState(null);
+  const params = useParams();
+  const { user } = useSupabaseAuth();
+  
+  const [projectData, setProjectData] = useState<ProjectData | null>(null);
+  const [identity, setIdentity] = useState("");
+  const [instructions, setInstructions] = useState("");
+  const [tone, setTone] = useState("");
+  const [temperature, setTemperature] = useState(0.7);
+  
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [savedMessage, setSavedMessage] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Try multiple public paths where config might live. This avoids 404 HTML parsing errors.
-  const possiblePaths = [
-    "/config/agentConfig.json",
-    "/agentConfig.json",
-    "/data/agentConfig.json",
-    "/config/agentProfile.json",
-    "/agentProfile.json",
-  ];
-
+  // Fetch project data from API
   useEffect(() => {
-    let mounted = true;
+    const fetchProjectData = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
-    async function tryLoad() {
-      setLoading(true);
-      setError(null);
-
-      // First check localStorage (user may have an edited config saved earlier)
       try {
-        const stored = localStorage.getItem("agentConfig");
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (mounted) setConfig(parsed);
+        setLoading(true);
+        setError(null);
+
+        // Get projectId from route params
+        const projectId = params?.id as string;
+        
+        if (!projectId) {
+          setError("No project ID found in URL");
           return;
         }
-      } catch (e) {
-        // ignore parse errors in localStorage
-        console.warn("Failed to parse local agentConfig from localStorage", e);
-      }
 
-      // Try fetching from the list of candidate paths
-      let lastError = null;
-      for (const p of possiblePaths) {
-        try {
-          const res = await fetch(p, {
-            headers: { Accept: "application/json" },
-          });
-
-          // If resource not found, continue to next
-          if (!res.ok) {
-            lastError = new Error(`HTTP ${res.status} for ${p}`);
-            continue;
-          }
-
-          // Check Content-Type first to avoid parsing HTML pages
-          const ct = res.headers.get("content-type") || "";
-          if (!ct.includes("application/json") && !ct.includes("text/json")) {
-            // it might still be JSON even if header missing; read text and detect
-            const text = await res.text();
-            // naive check if it looks like JSON
-            if (!text.trim().startsWith("{") && !text.trim().startsWith("[")) {
-              lastError = new Error(
-                `Non-JSON response at ${p}. Content-type: ${ct}`
-              );
-              continue;
-            }
-            try {
-              const json = JSON.parse(text);
-              if (mounted) setConfig(json);
-              return;
-            } catch (parseErr) {
-              lastError = parseErr;
-              continue;
-            }
-          }
-
-          // If content-type is JSON, parse normally
-          const data = await res.json();
-          if (mounted) setConfig(data);
-          return;
-        } catch (err) {
-          lastError = err;
-          continue; // try next path
+        // Fetch specific project
+        const response = await fetch(`/api/project/${projectId}`);
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to fetch project");
         }
+        
+        if (data.success && data.project) {
+          setProjectData(data.project);
+          
+          // Set form values from metadata
+          if (data.project.metadata) {
+            setIdentity(data.project.metadata.identity || "");
+            setInstructions(data.project.metadata.instructions || "");
+            setTone(data.project.metadata.tone || "");
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching project:", err);
+        setError(err instanceof Error ? err.message : "Failed to load project configuration");
+      } finally {
+        setLoading(false);
       }
+    };
 
-      // If none succeeded, fallback to default config and show warning
-      if (mounted) {
-        setConfig(DEFAULT_CONFIG);
-        setError(
-          `Failed to load config from public paths. Using default config. Last error: ${lastError?.message || "unknown"}`
-        );
-      }
+    fetchProjectData();
+  }, [user, params]);
 
-      setLoading(false);
+  const handleSave = async () => {
+    if (!projectData) {
+      setError("No project loaded");
+      return;
     }
 
-    tryLoad();
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  const handleChange = (key, value) => {
-    setConfig((prev) => ({ ...(prev || {}), [key]: value }));
-  };
-
-  // Save: first try API endpoint, fallback to localStorage
-  const handleSave = async () => {
-    setSavedMessage(null);
+    setIsSaving(true);
     setError(null);
+    setSuccessMessage(null);
+
     try {
-      // Attempt to POST to an API route (you should implement /api/agent/profile on the server)
-      const res = await fetch("/api/agent/profile", {
-        method: "POST",
+      const response = await fetch(`/api/project/${projectData.id}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(config),
+        body: JSON.stringify({
+          identity,
+          instructions,
+          tone,
+        }),
       });
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`API save failed: ${res.status} ${text}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to save configuration");
       }
 
-      setSavedMessage("Saved to server configuration (API).");
-      // also persist locally
-      localStorage.setItem("agentConfig", JSON.stringify(config));
-    } catch (apiErr) {
-      console.warn("API save failed, falling back to localStorage:", apiErr);
-      try {
-        localStorage.setItem("agentConfig", JSON.stringify(config));
-        setSavedMessage("Saved to localStorage (fallback).");
-      } catch (lsErr) {
-        setError(`Failed to save config: ${lsErr.message}`);
+      setSuccessMessage("Configuration saved successfully!");
+      
+      // Update local project data
+      if (data.project) {
+        setProjectData(data.project);
       }
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      console.error("Error saving configuration:", err);
+      setError(err instanceof Error ? err.message : "Failed to save configuration");
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  if (loading && !config)
+  const handleReset = () => {
+    if (projectData?.metadata) {
+      setIdentity(projectData.metadata.identity || "");
+      setInstructions(projectData.metadata.instructions || "");
+      setTone(projectData.metadata.tone || "");
+    } else {
+      setIdentity("");
+      setInstructions("");
+      setTone("");
+    }
+    setTemperature(0.7);
+    setError(null);
+    setSuccessMessage(null);
+  };
+
+  if (loading) {
     return (
-      <Card className="w-full max-w-xl border-none bg-transparent shadow-none">
-        <CardContent className="px-0 py-12 text-center text-muted-foreground">
-          Loading configuration…
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      </div>
     );
+  }
+
+  if (!user) {
+    return (
+      <div className="rounded-2xl border border-slate-800/60 bg-slate-900/80 p-6 text-center">
+        <AlertCircle className="mx-auto h-12 w-12 text-slate-400 mb-3" />
+        <p className="text-slate-400">Please sign in to configure your agent</p>
+      </div>
+    );
+  }
+
+  if (error && !projectData) {
+    return (
+      <div className="rounded-2xl border border-red-900/50 bg-red-950/30 p-6 text-center">
+        <AlertCircle className="mx-auto h-12 w-12 text-red-400 mb-3" />
+        <p className="text-red-400 text-sm">{error}</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6">
-      <Card>
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-xl font-semibold">Agent Configuration</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Define the identity, instructions, and behaviour for this agent.
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {error && (
-            <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-              ⚠️ {error}
-            </div>
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500">
+            <Settings className="h-4 w-4 text-white" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-slate-50">Agent Configuration</h3>
+            <p className="text-xs text-slate-400">
+              {projectData?.name || "No project selected"}
+            </p>
+          </div>
+        </div>
+        <Badge className="border-blue-500/50 bg-blue-500/10 text-blue-400 text-xs px-2 py-0.5">
+          <Bot className="h-3 w-3 mr-1" />
+          Active
+        </Badge>
+      </div>
+
+      <Separator className="bg-slate-800/60" />
+
+      {/* Status Messages */}
+      {successMessage && (
+        <div className="rounded-lg border border-emerald-500/50 bg-emerald-500/10 p-3 flex items-center gap-2">
+          <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+          <p className="text-xs text-emerald-400">{successMessage}</p>
+        </div>
+      )}
+
+      {error && (
+        <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-3 flex items-center gap-2">
+          <AlertCircle className="h-4 w-4 text-red-400 flex-shrink-0" />
+          <p className="text-xs text-red-400">{error}</p>
+        </div>
+      )}
+
+      {/* Configuration Form */}
+      <div className="space-y-4">
+        {/* Identity */}
+        <div className="space-y-2">
+          <Label htmlFor="identity" className="text-xs text-slate-300 flex items-center gap-1.5">
+            <Sparkles className="h-3 w-3 text-blue-400" />
+            Agent Identity
+          </Label>
+          <Textarea
+            id="identity"
+            value={identity}
+            onChange={(e) => setIdentity(e.target.value)}
+            placeholder="e.g., Helpful customer service assistant"
+            className="bg-slate-950 border-slate-700 text-white text-sm min-h-[60px] resize-none"
+            rows={2}
+          />
+        </div>
+
+        {/* Tone */}
+        <div className="space-y-2">
+          <Label htmlFor="tone" className="text-xs text-slate-300 flex items-center gap-1.5">
+            <MessageSquare className="h-3 w-3 text-blue-400" />
+            Tone
+          </Label>
+          <Input
+            id="tone"
+            value={tone}
+            onChange={(e) => setTone(e.target.value)}
+            placeholder="e.g., Professional and friendly"
+            className="bg-slate-950 border-slate-700 text-white text-sm h-9"
+          />
+        </div>
+
+        {/* Instructions */}
+        <div className="space-y-2">
+          <Label htmlFor="instructions" className="text-xs text-slate-300 flex items-center gap-1.5">
+            <Bot className="h-3 w-3 text-blue-400" />
+            Instructions
+          </Label>
+          <Textarea
+            id="instructions"
+            value={instructions}
+            onChange={(e) => setInstructions(e.target.value)}
+            placeholder="Specific instructions for the agent..."
+            className="bg-slate-950 border-slate-700 text-white text-sm min-h-[100px] resize-none"
+            rows={4}
+          />
+        </div>
+
+        {/* Temperature */}
+        <div className="space-y-2">
+          <Label htmlFor="temperature" className="text-xs text-slate-300 flex items-center gap-1.5">
+            <Thermometer className="h-3 w-3 text-blue-400" />
+            Temperature
+          </Label>
+          <div className="flex items-center gap-3">
+            <Slider
+              id="temperature"
+              min={0}
+              max={1}
+              step={0.01}
+              value={[temperature]}
+              onValueChange={(val) => setTemperature(val[0])}
+              className="flex-1"
+            />
+            <span className="w-12 text-center text-xs font-semibold text-slate-200 bg-slate-900/80 border border-slate-700 rounded px-2 py-1">
+              {temperature.toFixed(2)}
+            </span>
+          </div>
+          <p className="text-xs text-slate-500">Higher values make output more random</p>
+        </div>
+      </div>
+
+      <Separator className="bg-slate-800/60" />
+
+      {/* Action Buttons */}
+      <div className="flex gap-2">
+        <Button
+          onClick={handleReset}
+          variant="outline"
+          size="sm"
+          className="flex-1 h-8 text-xs border-slate-700 bg-slate-950 text-white hover:bg-slate-800"
+        >
+          <RefreshCw className="h-3 w-3 mr-1.5" />
+          Reset
+        </Button>
+        <Button
+          onClick={handleSave}
+          disabled={isSaving || !projectData}
+          size="sm"
+          className="flex-1 h-8 text-xs bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white shadow-lg shadow-blue-500/30"
+        >
+          {isSaving ? (
+            <>
+              <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            <>
+              <Save className="h-3 w-3 mr-1.5" />
+              Save Config
+            </>
           )}
+        </Button>
+      </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="identity">Identity</Label>
-            <Textarea
-              id="identity"
-              value={config?.Identity || ""}
-              onChange={(e) => handleChange("Identity", e.target.value)}
-              rows={3}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="instructions">Instructions</Label>
-            <Textarea
-              id="instructions"
-              value={config?.Instructions || ""}
-              onChange={(e) => handleChange("Instructions", e.target.value)}
-              rows={6}
-            />
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="tone">Tone</Label>
-              <Input
-                id="tone"
-                value={config?.Tone || ""}
-                onChange={(e) => handleChange("Tone", e.target.value)}
-              />
+      {/* Project Info */}
+      {projectData && (
+        <div className="rounded-lg border border-slate-800/60 bg-slate-900/40 p-3 space-y-2">
+          <p className="text-xs font-medium text-slate-300">Project Details</p>
+          <div className="space-y-1 text-xs text-slate-400">
+            <div className="flex justify-between">
+              <span>Name:</span>
+              <span className="text-slate-300">{projectData.name}</span>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="temperature">Temperature</Label>
-              <div className="flex items-center gap-3">
-                <Slider
-                  id="temperature"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={[Number((config?.Temperature ?? 0.7).toFixed(2))]}
-                  onValueChange={(val) =>
-                    handleChange("Temperature", Number(val[0]))
-                  }
-                />
-                <span className="w-12 text-center text-sm font-semibold">
-                  {(config?.Temperature ?? 0.7).toFixed(2)}
+            {projectData.description && (
+              <div className="flex justify-between">
+                <span>Description:</span>
+                <span className="text-slate-300 truncate max-w-[150px]" title={projectData.description}>
+                  {projectData.description}
                 </span>
               </div>
+            )}
+            <div className="flex justify-between">
+              <span>Last Updated:</span>
+              <span className="text-slate-300">
+                {new Date(projectData.updatedAt).toLocaleDateString()}
+              </span>
             </div>
           </div>
-        </CardContent>
-        <CardFooter className="flex items-center justify-between gap-4">
-          <div className="text-sm text-muted-foreground">
-            {savedMessage ? savedMessage : "Changes are auto-saved locally."}
-          </div>
-          <Button onClick={handleSave}>Save Configuration</Button>
-        </CardFooter>
-      </Card>
+        </div>
+      )}
     </div>
   );
 }
