@@ -376,7 +376,7 @@ export default function DashboardPage() {
                   </div>
                   
                   {/* Messages Area */}
-                  <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+                  <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 min-h-0">
                     {messages.length === 0 ? (
                       <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800/60 bg-slate-900/40 p-10 text-center">
                         <div className="inline-flex p-4 rounded-xl bg-slate-800/50 mb-4">
