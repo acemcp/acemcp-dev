@@ -21,24 +21,37 @@ export async function POST(req: Request) {
       );
     }
 
-    // Upsert user (create if doesn't exist, update if exists)
-    const prismaUser = await prisma.user.upsert({
+    // Check if user already exists
+    let prismaUser = await prisma.user.findUnique({
       where: { id: user.id },
-      update: {
-        email: user.email,
-        name: user.user_metadata?.full_name || user.user_metadata?.name || null,
-        image: user.user_metadata?.avatar_url || null,
-        emailVerified: user.email_confirmed_at ? new Date(user.email_confirmed_at) : null,
-      },
-      create: {
-        id: user.id,
-        email: user.email,
-        name: user.user_metadata?.full_name || user.user_metadata?.name || null,
-        image: user.user_metadata?.avatar_url || null,
-        emailVerified: user.email_confirmed_at ? new Date(user.email_confirmed_at) : null,
-      },
       include: { accounts: true }
     });
+
+    if (prismaUser) {
+      // Update existing user
+      prismaUser = await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          email: user.email,
+          name: user.user_metadata?.full_name || user.user_metadata?.name || null,
+          image: user.user_metadata?.avatar_url || null,
+          emailVerified: user.email_confirmed_at ? new Date(user.email_confirmed_at) : null,
+        },
+        include: { accounts: true }
+      });
+    } else {
+      // Create new user with Supabase ID
+      prismaUser = await prisma.user.create({
+        data: {
+          id: user.id,
+          email: user.email,
+          name: user.user_metadata?.full_name || user.user_metadata?.name || null,
+          image: user.user_metadata?.avatar_url || null,
+          emailVerified: user.email_confirmed_at ? new Date(user.email_confirmed_at) : null,
+        },
+        include: { accounts: true }
+      });
+    }
 
     // Handle OAuth account linking
     if (user.app_metadata?.provider && user.app_metadata?.provider !== 'email') {

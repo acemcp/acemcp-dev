@@ -2,70 +2,103 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
-import { useSupabaseAuth } from '@/providers/supabase-auth-provider';
+import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 
 function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { session } = useSupabaseAuth();
-  const [isChecking, setIsChecking] = useState(true);
-  const [hasRedirected, setHasRedirected] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const checkUserAndRedirect = async () => {
-      // Prevent multiple redirects
-      if (hasRedirected) return;
-
-      if (session) {
-        try {
-          setHasRedirected(true);
-
-          // Sync user to database
-          await fetch('/api/user/sync', { method: 'POST' });
-
-          const redirectTo = searchParams.get('redirectTo');
-          const prompt = searchParams.get('prompt');
-
-          // Build redirect URL with prompt if available
-          let redirectUrl = redirectTo || '/landing';
-
-          if (prompt) {
-            const separator = redirectUrl.includes('?') ? '&' : '?';
-            redirectUrl = `${redirectUrl}${separator}prompt=${encodeURIComponent(prompt)}`;
+    const handleAuthCallback = async () => {
+      try {
+        const supabase = getSupabaseBrowserClient();
+        
+        // Exchange the code for a session (handles OAuth callbacks)
+        const code = searchParams.get('code');
+        
+        if (code) {
+          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+          
+          if (exchangeError) {
+            console.error('Error exchanging code for session:', exchangeError);
+            setError(exchangeError.message);
+            // Redirect to authentication page with error
+            setTimeout(() => {
+              router.replace('/authentication?error=auth_failed');
+            }, 2000);
+            return;
           }
 
-          // Small delay to ensure state is settled before redirect
-          await new Promise(resolve => setTimeout(resolve, 100));
-
-          // Redirect to landing page (or specified redirectTo) with prompt
-          router.replace(redirectUrl);
-        } catch (error) {
-          console.error('Error syncing user:', error);
-          router.replace('/landing');
-        } finally {
-          setIsChecking(false);
+          if (!data.session) {
+            setError('No session created');
+            setTimeout(() => {
+              router.replace('/authentication?error=no_session');
+            }, 2000);
+            return;
+          }
         }
+
+        // Verify we have a valid session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError || !session) {
+          console.error('No valid session found:', sessionError);
+          setError('Authentication failed');
+          setTimeout(() => {
+            router.replace('/authentication?error=invalid_session');
+          }, 2000);
+          return;
+        }
+
+        // Sync user to database
+        try {
+          await fetch('/api/user/sync', { method: 'POST' });
+        } catch (syncError) {
+          console.error('Error syncing user:', syncError);
+          // Continue anyway - user is authenticated
+        }
+
+        // Get redirect parameters
+        const redirectTo = searchParams.get('redirectTo');
+        const prompt = searchParams.get('prompt');
+
+        // Build redirect URL
+        let redirectUrl = redirectTo || '/landing';
+
+        if (prompt) {
+          const separator = redirectUrl.includes('?') ? '&' : '?';
+          redirectUrl = `${redirectUrl}${separator}prompt=${encodeURIComponent(prompt)}`;
+        }
+
+        // Redirect to destination
+        router.replace(redirectUrl);
+        
+      } catch (error) {
+        console.error('Unexpected error in auth callback:', error);
+        setError('An unexpected error occurred');
+        setTimeout(() => {
+          router.replace('/authentication?error=unexpected');
+        }, 2000);
       }
     };
 
-    // Only run after initial loading is complete
-    if (!isChecking) {
-      checkUserAndRedirect();
-    } else {
-      // Set a timeout to finish checking
-      const timeout = setTimeout(() => {
-        setIsChecking(false);
-      }, 3000);
-
-      return () => clearTimeout(timeout);
-    }
-  }, [session, hasRedirected, isChecking, router, searchParams]);
+    handleAuthCallback();
+  }, [router, searchParams]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black text-white">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
       <div className="text-center">
         <div className="mb-4 animate-spin rounded-full border-4 border-blue-400 border-t-transparent h-12 w-12 mx-auto" />
-        <p>Completing sign in...</p>
+        {error ? (
+          <div>
+            <p className="text-red-400 mb-2">Authentication Error</p>
+            <p className="text-sm text-slate-400">{error}</p>
+            <p className="text-xs text-slate-500 mt-2">Redirecting...</p>
+          </div>
+        ) : (
+          <p className="text-slate-300">Completing sign in...</p>
+        )}
       </div>
     </div>
   );
