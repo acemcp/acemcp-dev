@@ -2,11 +2,11 @@ import {
   StreamTextResult,
   UIMessage,
   convertToModelMessages,
-  experimental_createMCPClient as createMCPClient,
   hasToolCall,
   stepCountIs,
   streamText,
 } from "ai";
+import { experimental_createMCPClient as createMCPClient } from "@ai-sdk/mcp";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { createMistral } from "@ai-sdk/mistral";
 
@@ -14,19 +14,29 @@ const mistral = createMistral({
   apiKey: "cAdRTLCViAHCn0ddFFEe50ULu04MbUvZ",
 });
 
-// Connect to the existing MCP server running on port 2025
-const mcpClient = await createMCPClient({
-  transport: new StreamableHTTPClientTransport(
-    new URL("http://localhost:2025/mcp")
-  ),
-});
+// Lazy initialization to avoid connecting during build time
+let mcpClient: any = null;
+let tools: any = null;
 
-export const tools = await mcpClient.tools();
-console.log("Connected to MCP server with tools:", tools);
+
+
+async function getMCPClient() {
+  if (!mcpClient) {
+    mcpClient = await createMCPClient({
+      transport: new StreamableHTTPClientTransport(
+        new URL("https://mcp-hono.rushikeshpatil8208.workers.dev/mcp")
+      ),
+    });
+    tools = await mcpClient.tools();
+    console.log("Connected to MCP server with tools:", tools);
+  }
+  return { mcpClient, tools };
+}
 
 export const maxDuration = 30;
 
 export async function GET() {
+  const { tools } = await getMCPClient();
   return Response.json(tools);
 }
 
@@ -34,6 +44,8 @@ export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
 
   try {
+    const { tools } = await getMCPClient();
+    
     const result: StreamTextResult<any, any> = streamText({
       system: "You are a helpful assistant with access to mcp tools",
       model: mistral("mistral-large-latest"),
