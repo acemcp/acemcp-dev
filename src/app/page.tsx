@@ -83,12 +83,39 @@ export default function DashboardPage() {
   const [selectedModel, setSelectedModel] = useState("GPT-4 Turbo");
   const [showModelDropdown, setShowModelDropdown] = useState(false);
   const [isWorkflowViewOpen, setIsWorkflowViewOpen] = useState(true);
+  const [isRedirecting, setIsRedirecting] = useState(true);
 
-  // Check authentication on mount
+  // Redirect to user's project or landing page
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/authentication?redirectTo=/");
-    }
+    const redirectToProject = async () => {
+      if (authLoading) return;
+      
+      if (!user) {
+        router.push("/authentication?redirectTo=/");
+        return;
+      }
+
+      try {
+        // Fetch user's projects
+        const response = await fetch("/api/user/projects");
+        const data = await response.json();
+        
+        if (data.success && data.projects && data.projects.length > 0) {
+          // Redirect to the most recent project
+          const latestProject = data.projects[0];
+          router.push(`/project/${latestProject.id}`);
+        } else {
+          // No projects found, redirect to landing
+          router.push("/landing");
+        }
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+        // On error, redirect to landing
+        router.push("/landing");
+      }
+    };
+
+    redirectToProject();
   }, [user, authLoading, router]);
 
   const modelConfigs = {

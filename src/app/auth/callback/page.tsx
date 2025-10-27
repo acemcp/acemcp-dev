@@ -9,11 +9,17 @@ function AuthCallbackContent() {
   const searchParams = useSearchParams();
   const { session } = useSupabaseAuth();
   const [isChecking, setIsChecking] = useState(true);
+  const [hasRedirected, setHasRedirected] = useState(false);
 
   useEffect(() => {
     const checkUserAndRedirect = async () => {
+      // Prevent multiple redirects
+      if (hasRedirected) return;
+      
       if (session) {
         try {
+          setHasRedirected(true);
+          
           // Sync user to database
           await fetch('/api/user/sync', { method: 'POST' });
           
@@ -22,24 +28,38 @@ function AuthCallbackContent() {
           
           // Build redirect URL with prompt if available
           let redirectUrl = redirectTo || '/landing';
+          console.log("redirectUrl", redirectUrl);
           if (prompt) {
             const separator = redirectUrl.includes('?') ? '&' : '?';
             redirectUrl = `${redirectUrl}${separator}prompt=${encodeURIComponent(prompt)}`;
           }
           
+          // Small delay to ensure state is settled before redirect
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
           // Redirect to landing page (or specified redirectTo) with prompt
-          router.push(redirectUrl);
+          router.replace(redirectUrl);
         } catch (error) {
           console.error('Error syncing user:', error);
-          router.push('/landing');
+          router.replace('/landing');
         } finally {
           setIsChecking(false);
         }
       }
     };
 
-    checkUserAndRedirect();
-  }, [session, router, searchParams]);
+    // Only run after initial loading is complete
+    if (!isChecking) {
+      checkUserAndRedirect();
+    } else {
+      // Set a timeout to finish checking
+      const timeout = setTimeout(() => {
+        setIsChecking(false);
+      }, 3000);
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [session, hasRedirected, isChecking, router, searchParams]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-black text-white">
