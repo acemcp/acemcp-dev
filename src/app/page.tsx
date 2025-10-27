@@ -34,6 +34,7 @@ import { cn } from "@/lib/utils";
 import MCPCard from "../../generativeUI/mcpConfigUI";
 import AgentPreview from "../../generativeUI/AgentPreview";
 import AgentConfig from "../../generativeUI/agnetConfig";
+import InputDemo from "../../generativeUI/InputDemo";
 
 type Tool = {
   name: string;
@@ -368,7 +369,7 @@ export default function DashboardPage() {
               className={cn(
                 "grid gap-4 h-[calc(100vh-140px)] transition-[grid-template-columns] duration-500 ease-in-out",
                 isWorkflowViewOpen
-                  ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_360px]" // 3 columns (default)
+                  ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_380px]" // 3 columns (default)
                   : "lg:grid-cols-[minmax(0,1.2fr)_0.5fr]" // 2 columns (chat + config)
               )}
             >
@@ -377,268 +378,44 @@ export default function DashboardPage() {
                 <div className="flex flex-col h-full rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-950/90 to-slate-900/80 shadow-2xl shadow-slate-950/60 backdrop-blur overflow-hidden">
                   {/* Header */}
                   <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/60">
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <span className="inline-flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-bold text-white">
-                          A
-                        </span>
-                        <span className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full bg-emerald-400 border-2 border-slate-950"></span>
-                      </div>
-                      <div>
-                        <h2 className="text-base font-semibold text-slate-50">
-                          Akron AI
-                        </h2>
-                        <p className="text-xs text-slate-400">
-                          Active • {selectedModel}
-                        </p>
-                      </div>
+                    <div>
+                      <h3 className="text-base font-semibold text-slate-50">
+                        Chat
+                      </h3>
+                      <p className="text-xs text-slate-400">
+                        Converse with your agent
+                      </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="rounded-full border border-slate-800/60 bg-slate-900/80 px-3 py-1 text-xs text-slate-300">
-                        {tokensUsed} / 4K
-                      </div>
 
-                      <Button
-                        size="sm"
-                        className="rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white h-7 w-7 p-0 flex items-center justify-center shadow-lg shadow-blue-500/30 hover:shadow-blue-500/60 hover:border hover:border-white/50 transition-all duration-300"
-                      >
-                        <Plus className="size-3" />
-                      </Button>
-
-                      {/* Sidebar toggle button */}
-                      <Button
-                        size="sm"
-                        onClick={() =>
-                          setIsWorkflowViewOpen(!isWorkflowViewOpen)
-                        }
-                        className="rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-300 hover:text-white hover:bg-blue-500/30 hover:shadow-lg hover:shadow-blue-500/50 hover:border-white/50 transition-all duration-300 h-7 w-7 p-0 flex items-center justify-center"
-                        title={
-                          isWorkflowViewOpen
-                            ? "Collapse Workflow View"
-                            : "Expand Workflow View"
-                        }
-                      >
-                        {isWorkflowViewOpen ? (
-                          <ChevronRight className="size-3.5" />
-                        ) : (
-                          <ChevronLeft className="size-3.5" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Messages Area */}
-                  <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-                    {messages.length === 0 ? (
-                      <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800/60 bg-slate-900/40 p-10 text-center">
-                        <div className="inline-flex p-4 rounded-xl bg-slate-800/50 mb-4">
-                          <Sparkles className="size-8 text-slate-400" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-slate-50 mb-2">
-                          Welcome to Akron AI
-                        </h3>
-                        <p className="max-w-sm text-sm text-slate-400 leading-relaxed">
-                          Start a conversation with your AI assistant. Describe
-                          workflows, ask questions, or explore MCP capabilities.
-                        </p>
-                      </div>
-                    ) : (
-                      messages.map((message) => (
-                        <div
-                          key={message.id}
-                          className={cn(
-                            "flex w-full",
-                            message.role === "user"
-                              ? "justify-end"
-                              : "justify-start"
-                          )}
-                        >
-                          <div
-                            className={cn(
-                              "max-w-[85%] space-y-2 rounded-2xl px-4 py-3 text-sm leading-relaxed",
-                              message.role === "user"
-                                ? "bg-blue-600 text-white"
-                                : "bg-slate-900/80 border border-slate-800/60 text-slate-200"
-                            )}
-                          >
-                            <div className="text-xs font-medium text-slate-400">
-                              {message.role === "assistant"
-                                ? "Akron AI"
-                                : "You"}
-                            </div>
-                            {message.parts?.map((part, index) => {
-                              if (part.type === "text") {
-                                return (
-                                  <p key={`${message.id}-text-${index}`}>
-                                    {part.text}
-                                  </p>
-                                );
-                              }
-                              if (isToolUIPart(part)) {
-                                const toolName = getToolName(part);
-                                const toolCallId = part.toolCallId;
-                                if (
-                                  toolName === "gatherMcpInformation" &&
-                                  part.state === "input-available"
-                                ) {
-                                  return (
-                                    <div
-                                      key={toolCallId}
-                                      className="rounded-2xl border border-blue-500/30 bg-slate-900/80 p-4 text-slate-200"
-                                    >
-                                      <p className="text-sm font-medium text-slate-100">
-                                        Provide MCP configuration
-                                      </p>
-                                      <p className="mt-1 text-xs text-slate-400">
-                                        Upload OpenAPI spec or connect an
-                                        existing server.
-                                      </p>
-                                      <div className="mt-4">
-                                        <MCPCard
-                                          handelSubmit={async () => {
-                                            await addToolResult({
-                                              toolCallId,
-                                              tool: toolName,
-                                              output:
-                                                "Submitted MCP configuration",
-                                            });
-                                          }}
-                                        />
-                                      </div>
-                                    </div>
-                                  );
-                                }
-                              }
-                              return null;
-                            })}
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-
-                  {/* Input Area */}
-                  <div className="px-4 pb-4 space-y-3">
-                    {/* Model Selection Dropdown */}
-                    <div className="relative">
-                      <button
-                        type="button"
-                        onClick={() => setShowModelDropdown(!showModelDropdown)}
-                        className="flex items-center justify-between w-full px-3 py-2 text-xs rounded-lg border border-slate-800/60 bg-slate-900/80 text-slate-300 hover:bg-slate-800/80 transition-colors"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Bot className="size-3.5" />
-                          <span className="font-medium">{selectedModel}</span>
-                          <span className="text-slate-500">•</span>
-                          <span className="text-slate-500">
-                            Temp:{" "}
-                            {
-                              modelConfigs[
-                                selectedModel as keyof typeof modelConfigs
-                              ].temperature
-                            }
-                          </span>
-                          <span className="text-slate-500">•</span>
-                          <span className="text-slate-500">
-                            Tokens:{" "}
-                            {
-                              modelConfigs[
-                                selectedModel as keyof typeof modelConfigs
-                              ].maxTokens
-                            }
-                          </span>
-                        </div>
-                        <ChevronDown
-                          className={cn(
-                            "size-3.5 transition-transform",
-                            showModelDropdown && "rotate-180"
-                          )}
-                        />
-                      </button>
-
-                      {showModelDropdown && (
-                        <div className="absolute bottom-full left-0 right-0 mb-2 rounded-lg border border-slate-800/60 bg-slate-900 shadow-xl z-50 overflow-hidden">
-                          {Object.entries(modelConfigs).map(
-                            ([model, config]) => (
-                              <button
-                                key={model}
-                                type="button"
-                                onClick={() => {
-                                  setSelectedModel(model);
-                                  setShowModelDropdown(false);
-                                }}
-                                className={cn(
-                                  "w-full px-4 py-3 text-left hover:bg-slate-800/80 transition-colors border-b border-slate-800/60 last:border-b-0",
-                                  selectedModel === model && "bg-slate-800/60"
-                                )}
-                              >
-                                <div className="flex items-center justify-between mb-1">
-                                  <span className="text-sm font-medium text-slate-200">
-                                    {model}
-                                  </span>
-                                  {selectedModel === model && (
-                                    <span className="text-xs text-blue-400">
-                                      ✓ Selected
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-3 text-xs text-slate-500">
-                                  <span>Temp: {config.temperature}</span>
-                                  <span>•</span>
-                                  <span>Max Tokens: {config.maxTokens}</span>
-                                  <span>•</span>
-                                  <span>Response: {config.responseTime}</span>
-                                </div>
-                              </button>
-                            )
-                          )}
-                        </div>
+                    {/* Sidebar toggle button — already wired to Workflow View */}
+                    <Button
+                      size="sm"
+                      onClick={() => setIsWorkflowViewOpen(!isWorkflowViewOpen)}
+                      className="rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-300 hover:text-white hover:bg-blue-500/30 hover:shadow-lg hover:shadow-blue-500/50 hover:border-white/50 transition-all duration-300 h-7 w-7 p-0 flex items-center justify-center"
+                      title={
+                        isWorkflowViewOpen
+                          ? "Collapse Workflow View"
+                          : "Expand Workflow View"
+                      }
+                    >
+                      {isWorkflowViewOpen ? (
+                        <ChevronRight className="size-3.5" />
+                      ) : (
+                        <ChevronLeft className="size-3.5" />
                       )}
-                    </div>
+                    </Button>
+                  </div>
 
-                    {/* Input Box */}
-                    <form onSubmit={handleSubmit}>
-                      <div className="relative flex items-center gap-2 rounded-lg border border-slate-800/60 bg-slate-900/80 px-4 py-3 shadow-sm">
-                        <Textarea
-                          value={input}
-                          onChange={(event) => setInput(event.target.value)}
-                          placeholder="Ask anything (Ctrl+L)"
-                          className="flex-1 bg-transparent border-none text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-0 resize-none min-h-[24px] max-h-[120px] p-0"
-                          rows={1}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" && !e.shiftKey) {
-                              e.preventDefault();
-                              handleSubmit(e as any);
-                            }
-                          }}
-                        />
-                        <Button
-                          type="submit"
-                          size="sm"
-                          className="rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white h-8 w-8 p-0 flex items-center justify-center shadow-lg shadow-blue-500/30 hover:shadow-blue-500/60 hover:border hover:border-white/50 transition-all duration-300"
-                        >
-                          <svg
-                            className="size-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 10l7-7m0 0l7 7m-7-7v18"
-                            />
-                          </svg>
-                        </Button>
-                      </div>
-                    </form>
+                  {/* Main chat content area */}
+                  <div className="flex flex-col flex-1 overflow-hidden">
+                    <InputDemo /> {/* <— The PromptInput-based chat UI */}
                   </div>
                 </div>
               </section>
+
               {/* Workflow View Section - Increased Size */}
               {isWorkflowViewOpen && (
-                <section className="flex flex-col h-full transition-all duration-500 ease-in-out">
+                <section className="flex flex-col h-full transition-all duration-700 ease-in-out">
                   <div className="flex flex-col h-full rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-950/90 to-slate-900/80 shadow-2xl shadow-slate-950/60 backdrop-blur overflow-hidden">
                     <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/60">
                       <div>
@@ -665,7 +442,7 @@ export default function DashboardPage() {
               )}
               {/* Agent Configuration Section */}
               {/* {isAgentSidebarOpen && ( */}
-              <aside className="flex flex-col flex-1 h-full transition-all duration-500 ease-in-out">
+              <aside className="flex flex-col flex-1 h-full transition-all duration-700 ease-in-out">
                 <div className="flex flex-col flex-1 rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-950/90 to-slate-900/80 shadow-2xl shadow-slate-950/60 backdrop-blur p-6 overflow-y-auto">
                   <AgentConfig />
                 </div>
