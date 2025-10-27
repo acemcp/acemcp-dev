@@ -15,28 +15,28 @@ function AuthCallbackContent() {
     const checkUserAndRedirect = async () => {
       // Prevent multiple redirects
       if (hasRedirected) return;
-      
+
       if (session) {
         try {
           setHasRedirected(true);
-          
+
           // Sync user to database
           await fetch('/api/user/sync', { method: 'POST' });
-          
+
           const redirectTo = searchParams.get('redirectTo');
           const prompt = searchParams.get('prompt');
-          
+
           // Build redirect URL with prompt if available
           let redirectUrl = redirectTo || '/landing';
-          console.log("redirectUrl", redirectUrl);
+
           if (prompt) {
             const separator = redirectUrl.includes('?') ? '&' : '?';
             redirectUrl = `${redirectUrl}${separator}prompt=${encodeURIComponent(prompt)}`;
           }
-          
+
           // Small delay to ensure state is settled before redirect
           await new Promise(resolve => setTimeout(resolve, 100));
-          
+
           // Redirect to landing page (or specified redirectTo) with prompt
           router.replace(redirectUrl);
         } catch (error) {
@@ -56,7 +56,7 @@ function AuthCallbackContent() {
       const timeout = setTimeout(() => {
         setIsChecking(false);
       }, 3000);
-      
+
       return () => clearTimeout(timeout);
     }
   }, [session, hasRedirected, isChecking, router, searchParams]);

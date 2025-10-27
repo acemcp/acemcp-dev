@@ -78,8 +78,6 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
   const { id: projectId } = React.use(params);
 
 
-  console.log("projectId", projectId);
-
   const [activeTab, setActiveTab] = useState<TabKey>("chat");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isWorkflowViewOpen, setIsWorkflowViewOpen] = useState(true);

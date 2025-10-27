@@ -40,8 +40,8 @@ export function MCPProvider({ children }: { children: ReactNode }) {
 
   const [promptMetadata, setPromptMetadata] = useState();
 
-  console.log("mcpConfig", mcpConfig);
-  
+
+
 
   const setFile = (file: File | null) => {
     setMcpConfig(prev => ({

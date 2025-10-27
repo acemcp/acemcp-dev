@@ -242,7 +242,7 @@ function LandingContent() {
     }
   }, [searchParams]);
 
-const handleGenerate = async () => {
+  const handleGenerate = async () => {
     //call the api
     if (!prompt.trim()) return;
     if (!session) {
@@ -269,9 +269,9 @@ const handleGenerate = async () => {
       }),
     });
     const data = await CreateprojectResponse.json();
-    console.log("data", data);
+
     const { project: { id } } = data;
-    console.log("project id ", id);
+
     const postData = {
       text: prompt,
       projectId: id
@@ -279,9 +279,9 @@ const handleGenerate = async () => {
     await axios.post('https://acemcp-service.rushikeshpatil8208.workers.dev/template', postData).then(res => {
       let { projectMetadata } = res.data
       setPromptMetadata(projectMetadata[0])
-      console.log("res", res);
+
     }).catch(err => {
-      console.log("err", err);
+
     }).finally(() => {
       setIsGenerating(false);
     });
@@ -295,10 +295,7 @@ const handleGenerate = async () => {
 
     // router.push(`/onboarding?${params.toString()}`);
   };
-  
-  useEffect(() => {
-    console.log("promtMetadata", promptMetadata);
-  }, [promptMetadata])  
+
 
   const handlePrimaryCta = () => {
     if (session) {
@@ -491,7 +488,7 @@ const handleGenerate = async () => {
             </div>
           </div>
 
-          
+
 
           <section className="mt-32">
             <div className="flex flex-col items-center text-center">
@@ -563,19 +560,17 @@ const handleGenerate = async () => {
                         key={stage.title}
                         type="button"
                         onMouseEnter={() => setActiveStage(index)}
-                        className={`group flex w-full items-center justify-between rounded-2xl border px-5 py-4 text-left transition-all duration-500 ${
-                          isActive
+                        className={`group flex w-full items-center justify-between rounded-2xl border px-5 py-4 text-left transition-all duration-500 ${isActive
                             ? "border-blue-400/70 bg-blue-500/10 shadow-[0_30px_100px_-60px_rgba(59,130,246,0.9)]"
                             : "border-white/10 bg-white/5 hover:border-blue-400/40 hover:bg-blue-500/10"
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center gap-4">
                           <div
-                            className={`flex size-11 items-center justify-center rounded-xl transition-all duration-500 ${
-                              isActive
+                            className={`flex size-11 items-center justify-center rounded-xl transition-all duration-500 ${isActive
                                 ? "bg-gradient-to-br from-blue-500 via-sky-500 to-cyan-500 text-white"
                                 : "bg-white/10 text-white/70"
-                            }`}
+                              }`}
                           >
                             <stage.icon className="h-5 w-5" />
                           </div>
@@ -721,7 +716,7 @@ const handleGenerate = async () => {
                 </Badge>
                 <h2 className="text-4xl font-bold text-white sm:text-5xl">
                   Start building your agent today
-</h2>
+                </h2>
                 <p className="mt-4 max-w-2xl text-lg text-white/70">
                   Join teams shipping production AI agents with enterprise-grade infrastructure and security.
                 </p>

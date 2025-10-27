@@ -28,7 +28,7 @@ async function getMCPClient() {
       ),
     });
     tools = await mcpClient.tools();
-    console.log("Connected to MCP server with tools:", tools);
+
   }
   return { mcpClient, tools };
 }
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
 
   try {
     const { tools } = await getMCPClient();
-    
+
     const result: StreamTextResult<any, any> = streamText({
       system: "You are a helpful assistant with access to mcp tools",
       model: mistral("mistral-large-latest"),

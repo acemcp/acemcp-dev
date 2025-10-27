@@ -215,13 +215,7 @@ Always use tools in sequence: generate -> analyze -> preview. Do not skip steps.
 
           return undefined;
         },
-        onStepFinish: async (stepResult) => {
-          console.log(`Advanced Agent Loop Step ${stepResult.stepNumber} finished:`, {
-            text: stepResult.text,
-            toolCalls: stepResult.toolCalls.length,
-            finishReason: stepResult.finishReason,
-          });
-        },
+
       });
 
       writer.merge(result.toUIMessageStream({ originalMessages: messages }));

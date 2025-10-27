@@ -106,14 +106,7 @@ Always use tools to generate and analyze code. Show your reasoning process clear
 
           return undefined;
         },
-        onStepFinish: async (stepResult) => {
-          // Log step information for debugging
-          console.log(`Step ${stepResult.stepNumber} finished:`, {
-            text: stepResult.text,
-            toolCalls: stepResult.toolCalls.length,
-            finishReason: stepResult.finishReason,
-          });
-        },
+
       });
 
       writer.merge(result.toUIMessageStream({ originalMessages: messages }));

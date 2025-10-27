@@ -140,12 +140,12 @@ function OnboardingContent() {
   const searchParams = useSearchParams();
   const { user, isLoading: authLoading } = useSupabaseAuth();
   const supabase = getSupabaseBrowserClient();
-  
-  
+
+
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [projectId, setProjectId] = useState<string | null>(null);
-  
+
   // Project metadata
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
@@ -170,15 +170,15 @@ function OnboardingContent() {
     }
   }, [user, authLoading, router]);
 
-    useEffect(() => {
-    if(promptMetadata) {
+  useEffect(() => {
+    if (promptMetadata) {
       setIdentity(promptMetadata.identity || "");
       setInstructions(promptMetadata.instructions || "");
       setTone(promptMetadata.tone || "");
     }
   }, [promptMetadata]);
 
-  console.log("promptMetadata", promptMetadata);
+
   useEffect(() => {
     // Get initial prompt from URL if available
     const prompt = searchParams.get("prompt");
@@ -187,15 +187,15 @@ function OnboardingContent() {
     }
   }, [searchParams]);
 
-    // const { data, error } = await supabase
-    //   .from('ProjectMetadata')
-    //   .upsert({ id: promptMetadata.projectId, name: promptMetadata.projectName, description: promptMetadata.projectDescription})
-    //   .select()
+  // const { data, error } = await supabase
+  //   .from('ProjectMetadata')
+  //   .upsert({ id: promptMetadata.projectId, name: promptMetadata.projectName, description: promptMetadata.projectDescription})
+  //   .select()
 
-    // if (error || !data) {
-    //   console.error("Supabase insert error:", error);
-    //   return c.json({ error: error?.message || "Failed to insert metadata" }, 500);
-    // }
+  // if (error || !data) {
+  //   console.error("Supabase insert error:", error);
+  //   return c.json({ error: error?.message || "Failed to insert metadata" }, 500);
+  // }
 
 
   const handleCreateProject = async () => {
@@ -223,19 +223,19 @@ function OnboardingContent() {
       //   }),
       // });
 
-    // const data1 = await response.json();
-    const userDetails = await supabase.auth.getUser();
-    const ownerId = userDetails.data.user?.id;
-    const { data, error } = await supabase
-      .from('Project')
-      .upsert({ id: promptMetadata?.id, name: projectName, projectDesc: projectDescription, updatedAt: new Date().toISOString(), ownerId: ownerId })
-      .eq("id", promptMetadata?.id)
-      .select()
+      // const data1 = await response.json();
+      const userDetails = await supabase.auth.getUser();
+      const ownerId = userDetails.data.user?.id;
+      const { data, error } = await supabase
+        .from('Project')
+        .upsert({ id: promptMetadata?.id, name: projectName, projectDesc: projectDescription, updatedAt: new Date().toISOString(), ownerId: ownerId })
+        .eq("id", promptMetadata?.id)
+        .select()
 
-    if (error || !data) {
-      console.error("Supabase insert error:", error);
-    }
-    setStep(2);
+      if (error || !data) {
+        console.error("Supabase insert error:", error);
+      }
+      setStep(2);
 
     } catch (error) {
       console.error("Error Updating project:", error);
@@ -307,9 +307,9 @@ function OnboardingContent() {
           url: server.url,
           authentication: server.showAuth
             ? {
-                headerName: server.authHeader,
-                headerValue: server.authValue,
-              }
+              headerName: server.authHeader,
+              headerValue: server.authValue,
+            }
             : null,
         };
 
@@ -373,11 +373,10 @@ function OnboardingContent() {
             {[1, 2, 3].map((stepNum) => (
               <div key={stepNum} className="flex items-center gap-4">
                 <div
-                  className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all ${
-                    step >= stepNum
+                  className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all ${step >= stepNum
                       ? "border-blue-500 bg-blue-500 text-white"
                       : "border-slate-700 bg-slate-900 text-slate-500"
-                  }`}
+                    }`}
                 >
                   {step > stepNum ? (
                     <CheckCircle2 className="h-5 w-5" />
@@ -387,9 +386,8 @@ function OnboardingContent() {
                 </div>
                 {stepNum < 3 && (
                   <div
-                    className={`w-16 h-0.5 ${
-                      step > stepNum ? "bg-blue-500" : "bg-slate-700"
-                    }`}
+                    className={`w-16 h-0.5 ${step > stepNum ? "bg-blue-500" : "bg-slate-700"
+                      }`}
                   />
                 )}
               </div>
@@ -705,9 +703,8 @@ function OnboardingContent() {
                             </span>
                           </div>
                           <svg
-                            className={`h-5 w-5 text-slate-400 transition-transform ${
-                              server.showAuth ? "rotate-180" : ""
-                            }`}
+                            className={`h-5 w-5 text-slate-400 transition-transform ${server.showAuth ? "rotate-180" : ""
+                              }`}
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
