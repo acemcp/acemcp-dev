@@ -32,6 +32,7 @@ import {
 } from '@/components/ai-elements/conversation';
 import { Message, MessageContent } from '@/components/ai-elements/message';
 import { Response } from '@/components/ai-elements/response';
+import { DefaultChatTransport } from 'ai';
 
 const models = [
   { id: 'gpt-4o', name: 'GPT-4o' },
@@ -44,7 +45,17 @@ const InputDemo = () => {
   const [useWebSearch, setUseWebSearch] = useState<boolean>(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const { messages, status, sendMessage } = useChat();
+  const { messages, status, sendMessage } = useChat(
+
+    {
+
+      transport: new DefaultChatTransport({
+        api: '/api/mcp',
+      }),
+    }
+
+
+  );
 
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
@@ -55,9 +66,9 @@ const InputDemo = () => {
     }
 
     sendMessage(
-      { 
+      {
         text: message.text || 'Sent with attachments',
-        files: message.files 
+        files: message.files
       },
       {
         body: {

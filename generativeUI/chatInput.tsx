@@ -52,7 +52,7 @@ const ChatInput = () => {
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const { messages, sendMessage, addToolResult, error, isLoading } = useChat({
+  const { messages, sendMessage, addToolResult, error } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/mcp",
     }),
@@ -66,7 +66,7 @@ const ChatInput = () => {
         // They are executed on the server side
         return;
       }
-      
+
       // Handle any client-side tools here if needed
       // Example: if (toolCall.toolName === 'clientSideTool') { ... }
     },
@@ -131,7 +131,7 @@ const ChatInput = () => {
                                     Tool: {part.toolName}
                                   </span>
                                 </div>
-                                
+
                                 {/* Input streaming state - shows partial inputs as they arrive */}
                                 {part.state === "input-streaming" && (
                                   <div className="mt-2">
@@ -141,7 +141,7 @@ const ChatInput = () => {
                                     </pre>
                                   </div>
                                 )}
-                                
+
                                 {/* Input available state - full input ready for execution */}
                                 {part.state === "input-available" && (
                                   <div className="mt-2">
@@ -151,7 +151,7 @@ const ChatInput = () => {
                                     </pre>
                                   </div>
                                 )}
-                                
+
                                 {/* Output available state - tool execution completed */}
                                 {part.state === "output-available" && (
                                   <div className="mt-2">
@@ -161,7 +161,7 @@ const ChatInput = () => {
                                     </pre>
                                   </div>
                                 )}
-                                
+
                                 {/* Output error state - tool execution failed */}
                                 {part.state === "output-error" && (
                                   <div className="mt-2">
@@ -192,9 +192,9 @@ const ChatInput = () => {
                             return (
                               <div key={`${message.id}-${i}`} className="my-2 rounded-lg border border-purple-200 bg-purple-50 p-2">
                                 <p className="text-xs font-medium text-purple-900">Source:</p>
-                                <a 
-                                  href={part.source.url} 
-                                  target="_blank" 
+                                <a
+                                  href={part.source.url}
+                                  target="_blank"
                                   rel="noopener noreferrer"
                                   className="text-xs text-purple-700 underline hover:text-purple-900"
                                 >
@@ -217,7 +217,7 @@ const ChatInput = () => {
                           // Handle static tool: gatherMcpInformation (AI SDK 5.0 pattern)
                           if (part.type === "tool-gatherMcpInformation") {
                             const callId = part.toolCallId;
-                            
+
                             switch (part.state) {
                               case "input-streaming":
                                 return (
@@ -225,7 +225,7 @@ const ChatInput = () => {
                                     <p className="text-xs font-medium text-indigo-700">Loading MCP configuration...</p>
                                   </div>
                                 );
-                              
+
                               case "input-available":
                                 return (
                                   <div key={callId} className="my-2 space-y-3 rounded-lg border border-indigo-200 bg-indigo-50 p-3">
@@ -245,14 +245,14 @@ const ChatInput = () => {
                                     />
                                   </div>
                                 );
-                              
+
                               case "output-available":
                                 return (
                                   <div key={callId} className="my-2 rounded-lg border border-green-200 bg-green-50 p-2">
                                     <p className="text-xs font-medium text-green-900">✓ MCP Configuration: {part.output}</p>
                                   </div>
                                 );
-                              
+
                               case "output-error":
                                 return (
                                   <div key={callId} className="my-2 rounded-lg border border-red-200 bg-red-50 p-2">

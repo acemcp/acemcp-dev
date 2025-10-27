@@ -77,6 +77,9 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
   const { user, isLoading: authLoading } = useSupabaseAuth();
   const { id: projectId } = React.use(params);
 
+
+  console.log("projectId", projectId);
+
   const [activeTab, setActiveTab] = useState<TabKey>("chat");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isWorkflowViewOpen, setIsWorkflowViewOpen] = useState(true);
@@ -86,7 +89,7 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
   useEffect(() => {
     const validateProject = async () => {
       if (authLoading) return;
-      
+
       if (!user) {
         router.push(`/authentication?redirectTo=/project/${projectId}`);
         return;
@@ -101,13 +104,13 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
         // Validate project exists and user has access
         const response = await fetch(`/api/project/${projectId}`);
         const data = await response.json();
-        
+
         if (!response.ok || !data.success) {
           // Project not found or no access, redirect to landing
           router.push("/landing");
           return;
         }
-        
+
         setIsValidating(false);
       } catch (error) {
         console.error("Error validating project:", error);
@@ -120,7 +123,7 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
 
   const { messages } = useChat({
     transport: new DefaultChatTransport({
-    api: "/api/mcp",
+      api: "/api/mcp",
     }),
   });
 
@@ -237,3 +240,4 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
     </div>
   );
 }
+
