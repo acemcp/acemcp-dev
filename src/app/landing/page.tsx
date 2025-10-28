@@ -279,9 +279,7 @@ function LandingContent() {
     });
     const data = await CreateprojectResponse.json();
 
-    let {
-      project: { id },
-    } = data;
+    let { project: { id } } = data;
 
     const postData = {
       text: prompt,
@@ -307,7 +305,7 @@ function LandingContent() {
     const params = new URLSearchParams();
     params.set("prompt", prompt)
     // router.push(`/onboarding?projectId=${id}`);
-    router.push(`/onboarding?projectId=${id}}`);
+    router.push(`/onboarding?projectId=${id}&${params.toString()}`);
 
     // router.push(`/onboarding?${params.toString()}`);
   };

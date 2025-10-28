@@ -41,6 +41,7 @@ import { Message, MessageContent } from "@/components/ai-elements/message";
 import { Response } from "@/components/ai-elements/response";
 import { DefaultChatTransport, getToolName, isToolUIPart, lastAssistantMessageIsCompleteWithToolCalls } from "ai";
 import MCPCard from "./mcpConfigUI";
+import { useParams } from "next/navigation.js";
 
 interface GatherMcpInformationInput {
   fileName?: string;
@@ -50,12 +51,16 @@ interface GatherMcpInformationInput {
 const ChatInput = () => {
   const [text, setText] = useState<string>("");
 
+
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { messages, sendMessage, addToolResult, error } = useChat({
     transport: new DefaultChatTransport({
-      api: "/api/mcp",
-    }),
+      api: "/api/mcp" ,   body : {
+
+        projectID:  
+      }   }),
     // Automatically send when all tool results are available
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
     // Handle client-side tools that should be automatically executed

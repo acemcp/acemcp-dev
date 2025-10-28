@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useSupabaseAuth } from "@/providers/supabase-auth-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,108 +34,14 @@ import {
 import { useMCP } from "@/context";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
-// Popular MCP Servers from the ecosystem
-const POPULAR_MCP_SERVERS = [
-  {
-    id: "github",
-    name: "GitHub",
-    description: "Access repositories, issues, PRs, and code search",
-    icon: Github,
-    category: "Development",
-    configTemplate: {
-      command: "npx",
-      args: ["-y", "@modelcontextprotocol/server-github"],
-      env: { GITHUB_PERSONAL_ACCESS_TOKEN: "" },
-    },
-  },
-  {
-    id: "slack",
-    name: "Slack",
-    description: "Send messages, manage channels, and read conversations",
-    icon: MessageSquare,
-    category: "Communication",
-    configTemplate: {
-      command: "npx",
-      args: ["-y", "@modelcontextprotocol/server-slack"],
-      env: { SLACK_BOT_TOKEN: "", SLACK_TEAM_ID: "" },
-    },
-  },
-  {
-    id: "postgres",
-    name: "PostgreSQL",
-    description: "Query and manage PostgreSQL databases",
-    icon: Database,
-    category: "Database",
-    configTemplate: {
-      command: "npx",
-      args: ["-y", "@modelcontextprotocol/server-postgres"],
-      env: { POSTGRES_CONNECTION_STRING: "" },
-    },
-  },
-  {
-    id: "gmail",
-    name: "Gmail",
-    description: "Read, send, and manage emails",
-    icon: Mail,
-    category: "Communication",
-    configTemplate: {
-      command: "npx",
-      args: ["-y", "@modelcontextprotocol/server-gmail"],
-      env: { GMAIL_CREDENTIALS: "" },
-    },
-  },
-  {
-    id: "google-calendar",
-    name: "Google Calendar",
-    description: "Manage events and schedules",
-    icon: Calendar,
-    category: "Productivity",
-    configTemplate: {
-      command: "npx",
-      args: ["-y", "@modelcontextprotocol/server-google-calendar"],
-      env: { GOOGLE_CALENDAR_CREDENTIALS: "" },
-    },
-  },
-  {
-    id: "notion",
-    name: "Notion",
-    description: "Access and manage Notion pages and databases",
-    icon: FileText,
-    category: "Productivity",
-    configTemplate: {
-      command: "npx",
-      args: ["-y", "@modelcontextprotocol/server-notion"],
-      env: { NOTION_API_KEY: "" },
-    },
-  },
-  {
-    id: "google-drive",
-    name: "Google Drive",
-    description: "Access and manage files in Google Drive",
-    icon: Cloud,
-    category: "Storage",
-    configTemplate: {
-      command: "npx",
-      args: ["-y", "@modelcontextprotocol/server-gdrive"],
-      env: { GOOGLE_DRIVE_CREDENTIALS: "" },
-    },
-  },
-  {
-    id: "custom",
-    name: "Custom Server",
-    description: "Add your own MCP server configuration",
-    icon: Code,
-    category: "Custom",
-    configTemplate: {
-      command: "",
-      args: [],
-      env: {},
-    },
-  },
-];
+
 
 function OnboardingContent() {
   const { promptMetadata, setPromptMetadata } = useMCP();
+
+
+
+   let {projectId} =  useParams()
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading: authLoading } = useSupabaseAuth();
@@ -144,7 +50,6 @@ function OnboardingContent() {
 
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [projectId, setProjectId] = useState<string | null>(null);
 
   // Project metadata
   const [projectName, setProjectName] = useState("");
@@ -152,17 +57,8 @@ function OnboardingContent() {
   const [identity, setIdentity] = useState("");
   const [instructions, setInstructions] = useState("");
   const [tone, setTone] = useState("");
+  const [mcpServers, setMcpServers] = useState<MCPServerConfig[]>([]);
 
-  // MCP Server selection
-  const [mcpServers, setMcpServers] = useState<
-    Array<{
-      id: string;
-      url: string;
-      authHeader: string;
-      authValue: string;
-      showAuth: boolean;
-    }>
-  >([]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -187,16 +83,217 @@ function OnboardingContent() {
     }
   }, [searchParams]);
 
-  // const { data, error } = await supabase
-  //   .from('ProjectMetadata')
-  //   .upsert({ id: promptMetadata.projectId, name: promptMetadata.projectName, description: promptMetadata.projectDescription})
-  //   .select()
 
-  // if (error || !data) {
-  //   console.error("Supabase insert error:", error);
-  //   return c.json({ error: error?.message || "Failed to insert metadata" }, 500);
-  // }
+  // Add this helper function to validate MCP servers
+  async function validateMCPServer(
+    url: string,
+    authHeader?: string,
+    authValue?: string
+  ): Promise<{
+    isValid: boolean;
+    error?: string;
+    tools?: any[];
+    serverInfo?: any;
+  }> {
+    try {
+      // Create headers object
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
 
+      // Add auth header if provided
+      if (authHeader && authValue) {
+        headers[authHeader] = authValue.startsWith("Bearer ")
+          ? authValue
+          : `Bearer ${authValue}`;
+      }
+
+      // First, try to connect to the MCP server
+      const response = await fetch("/api/validate-mcp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          serverUrl: url,
+          authHeader: authHeader || null,
+          authToken: authValue || null,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          isValid: false,
+          error: data.error || "Failed to connect to MCP server",
+        };
+      }
+
+      return {
+        isValid: true,
+        tools: data.tools,
+        serverInfo: data.serverInfo,
+      };
+    } catch (error) {
+      console.error("MCP validation error:", error);
+      return {
+        isValid: false,
+        error: error instanceof Error ? error.message : "Connection failed",
+      };
+    }
+  }
+
+  // Update the MCP server state to include validation status
+  type MCPServerConfig = {
+    id: string;
+    url: string;
+    authHeader: string;
+    authValue: string;
+    showAuth: boolean;
+    isValidating: boolean;
+    isValid: boolean | null;
+    validationError?: string;
+    tools?: any[];
+    serverInfo?: any;
+  };
+
+  // In your component, update the state type:
+
+  // Update the addMcpServer function:
+  const addMcpServer = () => {
+    const newId = `mcp-${Date.now()}`;
+    setMcpServers((prev) => [
+      ...prev,
+      {
+        id: newId,
+        url: "",
+        authHeader: "Authorization",
+        authValue: "",
+        showAuth: false,
+        isValidating: false,
+        isValid: null,
+        validationError: undefined,
+        tools: undefined,
+        serverInfo: undefined,
+      },
+    ]);
+  };
+
+  // Add validation handler:
+  const validateServer = async (serverId: string) => {
+    const server = mcpServers.find((s) => s.id === serverId);
+    if (!server || !server.url.trim()) {
+      alert("Please enter a server URL first");
+      return;
+    }
+
+    // Set validating state
+    updateMcpServer(serverId, { isValidating: true, isValid: null });
+
+    // Perform validation
+    const result = await validateMCPServer(
+      server.url,
+      server.showAuth ? server.authHeader : undefined,
+      server.showAuth ? server.authValue : undefined
+    );
+
+    // Update server with validation results
+    updateMcpServer(serverId, {
+      isValidating: false,
+      isValid: result.isValid,
+      validationError: result.error,
+      tools: result.tools,
+      serverInfo: result.serverInfo,
+    });
+  };
+
+  // Update the updateMcpServer function to handle new fields:
+  const updateMcpServer = (
+    serverId: string,
+    updates: Partial<MCPServerConfig>
+  ) => {
+    setMcpServers((prev) =>
+      prev.map((server) =>
+        server.id === serverId ? { ...server, ...updates } : server
+      )
+    );
+  };
+
+  // Update the handleDeploy validation:
+  const handleDeploy = async () => {
+    // Validate that at least one MCP server is configured
+    if (mcpServers.length === 0) {
+      alert("Please add at least one MCP server");
+      return;
+    }
+
+    // Validate all servers have URLs
+    const invalidServers = mcpServers.filter((server) => !server.url.trim());
+    if (invalidServers.length > 0) {
+      alert("Please enter a URL for all MCP servers");
+      return;
+    }
+
+    // Check if all servers are validated
+    const unvalidatedServers = mcpServers.filter(
+      (server) => server.isValid !== true
+    );
+    if (unvalidatedServers.length > 0) {
+      const proceed = confirm(
+        `${unvalidatedServers.length} server(s) haven't been validated. Do you want to continue anyway?`
+      );
+      if (!proceed) return;
+    }
+
+    // Check for failed validations
+    const failedServers = mcpServers.filter((server) => server.isValid === false);
+    if (failedServers.length > 0) {
+      const proceed = confirm(
+        `${failedServers.length} server(s) failed validation. Do you want to continue anyway?`
+      );
+      if (!proceed) return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Save each MCP server configuration
+      for (const server of mcpServers) {
+        const configJson = {
+          url: server.url,
+          authentication: server.showAuth
+            ? {
+              headerName: server.authHeader,
+              headerValue: server.authValue,
+            }
+            : null,
+          validationResult: {
+            isValid: server.isValid,
+            tools: server.tools,
+            serverInfo: server.serverInfo,
+          },
+        };
+
+        await fetch("/api/mcp-config", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            projectId: promptMetadata?.id,
+            serverUrl: server.url,
+            authHeader: server.showAuth ? server.authHeader : null,
+            authToken: server.showAuth ? server.authValue : null,
+            configJson,
+          }),
+        });
+      }
+
+      // Redirect to main dashboard
+      router.replace(`project/${projectId}?promptMetadata=${promptMetadata?.id}`);
+    } catch (error) {
+      console.error("Error deploying:", error);
+      alert("Failed to deploy");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleCreateProject = async () => {
     if (!projectName.trim()) {
@@ -209,20 +306,6 @@ function OnboardingContent() {
       // Sync user first
       await fetch("/api/user/sync", { method: "POST" });
 
-      // Create project
-      // const response = await fetch("/api/project/create", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({
-      //     name: projectName,
-      //     description: projectDescription,
-      //     prompt: searchParams.get("prompt"),
-      //     identity,
-      //     instructions,
-      //     tone,
-      //   }),
-      // });
-
       // const data1 = await response.json();
       const userDetails = await supabase.auth.getUser();
       const ownerId = userDetails.data.user?.id;
@@ -232,6 +315,10 @@ function OnboardingContent() {
         .eq("id", promptMetadata?.id)
         .select()
 
+
+
+        console.log("data",data);
+        
       if (error || !data) {
         console.error("Supabase insert error:", error);
       }
@@ -249,97 +336,6 @@ function OnboardingContent() {
     setStep(3);
   };
 
-  const addMcpServer = () => {
-    const newId = `mcp-${Date.now()}`;
-    setMcpServers((prev) => [
-      ...prev,
-      {
-        id: newId,
-        url: "",
-        authHeader: "Authorization",
-        authValue: "",
-        showAuth: false,
-      },
-    ]);
-  };
-
-  const removeMcpServer = (serverId: string) => {
-    setMcpServers((prev) => prev.filter((server) => server.id !== serverId));
-  };
-
-  const updateMcpServer = (
-    serverId: string,
-    updates: Partial<{
-      url: string;
-      authHeader: string;
-      authValue: string;
-      showAuth: boolean;
-    }>
-  ) => {
-    setMcpServers((prev) =>
-      prev.map((server) =>
-        server.id === serverId ? { ...server, ...updates } : server
-      )
-    );
-  };
-
-  const handleDeploy = async () => {
-    // if (!projectId) return;
-
-    // Validate that at least one MCP server is configured
-    if (mcpServers.length === 0) {
-      alert("Please add at least one MCP server");
-      return;
-    }
-
-    // Validate all servers have URLs
-    const invalidServers = mcpServers.filter((server) => !server.url.trim());
-    if (invalidServers.length > 0) {
-      alert("Please enter a URL for all MCP servers");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      // Save each MCP server configuration
-      for (const server of mcpServers) {
-        const configJson = {
-          url: server.url,
-          authentication: server.showAuth
-            ? {
-              headerName: server.authHeader,
-              headerValue: server.authValue,
-            }
-            : null,
-        };
-
-        await fetch("/api/mcp-config", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            projectId: promptMetadata?.id,
-            serverUrl: server.url, // Store the URL in serverUrl column
-            authHeader: server.showAuth ? server.authHeader : null,
-            authToken: server.showAuth ? server.authValue : null,
-            configJson,
-          }),
-        });
-      }
-
-      // Redirect to project dashboard
-      if (promptMetadata?.id) {
-        router.push(`/project/${promptMetadata.id}`);
-      } else {
-        // Fallback to landing if no project ID
-        router.push("/landing");
-      }
-    } catch (error) {
-      console.error("Error deploying:", error);
-      alert("Failed to deploy");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   if (authLoading) {
     return (
@@ -374,8 +370,8 @@ function OnboardingContent() {
               <div key={stepNum} className="flex items-center gap-4">
                 <div
                   className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all ${step >= stepNum
-                      ? "border-blue-500 bg-blue-500 text-white"
-                      : "border-slate-700 bg-slate-900 text-slate-500"
+                    ? "border-blue-500 bg-blue-500 text-white"
+                    : "border-slate-700 bg-slate-900 text-slate-500"
                     }`}
                 >
                   {step > stepNum ? (
@@ -616,7 +612,8 @@ function OnboardingContent() {
                   </div>
                 )}
 
-                {/* MCP Server Configuration Forms */}
+            // Replace the MCP Server Card JSX in your component
+
                 {mcpServers.map((server, index) => (
                   <Card
                     key={server.id}
@@ -640,15 +637,53 @@ function OnboardingContent() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {/* Status Badge */}
+                      {/* Status Badge with Validation State */}
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-slate-400">Status:</span>
-                        <Badge
-                          variant="outline"
-                          className="border-slate-600 text-slate-400"
-                        >
-                          Not Connected
-                        </Badge>
+                        {server.isValidating ? (
+                          <Badge
+                            variant="outline"
+                            className="border-yellow-600 text-yellow-400 bg-yellow-500/10"
+                          >
+                            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                            Validating...
+                          </Badge>
+                        ) : server.isValid === true ? (
+                          <Badge
+                            variant="outline"
+                            className="border-green-600 text-green-400 bg-green-500/10"
+                          >
+                            <CheckCircle2 className="mr-1 h-3 w-3" />
+                            Validated
+                          </Badge>
+                        ) : server.isValid === false ? (
+                          <Badge
+                            variant="outline"
+                            className="border-red-600 text-red-400 bg-red-500/10"
+                          >
+                            <svg
+                              className="mr-1 h-3 w-3"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                            Invalid
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant="outline"
+                            className="border-slate-600 text-slate-400"
+                          >
+                            Not Validated
+                          </Badge>
+                        )}
                       </div>
 
                       {/* Server URL Input */}
@@ -657,22 +692,99 @@ function OnboardingContent() {
                         <div className="flex gap-2">
                           <Input
                             value={server.url}
-                            onChange={(e) =>
+                            onChange={(e) => {
                               updateMcpServer(server.id, {
                                 url: e.target.value,
-                              })
-                            }
+                                isValid: null, // Reset validation when URL changes
+                                validationError: undefined,
+                              });
+                            }}
                             className="flex-1 bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
-                            placeholder="Enter MCP server URL"
+                            placeholder="https://your-mcp-server.com/mcp"
                           />
                           <Button
+                            onClick={() => validateServer(server.id)}
                             className="bg-gradient-to-r from-pink-600 via-purple-600 to-orange-500 hover:from-pink-500 hover:via-purple-500 hover:to-orange-400 text-white font-semibold px-8"
-                            disabled={!server.url.trim()}
+                            disabled={!server.url.trim() || server.isValidating}
                           >
-                            Connect
+                            {server.isValidating ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Validating
+                              </>
+                            ) : (
+                              "Validate"
+                            )}
                           </Button>
                         </div>
                       </div>
+
+                      {/* Validation Error Message */}
+                      {server.validationError && (
+                        <div className="rounded-lg bg-red-500/10 border border-red-500/30 p-3">
+                          <div className="flex items-start gap-2">
+                            <svg
+                              className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-red-400">
+                                Validation Failed
+                              </p>
+                              <p className="text-xs text-red-300 mt-1">
+                                {server.validationError}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Success Message with Tools */}
+                      {server.isValid && server.tools && (
+                        <div className="rounded-lg bg-green-500/10 border border-green-500/30 p-3">
+                          <div className="flex items-start gap-2">
+                            <CheckCircle2 className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-green-400">
+                                Server Validated Successfully
+                              </p>
+                              <p className="text-xs text-green-300 mt-1">
+                                Found {server.tools.length} tool(s)
+                              </p>
+                              {server.tools.length > 0 && (
+                                <div className="mt-2 flex flex-wrap gap-1">
+                                  {server.tools.slice(0, 5).map((tool: any, idx: number) => (
+                                    <Badge
+                                      key={idx}
+                                      variant="outline"
+                                      className="border-green-600/50 text-green-400 bg-green-500/5 text-xs"
+                                    >
+                                      {tool.name}
+                                    </Badge>
+                                  ))}
+                                  {server.tools.length > 5 && (
+                                    <Badge
+                                      variant="outline"
+                                      className="border-green-600/50 text-green-400 bg-green-500/5 text-xs"
+                                    >
+                                      +{server.tools.length - 5} more
+                                    </Badge>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Authentication Section (Collapsible) */}
                       <div className="border border-slate-700/50 rounded-lg bg-slate-900/30">
@@ -724,11 +836,12 @@ function OnboardingContent() {
                               <Label className="text-slate-200">Header Name</Label>
                               <Input
                                 value={server.authHeader}
-                                onChange={(e) =>
+                                onChange={(e) => {
                                   updateMcpServer(server.id, {
                                     authHeader: e.target.value,
-                                  })
-                                }
+                                    isValid: null, // Reset validation when auth changes
+                                  });
+                                }}
                                 className="bg-slate-900/50 border-slate-700 text-white"
                                 placeholder="Authorization"
                               />
@@ -739,39 +852,20 @@ function OnboardingContent() {
                                 <Input
                                   type="password"
                                   value={server.authValue}
-                                  onChange={(e) =>
+                                  onChange={(e) => {
                                     updateMcpServer(server.id, {
                                       authValue: e.target.value,
-                                    })
-                                  }
+                                      isValid: null, // Reset validation when auth changes
+                                    });
+                                  }}
                                   className="bg-slate-900/50 border-slate-700 text-white pr-10"
-                                  placeholder="Enter header value (API key, token, etc.)"
+                                  placeholder="Enter bearer token"
                                 />
-                                <button
-                                  type="button"
-                                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300"
-                                >
-                                  <svg
-                                    className="h-5 w-5"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                    />
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                    />
-                                  </svg>
-                                </button>
                               </div>
+                              <p className="text-xs text-slate-400">
+                                Token will be sent as: {server.authHeader}:{" "}
+                                {server.authValue ? "Bearer ***" : "Bearer <token>"}
+                              </p>
                             </div>
                           </div>
                         )}
@@ -779,7 +873,6 @@ function OnboardingContent() {
                     </CardContent>
                   </Card>
                 ))}
-
                 {/* Add Another Server Button */}
                 {mcpServers.length > 0 && (
                   <Button

@@ -9,11 +9,13 @@ import { AgentConfigSidebar } from "./AgentConfigSidebar";
 interface ChatPlaygroundLayoutProps {
   messages: UIMessage[];
   isWorkflowViewOpen: boolean;
+  projectId : any
   onToggleWorkflowView: () => void;
 }
 
 export function ChatPlaygroundLayout({
   messages,
+  projectId,
   isWorkflowViewOpen,
   onToggleWorkflowView,
 }: ChatPlaygroundLayoutProps) {
@@ -28,6 +30,7 @@ export function ChatPlaygroundLayout({
     >
       {/* Chat Interface Section */}
       <ChatInterface
+      projectId  =  {projectId}
         isWorkflowViewOpen={isWorkflowViewOpen}
         onToggleWorkflowView={onToggleWorkflowView}
       />

@@ -2,7 +2,7 @@
 import * as React from "react"; // ✅ add this
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useChat } from "@ai-sdk/react";
 import { useSupabaseAuth } from "@/providers/supabase-auth-provider";
 import { DefaultChatTransport, isToolUIPart, getToolName } from "ai";
@@ -80,8 +80,12 @@ export default function ProjectPage({
 }) {
   const router = useRouter();
   const { user, isLoading: authLoading } = useSupabaseAuth();
-  const { id: projectId } = React.use(params);
+  const { id: projectId } = useParams()
 
+
+
+  console.log("projectId in dashboard",projectId);
+  
   const [activeTab, setActiveTab] = useState<TabKey>("chat");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isWorkflowViewOpen, setIsWorkflowViewOpen] = useState(true);
@@ -97,10 +101,10 @@ export default function ProjectPage({
         return;
       }
 
-      if (!projectId) {
-        router.push("/landing");
-        return;
-      }
+      // if (!projectId) {
+      //   router.push("/landing");
+      //   return;
+      // }
 
       try {
         // Validate project exists and user has access
@@ -109,8 +113,12 @@ export default function ProjectPage({
 
         if (!response.ok || !data.success) {
           // Project not found or no access, redirect to landing
-          router.push("/landing");
+          // router.push("/404");
           return;
+
+
+          console.log("validated");
+          
         }
 
         setIsValidating(false);
@@ -241,6 +249,7 @@ export default function ProjectPage({
         <main className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6">
           {activeTab === "chat" && (
             <ChatPlaygroundLayout
+              projectId={projectId}
               messages={messages}
               isWorkflowViewOpen={isWorkflowViewOpen}
               onToggleWorkflowView={() =>
@@ -249,6 +258,9 @@ export default function ProjectPage({
             />
           )}
 
+
+
+      
           {activeTab === "workflow" && <WorkflowTab messages={messages} />}
 
           {activeTab === "workflow_builder" && <WorkflowBuilderTab />}

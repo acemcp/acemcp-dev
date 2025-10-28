@@ -39,7 +39,7 @@ const models = [
   { id: 'claude-opus-4-20250514', name: 'Claude 4 Opus' },
 ];
 
-const InputDemo = () => {
+const InputDemo = ({projectId} : any) => {
   const [text, setText] = useState<string>('');
   const [model, setModel] = useState<string>(models[0].id);
   const [useWebSearch, setUseWebSearch] = useState<boolean>(false);
@@ -51,6 +51,9 @@ const InputDemo = () => {
 
       transport: new DefaultChatTransport({
         api: '/api/mcp',
+        body : {
+          projectId: projectId
+        }
       }),
     }
 
@@ -85,7 +88,7 @@ const InputDemo = () => {
       <div className="flex flex-col h-full">
         <Conversation>
           <ConversationContent>
-            {messages.map((message) => (
+            {messages?.map((message) => (
               <Message from={message.role} key={message.id}>
                 <MessageContent>
                   {message.parts.map((part, i) => {

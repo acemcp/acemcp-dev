@@ -6,10 +6,12 @@ import InputDemo from "../../../generativeUI/InputDemo";
 
 interface ChatInterfaceProps {
   isWorkflowViewOpen: boolean;
+  projectId : any
   onToggleWorkflowView: () => void;
 }
 
 export function ChatInterface({
+  projectId , 
   isWorkflowViewOpen,
   onToggleWorkflowView,
 }: ChatInterfaceProps) {
@@ -46,7 +48,7 @@ export function ChatInterface({
 
         {/* Main chat content area */}
         <div className="flex flex-col flex-1 overflow-hidden">
-          <InputDemo />
+          <InputDemo  projectId = {projectId}/>
         </div>
       </div>
     </section>
