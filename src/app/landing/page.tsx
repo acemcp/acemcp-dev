@@ -223,6 +223,7 @@ function LandingContent() {
   const [identity, setIdentity] = useState("");
   const [instructions, setInstructions] = useState("");
   const [tone, setTone] = useState("");
+  const [isDashboardLoading, setIsDashboardLoading] = useState(false);
   const { session, isLoading, signOut } = useSupabaseAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -319,6 +320,34 @@ function LandingContent() {
     router.push(`/authentication?${params.toString()}`);
   };
 
+  const handleDashboardClick = async () => {
+    if (!session) {
+      router.push("/authentication?mode=signin&redirectTo=%2Flanding");
+      return;
+    }
+
+    setIsDashboardLoading(true);
+    try {
+      // Fetch user's projects
+      const response = await fetch("/api/user/projects");
+      const data = await response.json();
+      
+      if (data.success && data.projects && data.projects.length > 0) {
+        // Redirect to the most recent project
+        const latestProject = data.projects[0];
+        router.push(`/project/${latestProject.id}`);
+      } else {
+        // No projects found, stay on landing or show message
+        alert("You don't have any projects yet. Create one to get started!");
+        setIsDashboardLoading(false);
+      }
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      alert("Failed to load your projects. Please try again.");
+      setIsDashboardLoading(false);
+    }
+  };
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-black font-sans text-white">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -356,10 +385,18 @@ function LandingContent() {
                 <>
                   <Button
                     variant="ghost"
-                    onClick={() => router.push("/")}
-                    className="h-10 rounded-lg px-4 text-sm text-white/80 transition hover:text-white"
+                    onClick={handleDashboardClick}
+                    disabled={isDashboardLoading}
+                    className="h-10 rounded-lg px-4 text-sm text-white/80 transition hover:text-white disabled:opacity-50"
                   >
-                    Dashboard
+                    {isDashboardLoading ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Loading...
+                      </div>
+                    ) : (
+                      "Dashboard"
+                    )}
                   </Button>
                   <Button
                     variant="ghost"
