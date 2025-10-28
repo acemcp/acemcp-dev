@@ -129,7 +129,8 @@ const pipelineStages = [
   {
     icon: Sparkles,
     title: "Blueprint",
-    description: "Capture requirements with natural language briefs and templates.",
+    description:
+      "Capture requirements with natural language briefs and templates.",
     detail:
       "Outline responsibilities, guardrails, and data connections in minutes with collaborative drafting.",
     metric: "3 min setup",
@@ -164,25 +165,29 @@ const capabilityShowcase = [
   {
     icon: BarChart3,
     title: "Realtime Monitoring",
-    description: "Live dashboards track latency, throughput, sentiment, and compliance in one view.",
+    description:
+      "Live dashboards track latency, throughput, sentiment, and compliance in one view.",
     stat: "Unified Ops Center",
   },
   {
     icon: Shield,
     title: "Adaptive Guardrails",
-    description: "Dynamic safety nets enforce policy, redact PII, and block escalation risks automatically.",
+    description:
+      "Dynamic safety nets enforce policy, redact PII, and block escalation risks automatically.",
     stat: "Policy Engine",
   },
   {
     icon: Cloud,
     title: "Global Footprint",
-    description: "Multi-cloud, multi-region distribution keeps workloads close to users with failover baked in.",
+    description:
+      "Multi-cloud, multi-region distribution keeps workloads close to users with failover baked in.",
     stat: "14 Regions",
   },
   {
     icon: Gauge,
     title: "Performance Automation",
-    description: "Autonomous tuning improves conversion and reduces manual prompt iteration over time.",
+    description:
+      "Autonomous tuning improves conversion and reduces manual prompt iteration over time.",
     stat: "Auto-Tuning",
   },
 ];
@@ -191,19 +196,22 @@ const customerSignals = [
   {
     icon: ShieldCheck,
     title: "Human-in-the-loop",
-    description: "Route high-risk actions for approval with contextual snapshots and replay history.",
+    description:
+      "Route high-risk actions for approval with contextual snapshots and replay history.",
     metric: "12k reviews synced",
   },
   {
     icon: Workflow,
     title: "Deterministic orchestration",
-    description: "Stateful flows, retries, and fallbacks so every task completes predictably.",
+    description:
+      "Stateful flows, retries, and fallbacks so every task completes predictably.",
     metric: "4.8M flows executed",
   },
   {
     icon: Infinity,
     title: "Continuous learning",
-    description: "Evaluation suites and telemetry loops keep experiences improving weekly.",
+    description:
+      "Evaluation suites and telemetry loops keep experiences improving weekly.",
     metric: "Continuous evaluation",
   },
 ];
@@ -237,7 +245,7 @@ function LandingContent() {
 
   // Populate prompt from URL when user returns from authentication
   useEffect(() => {
-    const urlPrompt = searchParams.get('prompt');
+    const urlPrompt = searchParams.get("prompt");
     if (urlPrompt && !prompt) {
       setPrompt(urlPrompt);
     }
@@ -271,32 +279,38 @@ function LandingContent() {
     });
     const data = await CreateprojectResponse.json();
 
-    const { project: { id } } = data;
+    let {
+      project: { id },
+    } = data;
 
     const postData = {
       text: prompt,
-      projectId: id
+      projectId: id,
     };
-    await axios.post('https://acemcp-service.rushikeshpatil8208.workers.dev/template', postData).then(res => {
-      let { projectMetadata } = res.data
-      setPromptMetadata(projectMetadata[0])
-
-    }).catch(err => {
-
-    }).finally(() => {
-      setIsGenerating(false);
-    });
+    await axios
+      .post(
+        "https://acemcp-service.rushikeshpatil8208.workers.dev/template",
+        postData,
+      )
+      .then((res) => {
+        let { projectMetadata } = res.data;
+        setPromptMetadata(projectMetadata[0]);
+      })
+      .catch((err) => { })
+      .finally(() => {
+        setIsGenerating(false);
+      });
     //project id
     // const data = await response.json();
     // console.log(data);
     // Authenticated user - redirect to onboarding with prompt
     const params = new URLSearchParams();
-    params.set("prompt", prompt);
-    router.push(`/onboarding?${params.toString()}`);
+    params.set("prompt", prompt)
+    // router.push(`/onboarding?projectId=${id}`);
+    router.push(`/onboarding?projectId=${id}}`);
 
     // router.push(`/onboarding?${params.toString()}`);
   };
-
 
   const handlePrimaryCta = () => {
     if (session) {
@@ -331,7 +345,7 @@ function LandingContent() {
       // Fetch user's projects
       const response = await fetch("/api/user/projects");
       const data = await response.json();
-      
+
       if (data.success && data.projects && data.projects.length > 0) {
         // Redirect to the most recent project
         const latestProject = data.projects[0];
@@ -354,12 +368,8 @@ function LandingContent() {
         <div className="absolute left-1/2 top-0 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-500/12 blur-[150px]" />
         <div className="absolute right-0 top-1/4 h-[460px] w-[460px] translate-x-1/4 rounded-full bg-sky-500/12 blur-[130px]" />
         <div className="absolute bottom-0 left-1/3 h-[420px] w-[420px] -translate-x-1/4 translate-y-1/3 rounded-full bg-blue-600/25 blur-[120px]" />
-        <div
-          className="absolute left-1/3 top-1/3 h-[300px] w-[300px] animate-[pulse_4s_ease-in-out_infinite] rounded-full bg-gradient-to-br from-blue-500/25 to-cyan-500/25 blur-3xl"
-        />
-        <div
-          className="absolute right-1/4 top-2/3 h-[260px] w-[260px] animate-[pulse_5s_ease-in-out_infinite] rounded-full bg-gradient-to-br from-sky-500/25 to-blue-500/25 blur-3xl"
-        />
+        <div className="absolute left-1/3 top-1/3 h-[300px] w-[300px] animate-[pulse_4s_ease-in-out_infinite] rounded-full bg-gradient-to-br from-blue-500/25 to-cyan-500/25 blur-3xl" />
+        <div className="absolute right-1/4 top-2/3 h-[260px] w-[260px] animate-[pulse_5s_ease-in-out_infinite] rounded-full bg-gradient-to-br from-sky-500/25 to-blue-500/25 blur-3xl" />
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.028)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.028)_1px,transparent_1px)] bg-[size:72px_72px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,black,transparent)]" />
       </div>
 
@@ -409,7 +419,11 @@ function LandingContent() {
               ) : (
                 <Button
                   variant="ghost"
-                  onClick={() => router.push("/authentication?mode=signin&redirectTo=%2Flanding")}
+                  onClick={() =>
+                    router.push(
+                      "/authentication?mode=signin&redirectTo=%2Flanding",
+                    )
+                  }
                   className="h-10 rounded-lg px-4 text-sm text-white/80 transition hover:text-white"
                 >
                   Sign in
@@ -445,7 +459,8 @@ function LandingContent() {
             </h1>
 
             <p className="mt-8 max-w-2xl text-lg leading-relaxed text-white/65 sm:text-xl">
-              Describe your agent once. Get production-grade MCP servers with orchestration, monitoring, and enterprise security automatically.
+              Describe your agent once. Get production-grade MCP servers with
+              orchestration, monitoring, and enterprise security automatically.
             </p>
 
             <div className="relative mt-12 w-full max-w-5xl">
@@ -456,7 +471,10 @@ function LandingContent() {
                     value={prompt}
                     onChange={(event) => setPrompt(event.target.value)}
                     onKeyDown={(event) => {
-                      if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+                      if (
+                        event.key === "Enter" &&
+                        (event.metaKey || event.ctrlKey)
+                      ) {
                         event.preventDefault();
                         handleGenerate();
                       }
@@ -466,8 +484,12 @@ function LandingContent() {
                   />
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-2 text-xs text-white/45">
-                      <kbd className="rounded-md border border-white/10 bg-white/5 px-2 py-1 font-mono">⌘</kbd>
-                      <kbd className="rounded-md border border-white/10 bg-white/5 px-2 py-1 font-mono">Enter</kbd>
+                      <kbd className="rounded-md border border-white/10 bg-white/5 px-2 py-1 font-mono">
+                        ⌘
+                      </kbd>
+                      <kbd className="rounded-md border border-white/10 bg-white/5 px-2 py-1 font-mono">
+                        Enter
+                      </kbd>
                       <span>to generate</span>
                     </div>
                     <Button
@@ -516,16 +538,18 @@ function LandingContent() {
                       <item.icon className="h-5 w-5" strokeWidth={2} />
                     </div>
                     <div className="space-y-2">
-                      <h3 className="text-lg font-semibold text-white">{item.title}</h3>
-                      <p className="text-sm leading-relaxed text-white/60">{item.description}</p>
+                      <h3 className="text-lg font-semibold text-white">
+                        {item.title}
+                      </h3>
+                      <p className="text-sm leading-relaxed text-white/60">
+                        {item.description}
+                      </p>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-
-
 
           <section className="mt-32">
             <div className="flex flex-col items-center text-center">
@@ -536,7 +560,8 @@ function LandingContent() {
                 Everything you need to build AI agents
               </h2>
               <p className="mt-4 max-w-2xl text-lg text-white/65">
-                From natural language to production-ready infrastructure, Akron handles the entire agent lifecycle.
+                From natural language to production-ready infrastructure, Akron
+                handles the entire agent lifecycle.
               </p>
             </div>
 
@@ -555,7 +580,9 @@ function LandingContent() {
                         {feature.tag}
                       </Badge>
                     </div>
-                    <CardTitle className="text-xl text-white">{feature.title}</CardTitle>
+                    <CardTitle className="text-xl text-white">
+                      {feature.title}
+                    </CardTitle>
                     <CardDescription className="text-base leading-relaxed text-white/65">
                       {feature.description}
                     </CardDescription>
@@ -563,10 +590,7 @@ function LandingContent() {
                   <CardContent>
                     <ul className="space-y-3 text-sm text-white/70">
                       {feature.bullets.map((bullet) => (
-                        <li
-                          key={bullet}
-                          className="flex items-start gap-3"
-                        >
+                        <li key={bullet} className="flex items-start gap-3">
                           <Check className="mt-0.5 h-4 w-4 shrink-0 text-white/40" />
                           <span>{bullet}</span>
                         </li>
@@ -585,9 +609,12 @@ function LandingContent() {
                 <Badge className="w-fit border-white/10 bg-white/10 px-3 py-1 text-xs uppercase tracking-wide text-white/75">
                   Animated pipeline
                 </Badge>
-                <h3 className="text-3xl font-bold text-white">From prompt to production</h3>
+                <h3 className="text-3xl font-bold text-white">
+                  From prompt to production
+                </h3>
                 <p className="text-white/65">
-                  Follow the real-time journey as Akron assembles, deploys, and optimizes your agent across the stack.
+                  Follow the real-time journey as Akron assembles, deploys, and
+                  optimizes your agent across the stack.
                 </p>
                 <div className="space-y-4">
                   {pipelineStages.map((stage, index) => {
@@ -598,25 +625,31 @@ function LandingContent() {
                         type="button"
                         onMouseEnter={() => setActiveStage(index)}
                         className={`group flex w-full items-center justify-between rounded-2xl border px-5 py-4 text-left transition-all duration-500 ${isActive
-                            ? "border-blue-400/70 bg-blue-500/10 shadow-[0_30px_100px_-60px_rgba(59,130,246,0.9)]"
-                            : "border-white/10 bg-white/5 hover:border-blue-400/40 hover:bg-blue-500/10"
+                          ? "border-blue-400/70 bg-blue-500/10 shadow-[0_30px_100px_-60px_rgba(59,130,246,0.9)]"
+                          : "border-white/10 bg-white/5 hover:border-blue-400/40 hover:bg-blue-500/10"
                           }`}
                       >
                         <div className="flex items-center gap-4">
                           <div
                             className={`flex size-11 items-center justify-center rounded-xl transition-all duration-500 ${isActive
-                                ? "bg-gradient-to-br from-blue-500 via-sky-500 to-cyan-500 text-white"
-                                : "bg-white/10 text-white/70"
+                              ? "bg-gradient-to-br from-blue-500 via-sky-500 to-cyan-500 text-white"
+                              : "bg-white/10 text-white/70"
                               }`}
                           >
                             <stage.icon className="h-5 w-5" />
                           </div>
                           <div className="space-y-1">
-                            <p className="text-sm font-semibold text-white">{stage.title}</p>
-                            <p className="text-xs text-white/55">{stage.description}</p>
+                            <p className="text-sm font-semibold text-white">
+                              {stage.title}
+                            </p>
+                            <p className="text-xs text-white/55">
+                              {stage.description}
+                            </p>
                           </div>
                         </div>
-                        <span className="text-xs font-medium text-white/60">{stage.metric}</span>
+                        <span className="text-xs font-medium text-white/60">
+                          {stage.metric}
+                        </span>
                       </button>
                     );
                   })}
@@ -661,7 +694,9 @@ function LandingContent() {
                     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white transition duration-500 group-hover:scale-105 group-hover:bg-gradient-to-br group-hover:from-blue-500 group-hover:via-sky-500 group-hover:to-cyan-500">
                       <capability.icon className="h-5 w-5" />
                     </div>
-                    <CardTitle className="text-xl text-white">{capability.title}</CardTitle>
+                    <CardTitle className="text-xl text-white">
+                      {capability.title}
+                    </CardTitle>
                     <CardDescription className="text-white/65">
                       {capability.description}
                     </CardDescription>
@@ -685,7 +720,8 @@ function LandingContent() {
                 Modern teams rely on Akron
               </h2>
               <p className="mt-4 max-w-2xl text-lg text-white/65">
-                Product, support, and operations teams deliver faster cycles with human-in-the-loop control and measurable gains.
+                Product, support, and operations teams deliver faster cycles
+                with human-in-the-loop control and measurable gains.
               </p>
             </div>
 
@@ -699,7 +735,9 @@ function LandingContent() {
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-white transition duration-500 group-hover:scale-105 group-hover:bg-gradient-to-br group-hover:from-blue-500 group-hover:via-sky-500 group-hover:to-cyan-500">
                       <signal.icon className="h-5 w-5" />
                     </div>
-                    <CardTitle className="text-xl text-white">{signal.title}</CardTitle>
+                    <CardTitle className="text-xl text-white">
+                      {signal.title}
+                    </CardTitle>
                     <CardDescription className="text-white/65">
                       {signal.description}
                     </CardDescription>
@@ -723,7 +761,8 @@ function LandingContent() {
                 Connect your entire stack
               </h2>
               <p className="mt-4 max-w-2xl text-lg text-white/65">
-                Pre-built adapters for popular tools, with type-safe clients and automatic credential management.
+                Pre-built adapters for popular tools, with type-safe clients and
+                automatic credential management.
               </p>
             </div>
 
@@ -734,7 +773,9 @@ function LandingContent() {
                   className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-blue-400/60 hover:bg-blue-500/10 hover:shadow-[0_30px_100px_-60px_rgba(59,130,246,0.85)]"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-white">{integration.name}</span>
+                    <span className="font-semibold text-white">
+                      {integration.name}
+                    </span>
                     <span className="rounded-lg border border-white/15 bg-white/10 px-2.5 py-1 text-xs text-white/70">
                       {integration.category}
                     </span>
@@ -755,7 +796,8 @@ function LandingContent() {
                   Start building your agent today
                 </h2>
                 <p className="mt-4 max-w-2xl text-lg text-white/70">
-                  Join teams shipping production AI agents with enterprise-grade infrastructure and security.
+                  Join teams shipping production AI agents with enterprise-grade
+                  infrastructure and security.
                 </p>
                 <div className="mt-8 flex flex-wrap justify-center gap-3">
                   <Button
@@ -788,14 +830,24 @@ function LandingContent() {
                     <Zap className="h-4 w-4 text-white" strokeWidth={2.5} />
                   </div>
                 </div>
-                <span className="text-sm font-semibold text-white/85">Akron</span>
+                <span className="text-sm font-semibold text-white/85">
+                  Akron
+                </span>
               </div>
-              <p className="text-sm text-white/45">© 2025 Akron. All rights reserved.</p>
+              <p className="text-sm text-white/45">
+                © 2025 Akron. All rights reserved.
+              </p>
               <div className="flex items-center gap-4">
-                <a href="#" className="text-white/45 transition-colors hover:text-white">
+                <a
+                  href="#"
+                  className="text-white/45 transition-colors hover:text-white"
+                >
                   <Github className="h-5 w-5" />
                 </a>
-                <a href="#" className="text-white/45 transition-colors hover:text-white">
+                <a
+                  href="#"
+                  className="text-white/45 transition-colors hover:text-white"
+                >
                   <Twitter className="h-5 w-5" />
                 </a>
               </div>

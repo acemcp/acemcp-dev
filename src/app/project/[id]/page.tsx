@@ -1,15 +1,11 @@
 "use client";
-import * as React from "react";  // ✅ add this
+import * as React from "react"; // ✅ add this
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useChat } from "@ai-sdk/react";
 import { useSupabaseAuth } from "@/providers/supabase-auth-provider";
-import {
-  DefaultChatTransport,
-  isToolUIPart,
-  getToolName,
-} from "ai";
+import { DefaultChatTransport, isToolUIPart, getToolName } from "ai";
 import {
   LayoutDashboard,
   Bot,
@@ -70,13 +66,21 @@ const metrics = [
   { label: "Avg Response", value: "1.2s", delta: "-15% vs last week" },
 ];
 
-const quickActions = ["Check Order", "Return Item", "Track Package", "Escalate"];
+const quickActions = [
+  "Check Order",
+  "Return Item",
+  "Track Package",
+  "Escalate",
+];
 
-export default function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
+export default function ProjectPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const router = useRouter();
   const { user, isLoading: authLoading } = useSupabaseAuth();
   const { id: projectId } = React.use(params);
-
 
   const [activeTab, setActiveTab] = useState<TabKey>("chat");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -122,6 +126,9 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
   const { messages } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/mcp",
+      body: {
+        projectId,
+      },
     }),
   });
 
@@ -144,17 +151,21 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-100">
       {/* Collapsible Sidebar */}
-      <aside className={cn(
-        "hidden flex-col border-r border-slate-800/60 bg-slate-950/80 backdrop-blur lg:flex transition-all duration-300 relative",
-        isSidebarCollapsed ? "w-20" : "w-68"
-      )}>
+      <aside
+        className={cn(
+          "hidden flex-col border-r border-slate-800/60 bg-slate-950/80 backdrop-blur lg:flex transition-all duration-300 relative",
+          isSidebarCollapsed ? "w-20" : "w-68",
+        )}
+      >
         <div className="px-4 py-6">
           <div className="flex items-center gap-3 rounded-2xl border border-slate-800/60 bg-slate-900/80 px-3 py-2">
             <span className="inline-flex size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-base font-semibold text-white shadow-lg shadow-blue-500/40">
               A
             </span>
             {!isSidebarCollapsed && (
-              <span className="text-lg font-semibold text-slate-100 bg-gradient-to-r from-blue-400 to-blue-200 bg-clip-text text-transparent">Akron</span>
+              <span className="text-lg font-semibold text-slate-100 bg-gradient-to-r from-blue-400 to-blue-200 bg-clip-text text-transparent">
+                Akron
+              </span>
             )}
           </div>
           {/* Toggle Button */}
@@ -162,7 +173,11 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
             className="absolute -right-3 top-8 flex items-center justify-center size-6 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-300 hover:text-white hover:bg-blue-500/30 hover:shadow-lg hover:shadow-blue-500/50 hover:border-white/50 transition-all shadow-lg z-10"
           >
-            {isSidebarCollapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
+            {isSidebarCollapsed ? (
+              <ChevronRight className="size-4" />
+            ) : (
+              <ChevronLeft className="size-4" />
+            )}
           </button>
         </div>
         <nav className="mt-8 space-y-1 px-4">
@@ -176,7 +191,7 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
                   "flex w-full items-center justify-between rounded-2xl px-3 py-2 text-sm font-medium transition",
                   isActive
                     ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/40"
-                    : "text-slate-400 hover:bg-slate-900/80 hover:text-slate-100"
+                    : "text-slate-400 hover:bg-slate-900/80 hover:text-slate-100",
                 )}
                 title={isSidebarCollapsed ? item.label : undefined}
               >
@@ -188,7 +203,9 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
                   <span
                     className={cn(
                       "rounded-full px-2 py-0.5 text-xs",
-                      isActive ? "bg-white/20" : "bg-slate-900/80 text-slate-300"
+                      isActive
+                        ? "bg-white/20"
+                        : "bg-slate-900/80 text-slate-300",
                     )}
                   >
                     {item.badge}
@@ -226,7 +243,9 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
             <ChatPlaygroundLayout
               messages={messages}
               isWorkflowViewOpen={isWorkflowViewOpen}
-              onToggleWorkflowView={() => setIsWorkflowViewOpen(!isWorkflowViewOpen)}
+              onToggleWorkflowView={() =>
+                setIsWorkflowViewOpen(!isWorkflowViewOpen)
+              }
             />
           )}
 
@@ -238,4 +257,3 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
     </div>
   );
 }
-
