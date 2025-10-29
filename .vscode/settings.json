@@ -13,5 +13,6 @@
     "zencoder.inlineSuggestions.enable": false,
     "mcpServers": {},
     "tabnine.experimentalAutoImports": true,
-    "editor.fontLigatures": false
+    "editor.fontLigatures": false,
+    "typescript.autoClosingTags": false
 }

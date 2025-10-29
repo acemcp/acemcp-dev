@@ -14,21 +14,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+
 import {
   Loader2,
-  Sparkles,
-  Github,
-  MessageSquare,
-  Database,
-  Mail,
-  Calendar,
-  FileText,
-  Cloud,
-  Code,
   Zap,
   CheckCircle2,
-  ArrowRight,
   Server,
 } from "lucide-react";
 import { useMCP } from "@/context";
@@ -37,12 +27,12 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 
 function OnboardingContent() {
-  const { promptMetadata, setPromptMetadata } = useMCP();
+  const { promptMetadata } = useMCP();
 
 
 
-   let {projectId} =  useParams()
-   console.log("projectId",projectId);
+  let { projectId } = useParams()
+  console.log("projectId", projectId);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading: authLoading } = useSupabaseAuth();
@@ -219,6 +209,12 @@ function OnboardingContent() {
     );
   };
 
+  // Placeholder function - not implementing functionality as instructed
+  const removeMcpServer = (serverId: string) => {
+    // Placeholder - functionality not implemented as per instructions
+    console.log("Remove server functionality not implemented:", serverId);
+  };
+
   // Update the handleDeploy validation:
   const handleDeploy = async () => {
     // Validate that at least one MCP server is configured
@@ -318,8 +314,8 @@ function OnboardingContent() {
 
 
 
-        console.log("data",data);
-        
+      console.log("data", data);
+
       if (error || !data) {
         console.error("Supabase insert error:", error);
       }
@@ -347,477 +343,437 @@ function OnboardingContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 py-12 px-4">
-      <div className="max-w-5xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 via-sky-500 to-cyan-500">
-              <Sparkles className="h-6 w-6 text-white" />
+    <div className="relative min-h-screen overflow-hidden bg-[#0a0a0a] font-sans text-white">
+      {/* Background - Same as authentication page */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        {/* Base flowing gradient - Dark blue to lighter blue */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `
+              linear-gradient(180deg, 
+                #0a0a0a 0%, 
+                #0f1419 15%, 
+                #1a1f2e 30%, 
+                #1e2a3a 45%, 
+                #243447 60%, 
+                #2a3f54 75%, 
+                #304a61 90%, 
+                #36556e 100%
+              )
+            `,
+          }}
+        />
+
+        {/* Complementary blue tone overlays for depth */}
+        <div
+          className="absolute inset-0 opacity-60"
+          style={{
+            background: `
+              radial-gradient(ellipse at 20% 20%, rgba(30, 58, 138, 0.4) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 30%, rgba(37, 99, 235, 0.3) 0%, transparent 50%),
+              radial-gradient(ellipse at 40% 70%, rgba(29, 78, 216, 0.35) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 80%, rgba(30, 64, 175, 0.25) 0%, transparent 50%),
+              radial-gradient(ellipse at 10% 60%, rgba(31, 81, 194, 0.3) 0%, transparent 50%),
+              radial-gradient(ellipse at 90% 40%, rgba(28, 100, 242, 0.2) 0%, transparent 50%)
+            `,
+          }}
+        />
+
+        {/* Large flowing orbs - Only blue tones */}
+        <div
+          className="absolute top-0 left-0 w-[100vh] h-[100vh] rounded-full opacity-12 animate-pulse"
+          style={{
+            background: 'radial-gradient(circle, rgba(30, 58, 138, 0.8) 0%, rgba(37, 99, 235, 0.3) 40%, transparent 70%)',
+            filter: 'blur(80px)',
+            animationDuration: '12s',
+            transform: 'translate(-40%, -40%)',
+          }}
+        />
+
+        <div
+          className="absolute top-1/4 right-0 w-[90vh] h-[90vh] rounded-full opacity-15 animate-pulse"
+          style={{
+            background: 'radial-gradient(circle, rgba(29, 78, 216, 0.7) 0%, rgba(30, 64, 175, 0.4) 35%, transparent 65%)',
+            filter: 'blur(70px)',
+            animationDuration: '10s',
+            animationDelay: '4s',
+            transform: 'translate(40%, -20%)',
+          }}
+        />
+
+        <div
+          className="absolute bottom-0 left-1/2 w-[120vh] h-[120vh] rounded-full opacity-10 animate-pulse"
+          style={{
+            background: 'radial-gradient(circle, rgba(31, 81, 194, 0.6) 0%, rgba(28, 100, 242, 0.3) 30%, transparent 60%)',
+            filter: 'blur(90px)',
+            animationDuration: '14s',
+            animationDelay: '2s',
+            transform: 'translate(-50%, 40%)',
+          }}
+        />
+      </div>
+
+      {/* Content */}
+      <div className="relative flex min-h-screen flex-col items-center justify-center px-4 py-16">
+        {/* AKRON Logo */}
+        <div className="mb-8 flex items-center gap-3">
+          <div className="relative flex h-12 w-12 items-center justify-center">
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#5F96F1] to-[#2472eb] blur-sm" />
+            <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#5F96F1] to-[#2472eb]">
+              <Zap className="h-6 w-6 text-white" strokeWidth={2.5} />
             </div>
           </div>
-          <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-            Welcome to Akron
-          </h1>
-          <p className="text-lg text-slate-400">
-            Let's set up your AI agent in 3 simple steps
-          </p>
+          <span className="text-3xl font-bold text-white">akron</span>
         </div>
 
-        {/* Progress Steps */}
-        <div className="flex items-center justify-center mb-12">
-          <div className="flex items-center gap-4">
-            {[1, 2, 3].map((stepNum) => (
-              <div key={stepNum} className="flex items-center gap-4">
-                <div
-                  className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all ${step >= stepNum
-                    ? "border-blue-500 bg-blue-500 text-white"
-                    : "border-slate-700 bg-slate-900 text-slate-500"
-                    }`}
-                >
-                  {step > stepNum ? (
-                    <CheckCircle2 className="h-5 w-5" />
-                  ) : (
-                    stepNum
+        <div className="w-full max-w-2xl">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold mb-3 text-white">
+              Welcome to Akron
+            </h1>
+            <p className="text-lg text-white/60">
+              Let's set up your AI agent in 3 simple steps
+            </p>
+          </div>
+
+          {/* Progress Steps */}
+          <div className="flex items-center justify-center mb-12">
+            <div className="flex items-center gap-4">
+              {[1, 2, 3].map((stepNum) => (
+                <div key={stepNum} className="flex items-center gap-4">
+                  <div
+                    className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all font-semibold ${step >= stepNum
+                      ? "border-[#5F96F1] bg-[#5F96F1] text-white"
+                      : "border-white/20 bg-transparent text-white/40"
+                      }`}
+                  >
+                    {step > stepNum ? (
+                      <CheckCircle2 className="h-6 w-6" />
+                    ) : (
+                      stepNum
+                    )}
+                  </div>
+                  {stepNum < 3 && (
+                    <div
+                      className={`w-16 h-0.5 transition-all ${step > stepNum ? "bg-[#5F96F1]" : "bg-white/20"
+                        }`}
+                    />
                   )}
                 </div>
-                {stepNum < 3 && (
-                  <div
-                    className={`w-16 h-0.5 ${step > stepNum ? "bg-blue-500" : "bg-slate-700"
-                      }`}
-                  />
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Step 1: Project Metadata */}
-        {step === 1 && (
-          <Card className="border-blue-900/50 bg-gradient-to-br from-slate-900/90 via-blue-950/30 to-slate-900/90 backdrop-blur-xl shadow-2xl">
-            <CardHeader>
-              <CardTitle className="text-2xl text-white">
-                Project Details
-              </CardTitle>
-              <CardDescription className="text-slate-400">
-                Tell us about your AI agent project
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="projectName" className="text-slate-200">
-                  Project Name *
-                </Label>
-                <Input
-                  id="projectName"
-                  value={projectName}
-                  onChange={(e) => setProjectName(e.target.value)}
-                  placeholder="e.g., Customer Support Agent"
-                  className="bg-slate-950 border-slate-700 text-white"
-                />
+          {/* Step 1: Project Metadata */}
+          {step === 1 && (
+            <div className="space-y-8">
+              {/* Header */}
+              <div className="text-center">
+                <h2 className="text-2xl font-semibold text-white/90 mb-4">
+                  Project Details
+                </h2>
+                <p className="text-white/60">
+                  Tell us about your AI agent project
+                </p>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="projectDescription" className="text-slate-200">
-                  Description
-                </Label>
-                <Textarea
-                  id="projectDescription"
-                  value={projectDescription}
-                  onChange={(e) => setProjectDescription(e.target.value)}
-                  placeholder="What does this agent do?"
-                  className="bg-slate-950 border-slate-700 text-white min-h-[100px]"
-                />
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="identity" className="text-slate-200">
-                    Agent Identity
-                  </Label>
-                  <Input
-                    id="identity"
-                    value={identity}
-                    onChange={(e) => setIdentity(e.target.value)}
-                    placeholder="e.g., Helpful customer service assistant"
-                    className="bg-slate-950 border-slate-700 text-white"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="tone" className="text-slate-200">
-                    Tone
-                  </Label>
-                  <Input
-                    id="tone"
-                    value={tone}
-                    onChange={(e) => setTone(e.target.value)}
-                    placeholder="e.g., Professional and friendly"
-                    className="bg-slate-950 border-slate-700 text-white"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="instructions" className="text-slate-200">
-                  Instructions
-                </Label>
-                <Textarea
-                  id="instructions"
-                  value={instructions}
-                  onChange={(e) => setInstructions(e.target.value)}
-                  placeholder="Specific instructions for the agent..."
-                  className="bg-slate-950 border-slate-700 text-white min-h-[120px]"
-                />
-              </div>
-
-              <Button
-                onClick={handleCreateProject}
-                disabled={isLoading || !projectName.trim()}
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400"
-              >
-                {isLoading ? (
-                  <>
-                    Creating...
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-
-                  </>
-                ) : (
-                  <>
-                    Continue
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Step 2: Edit Metadata */}
-        {step === 2 && (
-          <Card className="border-blue-900/50 bg-gradient-to-br from-slate-900/90 via-blue-950/30 to-slate-900/90 backdrop-blur-xl shadow-2xl">
-            <CardHeader>
-              <CardTitle className="text-2xl text-white">
-                Review & Edit Metadata
-              </CardTitle>
-              <CardDescription className="text-slate-400">
-                Fine-tune your project configuration
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label className="text-slate-200">Project Name</Label>
+              {/* Form Fields */}
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <Label className="text-white/80 font-medium">Project Name *</Label>
                   <Input
                     value={projectName}
                     onChange={(e) => setProjectName(e.target.value)}
-                    className="bg-slate-950 border-slate-700 text-white"
+                    placeholder="e.g., Customer Support Agent"
+                    className="h-12 rounded-xl border border-white/15 bg-[#2a2a2a] text-white placeholder:text-white/40 focus:border-white/30 focus:bg-[#333333] backdrop-blur-sm text-base"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-slate-200">Tone</Label>
+                <div className="space-y-3">
+                  <Label className="text-white/80 font-medium">Description</Label>
+                  <Textarea
+                    value={projectDescription}
+                    onChange={(e) => setProjectDescription(e.target.value)}
+                    placeholder="What does this agent do?"
+                    className="min-h-[100px] rounded-xl border border-white/15 bg-[#2a2a2a] text-white placeholder:text-white/40 focus:border-white/30 focus:bg-[#333333] backdrop-blur-sm text-base resize-none"
+                  />
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <Label className="text-white/80 font-medium">Agent Identity</Label>
+                    <Input
+                      value={identity}
+                      onChange={(e) => setIdentity(e.target.value)}
+                      placeholder="e.g., Helpful customer service assistant"
+                      className="h-12 rounded-xl border border-white/15 bg-[#2a2a2a] text-white placeholder:text-white/40 focus:border-white/30 focus:bg-[#333333] backdrop-blur-sm text-base"
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label className="text-white/80 font-medium">Tone</Label>
+                    <Input
+                      value={tone}
+                      onChange={(e) => setTone(e.target.value)}
+                      placeholder="e.g., Professional and friendly"
+                      className="h-12 rounded-xl border border-white/15 bg-[#2a2a2a] text-white placeholder:text-white/40 focus:border-white/30 focus:bg-[#333333] backdrop-blur-sm text-base"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <Label className="text-white/80 font-medium">Instructions</Label>
+                  <Textarea
+                    value={instructions}
+                    onChange={(e) => setInstructions(e.target.value)}
+                    placeholder="Specific instructions for the agent..."
+                    className="min-h-[120px] rounded-xl border border-white/15 bg-[#2a2a2a] text-white placeholder:text-white/40 focus:border-white/30 focus:bg-[#333333] backdrop-blur-sm text-base resize-none"
+                  />
+                </div>
+              </div>
+
+              {/* Next Button */}
+              <Button
+                onClick={handleCreateProject}
+                disabled={isLoading || !projectName.trim()}
+                className="w-full h-14 justify-center bg-gradient-to-r from-[#5F96F1] to-[#2472eb] text-white hover:opacity-90 transition-all duration-200 rounded-xl font-medium text-base"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Continue"
+                )}
+              </Button>
+            </div>
+          )}
+
+          {/* Step 2: Edit Metadata */}
+          {step === 2 && (
+            <div className="space-y-8">
+              {/* Question */}
+              <div className="text-center">
+                <h2 className="text-2xl font-semibold text-white/90 mb-4">
+                  Tell us about your project
+                </h2>
+                <p className="text-white/60">
+                  Help us understand what you're building
+                </p>
+              </div>
+
+              {/* Form Fields */}
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <Label className="text-white/80 font-medium">Project Name</Label>
                   <Input
-                    value={tone}
-                    onChange={(e) => setTone(e.target.value)}
-                    className="bg-slate-950 border-slate-700 text-white"
+                    value={projectName}
+                    onChange={(e) => setProjectName(e.target.value)}
+                    placeholder="Enter your project name"
+                    className="h-12 rounded-xl border border-white/15 bg-[#2a2a2a] text-white placeholder:text-white/40 focus:border-white/30 focus:bg-[#333333] backdrop-blur-sm text-base"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label className="text-white/80 font-medium">Description</Label>
+                  <Textarea
+                    value={projectDescription}
+                    onChange={(e) => setProjectDescription(e.target.value)}
+                    placeholder="What does this project do?"
+                    className="min-h-[100px] rounded-xl border border-white/15 bg-[#2a2a2a] text-white placeholder:text-white/40 focus:border-white/30 focus:bg-[#333333] backdrop-blur-sm text-base resize-none"
+                  />
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <Label className="text-white/80 font-medium">Agent Identity</Label>
+                    <Input
+                      value={identity}
+                      onChange={(e) => setIdentity(e.target.value)}
+                      placeholder="e.g., Helpful assistant"
+                      className="h-12 rounded-xl border border-white/15 bg-[#2a2a2a] text-white placeholder:text-white/40 focus:border-white/30 focus:bg-[#333333] backdrop-blur-sm text-base"
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label className="text-white/80 font-medium">Tone</Label>
+                    <Input
+                      value={tone}
+                      onChange={(e) => setTone(e.target.value)}
+                      placeholder="e.g., Professional and friendly"
+                      className="h-12 rounded-xl border border-white/15 bg-[#2a2a2a] text-white placeholder:text-white/40 focus:border-white/30 focus:bg-[#333333] backdrop-blur-sm text-base"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <Label className="text-white/80 font-medium">Instructions</Label>
+                  <Textarea
+                    value={instructions}
+                    onChange={(e) => setInstructions(e.target.value)}
+                    placeholder="Specific instructions for the agent..."
+                    className="min-h-[120px] rounded-xl border border-white/15 bg-[#2a2a2a] text-white placeholder:text-white/40 focus:border-white/30 focus:bg-[#333333] backdrop-blur-sm text-base resize-none"
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-slate-200">Description</Label>
-                <Textarea
-                  value={projectDescription}
-                  onChange={(e) => setProjectDescription(e.target.value)}
-                  className="bg-slate-950 border-slate-700 text-white min-h-[80px]"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-slate-200">Agent Identity</Label>
-                <Input
-                  value={identity}
-                  onChange={(e) => setIdentity(e.target.value)}
-                  className="bg-slate-950 border-slate-700 text-white"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-slate-200">Instructions</Label>
-                <Textarea
-                  value={instructions}
-                  onChange={(e) => setInstructions(e.target.value)}
-                  className="bg-slate-950 border-slate-700 text-white min-h-[120px]"
-                />
-              </div>
-
-              <div className="flex gap-3">
+              {/* Navigation Buttons */}
+              <div className="flex gap-4">
                 <Button
                   onClick={() => setStep(1)}
                   variant="outline"
-                  className="flex-1 border-slate-700 bg-slate-950 text-white hover:bg-slate-800"
+                  className="flex-1 h-12 rounded-xl border border-white/15 bg-[#2a2a2a] text-white/90 hover:bg-[#333333] hover:border-white/25 transition-all duration-200 backdrop-blur-sm font-medium"
                 >
                   Back
                 </Button>
                 <Button
                   onClick={handleUpdateMetadata}
                   disabled={isLoading}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400"
+                  className="flex-1 h-12 justify-center bg-gradient-to-r from-[#5F96F1] to-[#2472eb] text-white hover:opacity-90 transition-all duration-200 rounded-xl font-medium"
                 >
                   {isLoading ? (
                     <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Saving...
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin " />
                     </>
                   ) : (
-                    <>
-                      Continue
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </>
+                    "Continue"
                   )}
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          )}
 
-        {/* Step 3: MCP Servers & Deploy */}
-        {step === 3 && (
-          <div className="space-y-6">
-            <Card className="border-blue-900/50 bg-gradient-to-br from-slate-900/90 via-blue-950/30 to-slate-900/90 backdrop-blur-xl shadow-2xl">
-              <CardHeader>
-                <CardTitle className="text-2xl text-white flex items-center gap-2">
-                  <Server className="h-6 w-6 text-blue-400" />
+          {/* Step 3: MCP Servers & Deploy */}
+          {step === 3 && (
+            <div className="space-y-8">
+              {/* Header */}
+              <div className="text-center">
+                <h2 className="text-2xl font-semibold text-white/90 mb-4 flex items-center justify-center gap-3">
+                  <Server className="h-7 w-7 text-[#5F96F1]" />
                   Connect MCP Servers
-                </CardTitle>
-                <CardDescription className="text-slate-400">
+                </h2>
+                <p className="text-white/60">
                   Add MCP server URLs to enhance your agent's capabilities
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
+                </p>
+              </div>
+
+              {/* MCP Servers Container */}
+              <div className="space-y-6">
                 {/* Add MCP Server Button */}
                 {mcpServers.length === 0 && (
-                  <div className="text-center py-8">
-                    <p className="text-slate-400 mb-4">
-                      No MCP servers configured yet
-                    </p>
+                  <div className="text-center py-12">
+                    <div className="mb-6">
+                      <div className="w-16 h-16 mx-auto rounded-2xl bg-white/5 border border-white/15 flex items-center justify-center mb-4">
+                        <Server className="h-8 w-8 text-white/40" />
+                      </div>
+                      <p className="text-white/60 mb-6">
+                        No MCP servers configured yet
+                      </p>
+                    </div>
                     <Button
                       onClick={addMcpServer}
-                      variant="outline"
-                      className="border-blue-500/50 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 hover:border-blue-400"
+                      className="h-12 px-8 bg-gradient-to-r from-[#5F96F1] to-[#2472eb] text-white hover:opacity-90 transition-all duration-200 rounded-xl font-medium"
                     >
-                      <Server className="mr-2 h-4 w-4" />
+                      <Server className="mr-2 h-5 w-5" />
                       Add MCP Server
                     </Button>
                   </div>
                 )}
 
-            // Replace the MCP Server Card JSX in your component
-
                 {mcpServers.map((server, index) => (
-                  <Card
+                  <div
                     key={server.id}
-                    className="border-blue-800/30 bg-gradient-to-br from-slate-950/50 to-blue-950/20 backdrop-blur-sm"
+                    className="rounded-2xl border border-white/15 bg-white/5 backdrop-blur-sm p-6"
                   >
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-lg text-white flex items-center justify-between">
-                        <span className="flex items-center gap-2">
-                          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-semibold text-sm">
-                            {index + 1}
-                          </div>
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#5F96F1] to-[#2472eb] flex items-center justify-center text-white font-semibold">
+                          {index + 1}
+                        </div>
+                        <h3 className="text-lg font-semibold text-white">
                           MCP Server {index + 1}
-                        </span>
-                        <button
-                          onClick={() => removeMcpServer(server.id)}
-                          className="text-slate-400 hover:text-red-400 text-2xl leading-none"
-                          title="Remove server"
-                        >
-                          ×
-                        </button>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {/* Status Badge with Validation State */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-slate-400">Status:</span>
-                        {server.isValidating ? (
-                          <Badge
-                            variant="outline"
-                            className="border-yellow-600 text-yellow-400 bg-yellow-500/10"
-                          >
-                            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                            Validating...
-                          </Badge>
-                        ) : server.isValid === true ? (
-                          <Badge
-                            variant="outline"
-                            className="border-green-600 text-green-400 bg-green-500/10"
-                          >
-                            <CheckCircle2 className="mr-1 h-3 w-3" />
-                            Validated
-                          </Badge>
-                        ) : server.isValid === false ? (
-                          <Badge
-                            variant="outline"
-                            className="border-red-600 text-red-400 bg-red-500/10"
-                          >
-                            <svg
-                              className="mr-1 h-3 w-3"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M6 18L18 6M6 6l12 12"
-                              />
-                            </svg>
-                            Invalid
-                          </Badge>
-                        ) : (
-                          <Badge
-                            variant="outline"
-                            className="border-slate-600 text-slate-400"
-                          >
-                            Not Validated
-                          </Badge>
-                        )}
+                        </h3>
                       </div>
+                      <button
+                        onClick={() => removeMcpServer(server.id)}
+                        className="text-white/40 hover:text-red-400 text-2xl leading-none transition-colors"
+                        title="Remove server"
+                      >
+                        ×
+                      </button>
+                    </div>
 
-                      {/* Server URL Input */}
-                      <div className="space-y-2">
-                        <Label className="text-slate-200">MCP Server URL</Label>
-                        <div className="flex gap-2">
-                          <Input
-                            value={server.url}
-                            onChange={(e) => {
-                              updateMcpServer(server.id, {
-                                url: e.target.value,
-                                isValid: null, // Reset validation when URL changes
-                                validationError: undefined,
-                              });
-                            }}
-                            className="flex-1 bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
-                            placeholder="https://your-mcp-server.com/mcp"
-                          />
-                          <Button
-                            onClick={() => validateServer(server.id)}
-                            className="bg-gradient-to-r from-pink-600 via-purple-600 to-orange-500 hover:from-pink-500 hover:via-purple-500 hover:to-orange-400 text-white font-semibold px-8"
-                            disabled={!server.url.trim() || server.isValidating}
-                          >
-                            {server.isValidating ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Validating
-                              </>
-                            ) : (
-                              "Validate"
-                            )}
-                          </Button>
+                    {/* Status Badge */}
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-sm text-white/60">Status:</span>
+                      {server.isValidating ? (
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-sm">
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          Validating...
                         </div>
-                      </div>
-
-                      {/* Validation Error Message */}
-                      {server.validationError && (
-                        <div className="rounded-lg bg-red-500/10 border border-red-500/30 p-3">
-                          <div className="flex items-start gap-2">
-                            <svg
-                              className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                            <div className="flex-1">
-                              <p className="text-sm font-medium text-red-400">
-                                Validation Failed
-                              </p>
-                              <p className="text-xs text-red-300 mt-1">
-                                {server.validationError}
-                              </p>
-                            </div>
-                          </div>
+                      ) : server.isValid === true ? (
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-sm">
+                          <CheckCircle2 className="h-3 w-3" />
+                          Validated
+                        </div>
+                      ) : server.isValid === false ? (
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                          Invalid
+                        </div>
+                      ) : (
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/15 text-white/60 text-sm">
+                          Not Validated
                         </div>
                       )}
+                    </div>
 
-                      {/* Success Message with Tools */}
-                      {server.isValid && server.tools && (
-                        <div className="rounded-lg bg-green-500/10 border border-green-500/30 p-3">
-                          <div className="flex items-start gap-2">
-                            <CheckCircle2 className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
-                            <div className="flex-1">
-                              <p className="text-sm font-medium text-green-400">
-                                Server Validated Successfully
-                              </p>
-                              <p className="text-xs text-green-300 mt-1">
-                                Found {server.tools.length} tool(s)
-                              </p>
-                              {server.tools.length > 0 && (
-                                <div className="mt-2 flex flex-wrap gap-1">
-                                  {server.tools.slice(0, 5).map((tool: any, idx: number) => (
-                                    <Badge
-                                      key={idx}
-                                      variant="outline"
-                                      className="border-green-600/50 text-green-400 bg-green-500/5 text-xs"
-                                    >
-                                      {tool.name}
-                                    </Badge>
-                                  ))}
-                                  {server.tools.length > 5 && (
-                                    <Badge
-                                      variant="outline"
-                                      className="border-green-600/50 text-green-400 bg-green-500/5 text-xs"
-                                    >
-                                      +{server.tools.length - 5} more
-                                    </Badge>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Authentication Section (Collapsible) */}
-                      <div className="border border-slate-700/50 rounded-lg bg-slate-900/30">
-                        <button
-                          onClick={() =>
+                    {/* Server URL Input */}
+                    <div className="space-y-3 mb-4">
+                      <Label className="text-white/80 font-medium">MCP Server URL</Label>
+                      <div className="flex gap-3">
+                        <Input
+                          value={server.url}
+                          onChange={(e) => {
                             updateMcpServer(server.id, {
-                              showAuth: !server.showAuth,
-                            })
-                          }
-                          className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-slate-800/30 transition-colors rounded-lg"
+                              url: e.target.value,
+                              isValid: null,
+                              validationError: undefined,
+                            });
+                          }}
+                          className="flex-1 h-12 rounded-xl border border-white/15 bg-[#2a2a2a] text-white placeholder:text-white/40 focus:border-white/30 focus:bg-[#333333] backdrop-blur-sm text-base"
+                          placeholder="https://your-mcp-server.com/mcp"
+                        />
+                        <Button
+                          onClick={() => validateServer(server.id)}
+                          className="h-12 px-6 bg-gradient-to-r from-[#5F96F1] to-[#2472eb] text-white hover:opacity-90 transition-all duration-200 rounded-xl font-medium"
+                          disabled={!server.url.trim() || server.isValidating}
                         >
-                          <div className="flex items-center gap-2">
-                            <svg
-                              className="h-5 w-5 text-slate-400"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                              />
-                            </svg>
-                            <span className="text-slate-200 font-medium">
-                              Authentication (Optional)
-                            </span>
-                          </div>
+                          {server.isValidating ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Validating
+                            </>
+                          ) : (
+                            "Validate"
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Validation Error Message */}
+                    {server.validationError && (
+                      <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-4">
+                        <div className="flex items-start gap-3">
                           <svg
-                            className={`h-5 w-5 text-slate-400 transition-transform ${server.showAuth ? "rotate-180" : ""
-                              }`}
+                            className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -826,96 +782,183 @@ function OnboardingContent() {
                               strokeLinecap="round"
                               strokeLinejoin="round"
                               strokeWidth={2}
-                              d="M19 9l-7 7-7-7"
+                              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                             />
                           </svg>
-                        </button>
-
-                        {server.showAuth && (
-                          <div className="px-4 pb-4 space-y-4">
-                            <div className="space-y-2">
-                              <Label className="text-slate-200">Header Name</Label>
-                              <Input
-                                value={server.authHeader}
-                                onChange={(e) => {
-                                  updateMcpServer(server.id, {
-                                    authHeader: e.target.value,
-                                    isValid: null, // Reset validation when auth changes
-                                  });
-                                }}
-                                className="bg-slate-900/50 border-slate-700 text-white"
-                                placeholder="Authorization"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-slate-200">Bearer Value</Label>
-                              <div className="relative">
-                                <Input
-                                  type="password"
-                                  value={server.authValue}
-                                  onChange={(e) => {
-                                    updateMcpServer(server.id, {
-                                      authValue: e.target.value,
-                                      isValid: null, // Reset validation when auth changes
-                                    });
-                                  }}
-                                  className="bg-slate-900/50 border-slate-700 text-white pr-10"
-                                  placeholder="Enter bearer token"
-                                />
-                              </div>
-                              <p className="text-xs text-slate-400">
-                                Token will be sent as: {server.authHeader}:{" "}
-                                {server.authValue ? "Bearer ***" : "Bearer <token>"}
-                              </p>
-                            </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-red-400">
+                              Validation Failed
+                            </p>
+                            <p className="text-xs text-red-300 mt-1">
+                              {server.validationError}
+                            </p>
                           </div>
-                        )}
+                        </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    )}
+
+                    {/* Success Message with Tools */}
+                    {server.isValid && server.tools && (
+                      <div className="rounded-xl bg-green-500/10 border border-green-500/30 p-4">
+                        <div className="flex items-start gap-3">
+                          <CheckCircle2 className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-green-400">
+                              Server Validated Successfully
+                            </p>
+                            <p className="text-xs text-green-300 mt-1">
+                              Found {server.tools.length} tool(s)
+                            </p>
+                            {server.tools.length > 0 && (
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {server.tools.slice(0, 5).map((tool: any, idx: number) => (
+                                  <span
+                                    key={idx}
+                                    className="inline-flex items-center px-2 py-1 rounded-md bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-medium"
+                                  >
+                                    {tool.name}
+                                  </span>
+                                ))}
+                                {server.tools.length > 5 && (
+                                  <span className="inline-flex items-center px-2 py-1 rounded-md bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-medium">
+                                    +{server.tools.length - 5} more
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Authentication Section (Collapsible) */}
+                    <div className="border border-white/15 rounded-xl bg-white/5">
+                      <button
+                        onClick={() =>
+                          updateMcpServer(server.id, {
+                            showAuth: !server.showAuth,
+                          })
+                        }
+                        className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-white/5 transition-colors rounded-xl"
+                      >
+                        <div className="flex items-center gap-3">
+                          <svg
+                            className="h-5 w-5 text-white/60"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                            />
+                          </svg>
+                          <span className="text-white/80 font-medium">
+                            Authentication (Optional)
+                          </span>
+                        </div>
+                        <svg
+                          className={`h-5 w-5 text-white/60 transition-transform ${server.showAuth ? "rotate-180" : ""
+                            }`}
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 9l-7 7-7-7"
+                          />
+                        </svg>
+                      </button>
+
+                      {server.showAuth && (
+                        <div className="px-4 pb-4 space-y-4 animate-in slide-in-from-top-2 duration-300">
+                          <div className="space-y-3">
+                            <Label className="text-white/80 font-medium">Header Name</Label>
+                            <Input
+                              value={server.authHeader}
+                              onChange={(e) => {
+                                updateMcpServer(server.id, {
+                                  authHeader: e.target.value,
+                                  isValid: null,
+                                });
+                              }}
+                              className="h-12 rounded-xl border border-white/15 bg-[#2a2a2a] text-white placeholder:text-white/40 focus:border-white/30 focus:bg-[#333333] backdrop-blur-sm text-base"
+                              placeholder="Authorization"
+                            />
+                          </div>
+                          <div className="space-y-3">
+                            <Label className="text-white/80 font-medium">Bearer Value</Label>
+                            <Input
+                              type="password"
+                              value={server.authValue}
+                              onChange={(e) => {
+                                updateMcpServer(server.id, {
+                                  authValue: e.target.value,
+                                  isValid: null,
+                                });
+                              }}
+                              className="h-12 rounded-xl border border-white/15 bg-[#2a2a2a] text-white placeholder:text-white/40 focus:border-white/30 focus:bg-[#333333] backdrop-blur-sm text-base"
+                              placeholder="Enter bearer token"
+                            />
+                            <p className="text-xs text-white/50">
+                              Token will be sent as: {server.authHeader}:{" "}
+                              {server.authValue ? "Bearer ***" : "Bearer <token>"}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 ))}
+
                 {/* Add Another Server Button */}
                 {mcpServers.length > 0 && (
                   <Button
                     onClick={addMcpServer}
                     variant="outline"
-                    className="w-full border-dashed border-blue-500/50 bg-blue-500/5 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400"
+                    className="w-full h-12 border-dashed border-white/30 bg-white/5 text-white/80 hover:bg-white/10 hover:border-white/40 transition-all duration-200 rounded-xl font-medium"
                   >
-                    <Server className="mr-2 h-4 w-4" />
+                    <Server className="mr-2 h-5 w-5" />
                     Add Another MCP Server
                   </Button>
                 )}
-              </CardContent>
-            </Card>
+              </div>
 
-            <div className="flex gap-3">
-              <Button
-                onClick={() => setStep(2)}
-                variant="outline"
-                className="flex-1 border-slate-700 bg-slate-950 text-white hover:bg-slate-800"
-              >
-                Back
-              </Button>
-              <Button
-                onClick={handleDeploy}
-                disabled={isLoading}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400"
-              >
-                {isLoading ? (
-                  <>
-                    Deploying...
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  </>
-                ) : (
-                  <>
-                    <Zap className="mr-2 h-4 w-4" />
-                    Deploy & Continue
-                  </>
-                )}
-              </Button>
+              {/* Navigation Buttons */}
+              <div className="flex gap-4">
+                <Button
+                  onClick={() => setStep(2)}
+                  variant="outline"
+                  className="flex-1 h-12 rounded-xl border border-white/15 bg-[#2a2a2a] text-white/90 hover:bg-[#333333] hover:border-white/25 transition-all duration-200 backdrop-blur-sm font-medium"
+                >
+                  Back
+                </Button>
+                <Button
+                  onClick={handleDeploy}
+                  disabled={isLoading}
+                  className="flex-1 h-12 justify-center bg-gradient-to-r from-[#5F96F1] to-[#2472eb] text-white hover:opacity-90 transition-all duration-200 rounded-xl font-medium"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Deploying...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="mr-2 h-4 w-4" />
+                      Deploy & Continue
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
