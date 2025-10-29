@@ -42,6 +42,7 @@ function OnboardingContent() {
 
 
    let {projectId} =  useParams()
+   console.log("projectId",projectId);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading: authLoading } = useSupabaseAuth();
@@ -286,7 +287,7 @@ function OnboardingContent() {
       }
 
       // Redirect to main dashboard
-      router.replace(`project/${projectId}?promptMetadata=${promptMetadata?.id}`);
+      router.replace(`project/${promptMetadata?.id}`);
     } catch (error) {
       console.error("Error deploying:", error);
       alert("Failed to deploy");
