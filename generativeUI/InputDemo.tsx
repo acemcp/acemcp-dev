@@ -23,7 +23,7 @@ import {
   PromptInputTools,
 } from "@/components/ai-elements/prompt-input";
 import { GlobeIcon } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import {
   Conversation,
@@ -32,32 +32,31 @@ import {
 } from "@/components/ai-elements/conversation";
 import {
   Message,
-  MessageAvatar, // <-- 1. IMPORTED
+  MessageAvatar,
   MessageContent,
 } from "@/components/ai-elements/message";
 import { Response } from "@/components/ai-elements/response";
-import { Shimmer } from "@/components/ai-elements/shimmer"; // Import the Shimmer component
-import { DefaultChatTransport } from "ai";
+import { Shimmer } from "@/components/ai-elements/shimmer";
+import { DefaultChatTransport, APICallError } from "ai"; // ✅ Added import
 
 const models = [
   { id: "gpt-4o", name: "GPT-4o" },
   { id: "claude-opus-4-20250514", name: "Claude 4 Opus" },
 ];
 
-// --- 2. ADDED CONSTANTS FOR AVATARS ---
 const USER_AVATAR = "https://github.com/haydenbleasel.png";
 const USER_NAME = "User";
 const ASSISTANT_AVATAR = "https://github.com/openai.png";
 const ASSISTANT_NAME = "Assistant";
-// ----------------------------------------
 
 const InputDemo = ({ projectId }: any) => {
   const [text, setText] = useState<string>("");
   const [model, setModel] = useState<string>(models[0].id);
   const [useWebSearch, setUseWebSearch] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // ✅ Added error message state
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const { messages, status, sendMessage } = useChat({
+  const { messages, status, sendMessage, error } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/mcp",
       body: {
@@ -65,6 +64,12 @@ const InputDemo = ({ projectId }: any) => {
       },
     }),
   });
+
+  useEffect(() => {
+    if (error) {
+      setErrorMessage(`${error}`);
+    }
+  }, [error]);
 
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
@@ -89,18 +94,13 @@ const InputDemo = ({ projectId }: any) => {
     setText("");
   };
 
-
-
-
   return (
     // This layout structure is correct
     <div className="flex flex-col h-[88vh] items-center justify-center overflow-hidden">
       <div className="flex w-full max-w-6xl flex-col border rounded-lg shadow-md bg-background h-full mx-auto overflow-hidden">
         <Conversation>
           <ConversationContent>
-            {/* --- 3. UPDATED RENDER LOOP --- */}
             {messages?.map((message) => {
-              // Only render user and assistant messages
               if (message.role !== "user" && message.role !== "assistant") {
                 return null;
               }
@@ -109,7 +109,6 @@ const InputDemo = ({ projectId }: any) => {
 
               return (
                 <Message from={message.role} key={message.id}>
-                  {/* This <div> wrapper is needed for layout, just like in Example.tsx */}
                   <div>
                     <MessageContent>
                       {message.parts.map((part, i) => {
@@ -126,7 +125,6 @@ const InputDemo = ({ projectId }: any) => {
                       })}
                     </MessageContent>
                   </div>
-                  {/* Add the Avatar component */}
                   <MessageAvatar
                     name={isUser ? USER_NAME : ASSISTANT_NAME}
                     src={isUser ? USER_AVATAR : ASSISTANT_AVATAR}
@@ -134,27 +132,33 @@ const InputDemo = ({ projectId }: any) => {
                 </Message>
               );
             })}
-            {/* ------------------------------- */}
 
-            {/* --- 4. UPDATED LOADING STATE --- */}
             {status === "submitted" && (
               <Message from="assistant">
-                {/* Added the <div> wrapper */}
                 <div>
                   <MessageContent>
                     <Shimmer>{" Generating Response... "}</Shimmer>
                   </MessageContent>
                 </div>
-                {/* Added the Avatar */}
                 <MessageAvatar name={ASSISTANT_NAME} src={ASSISTANT_AVATAR} />
               </Message>
             )}
-            {/* --------------------------------- */}
+
+            {/* ✅ Display error message in chat */}
+            {errorMessage && status !== "submitted" && (
+              <Message from="assistant">
+                <div>
+                  <MessageContent>
+                    <Response>{`⚠️ ${errorMessage}`}</Response>
+                  </MessageContent>
+                </div>
+                <MessageAvatar name={ASSISTANT_NAME} src={ASSISTANT_AVATAR} />
+              </Message>
+            )}
           </ConversationContent>
           <ConversationScrollButton />
         </Conversation>
 
-        {/* This prompt input section is correct */}
         <div className="grid shrink-0 gap-4 pt-4">
           <div className="w-full px-4 pb-4">
             <PromptInput onSubmit={handleSubmit} globalDrop multiple>

@@ -58,8 +58,6 @@ export default function ProjectPage({
   const { user, isLoading: authLoading } = useSupabaseAuth();
   const { id: projectId } = useParams();
 
-  console.log("projectId in dashboard", projectId);
-
   const [activeTab, setActiveTab] = useState<TabKey>("chat");
   const [isWorkflowViewOpen, setIsWorkflowViewOpen] = useState(false);
   const [isValidating, setIsValidating] = useState(true);
@@ -83,8 +81,6 @@ export default function ProjectPage({
           // Project not found or no access, redirect to landing
           // router.push("/404");
           return;
-
-          console.log("validated");
         }
 
         setIsValidating(false);
@@ -143,8 +139,8 @@ export default function ProjectPage({
             {/* Chat Interface Section */}
             <section className="flex flex-col h-full transition-all duration-500 ease-in-out">
               {/* <div className="flex flex-col h-full rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-950/90 to-slate-900/80 shadow-2xl shadow-slate-950/60 backdrop-blur overflow-hidden"> */}
-                {/* Header */}
-                {/* <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/60">
+              {/* Header */}
+              {/* <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/60">
                   <div>
                     <h3 className="text-base font-semibold text-slate-50">
                       Chat
@@ -153,8 +149,8 @@ export default function ProjectPage({
                       Converse with your agent
                     </p>
                   </div> */}
-                  {/* Workflow View toggle button */}
-                  {/* <Button
+              {/* Workflow View toggle button */}
+              {/* <Button
               size="sm"
               onClick={onToggleWorkflowView}
               className="rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-300 hover:text-white hover:bg-blue-500/30 hover:shadow-lg hover:shadow-blue-500/50 hover:border-white/50 transition-all duration-300 h-7 w-7 p-0 flex items-center justify-center"
@@ -170,12 +166,12 @@ export default function ProjectPage({
                 <ChevronLeft className="size-3.5" />
               )}
             </Button> */}
-                {/* </div> */}
+              {/* </div> */}
 
-                {/* Main chat content area */}
-                {/* <div className="flex flex-col flex-1 overflow-hidden h-screen"> */}
-                  <InputDemo projectId={projectId} />
-                {/* </div> */}
+              {/* Main chat content area */}
+              {/* <div className="flex flex-col flex-1 overflow-hidden h-screen"> */}
+              <InputDemo projectId={projectId} />
+              {/* </div> */}
               {/* </div> */}
             </section>
             {/* Workflow View Section */}
