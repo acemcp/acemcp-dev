@@ -32,7 +32,6 @@ function OnboardingContent() {
 
 
   let { projectId } = useParams()
-  console.log("projectId", projectId);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading: authLoading } = useSupabaseAuth();
@@ -314,7 +313,6 @@ function OnboardingContent() {
 
 
 
-      console.log("data", data);
 
       if (error || !data) {
         console.error("Supabase insert error:", error);

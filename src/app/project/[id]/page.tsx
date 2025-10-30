@@ -24,8 +24,6 @@ export default function ProjectPage() {
   const { user, isLoading: authLoading } = useSupabaseAuth();
   const { id: projectId } = useParams();
 
-  console.log("projectId in dashboard", projectId);
-
   const [activeTab, setActiveTab] = useState<TabKey>("chat");
   const [isValidating, setIsValidating] = useState(true);
 

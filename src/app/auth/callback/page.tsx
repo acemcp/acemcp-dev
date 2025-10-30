@@ -21,7 +21,6 @@ function AuthCallbackContent() {
           const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
           
           if (exchangeError) {
-            console.error('Error exchanging code for session:', exchangeError);
             setError(exchangeError.message);
             // Redirect to authentication page with error
             setTimeout(() => {

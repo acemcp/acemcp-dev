@@ -28,7 +28,6 @@ export async function GET(
 
 
 
-    console.log("id",id);
     
     const project = await prisma.project.findUnique({
       where: { id },

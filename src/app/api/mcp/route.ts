@@ -29,7 +29,6 @@ let mcpToolsCache: Record<string, any> = {};
 
 
 async function getMCPTools(projectId: string) {
-  console.log("projectId mcp", projectId);
 
 
   if (!mcpToolsCache[projectId]) {
@@ -74,7 +73,6 @@ async function getMCPTools(projectId: string) {
       const tools = await mcpClient.tools();
 
 
-      // console.log("tools", tools);
 
       // Merge tools, assuming no conflicts in tool names
       Object.assign(allTools, tools);
@@ -84,14 +82,12 @@ async function getMCPTools(projectId: string) {
   }
   return mcpToolsCache;
 }
-console.log("mcpToolsCache", mcpToolsCache);
 
 // export const maxDuration = 30;
 
 // export async function GET(req: NextApiRequest) {
 //   // const projectId = new URL(req.url).searchParams.get("projectId");
 //    const {projectId} = await req.body
-//    console.log("projectIdmcp" , projectId);
 
 //   if (!projectId) {
 //     return new Response("Project ID required", { status: 400 });
@@ -111,7 +107,6 @@ export async function POST(req: Request) {
   const { messages, projectId }: { messages: UIMessage[]; projectId: any } =
     await req.json();
 
-  // console.log("projectIdmcp", projectId);
 
 
   if (!projectId) {
@@ -130,7 +125,6 @@ export async function POST(req: Request) {
 
       // prepareStep: (steps: any, stepNumber: any) => {
 
-      //   console.log("steps", steps)
 
       // },
       toolChoice: "auto",

@@ -345,7 +345,6 @@ function LandingContent() {
       });
     //project id
     // const data = await response.json();
-    // console.log(data);
     // Authenticated user - redirect to onboarding with prompt
     const params = new URLSearchParams();
     params.set("prompt", prompt)
@@ -399,7 +398,6 @@ function LandingContent() {
         setIsDashboardLoading(false);
       }
     } catch (error) {
-      console.error("Error fetching projects:", error);
       alert("Failed to load your projects. Please try again.");
       setIsDashboardLoading(false);
     }
