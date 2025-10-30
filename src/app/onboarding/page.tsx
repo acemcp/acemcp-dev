@@ -684,6 +684,8 @@ function OnboardingContent() {
                   </div>
                 )}
 
+            {/* // Replace the MCP Server Card JSX in your component */}
+
                 {mcpServers.map((server, index) => (
                   <div
                     key={server.id}
