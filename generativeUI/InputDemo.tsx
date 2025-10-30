@@ -94,7 +94,7 @@ const InputDemo = ({ projectId }: any) => {
 
   return (
     // This layout structure is correct
-    <div className="flex flex-col h-[80vh] items-center justify-center overflow-hidden p-6 sm:p-10">
+    <div className="flex flex-col h-[88vh] items-center justify-center overflow-hidden">
       <div className="flex w-full max-w-6xl flex-col border rounded-lg shadow-md bg-background h-full mx-auto overflow-hidden">
         <Conversation>
           <ConversationContent>
@@ -180,7 +180,7 @@ const InputDemo = ({ projectId }: any) => {
                     onTranscriptionChange={setText}
                     textareaRef={textareaRef}
                   />
-                  <PromptInputButton
+                  {/* <PromptInputButton
                     onClick={() => setUseWebSearch(!useWebSearch)}
                     variant={useWebSearch ? "default" : "ghost"}
                   >
@@ -206,7 +206,7 @@ const InputDemo = ({ projectId }: any) => {
                         </PromptInputModelSelectItem>
                       ))}
                     </PromptInputModelSelectContent>
-                  </PromptInputModelSelect>
+                  </PromptInputModelSelect> */}
                 </PromptInputTools>
                 <PromptInputSubmit
                   disabled={!text && !status}

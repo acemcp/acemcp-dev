@@ -142,9 +142,9 @@ export default function ProjectPage({
           >
             {/* Chat Interface Section */}
             <section className="flex flex-col h-full transition-all duration-500 ease-in-out">
-              <div className="flex flex-col h-full rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-950/90 to-slate-900/80 shadow-2xl shadow-slate-950/60 backdrop-blur overflow-hidden">
+              {/* <div className="flex flex-col h-full rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-950/90 to-slate-900/80 shadow-2xl shadow-slate-950/60 backdrop-blur overflow-hidden"> */}
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/60">
+                {/* <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/60">
                   <div>
                     <h3 className="text-base font-semibold text-slate-50">
                       Chat
@@ -152,7 +152,7 @@ export default function ProjectPage({
                     <p className="text-xs text-slate-400">
                       Converse with your agent
                     </p>
-                  </div>
+                  </div> */}
                   {/* Workflow View toggle button */}
                   {/* <Button
               size="sm"
@@ -170,13 +170,13 @@ export default function ProjectPage({
                 <ChevronLeft className="size-3.5" />
               )}
             </Button> */}
-                </div>
+                {/* </div> */}
 
                 {/* Main chat content area */}
-                <div className="flex flex-col flex-1 overflow-hidden h-screen">
+                {/* <div className="flex flex-col flex-1 overflow-hidden h-screen"> */}
                   <InputDemo projectId={projectId} />
-                </div>
-              </div>
+                {/* </div> */}
+              {/* </div> */}
             </section>
             {/* Workflow View Section */}
             {/* {isWorkflowViewOpen && <WorkflowView messages={messages} />} */}
