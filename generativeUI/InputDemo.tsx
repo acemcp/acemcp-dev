@@ -93,11 +93,11 @@ const InputDemo = ({ projectId }: any) => {
 
 
   return (
-    // This layout structure is correct
-    <div className="flex flex-col h-[88vh] items-center justify-center overflow-hidden">
-      <div className="flex w-full max-w-6xl flex-col border rounded-lg shadow-md bg-background h-full mx-auto overflow-hidden">
-        <Conversation>
-          <ConversationContent>
+    <div className="flex flex-col h-full bg-background font-sans">
+      {/* Conversation Area - Takes up remaining space */}
+      <div className="flex-1 overflow-y-auto">
+        <Conversation className="h-full">
+          <ConversationContent className="bg-background">
             {/* --- 3. UPDATED RENDER LOOP --- */}
             {messages?.map((message) => {
               // Only render user and assistant messages
@@ -153,68 +153,43 @@ const InputDemo = ({ projectId }: any) => {
           </ConversationContent>
           <ConversationScrollButton />
         </Conversation>
+      </div>
 
-        {/* This prompt input section is correct */}
-        <div className="grid shrink-0 gap-4 pt-4">
-          <div className="w-full px-4 pb-4">
-            <PromptInput onSubmit={handleSubmit} globalDrop multiple>
-              <PromptInputBody>
-                <PromptInputAttachments>
-                  {(attachment) => <PromptInputAttachment data={attachment} />}
-                </PromptInputAttachments>
-                <PromptInputTextarea
-                  onChange={(e) => setText(e.target.value)}
-                  ref={textareaRef}
-                  value={text}
+      {/* Input Area - Fixed at bottom */}
+      <div className="flex-shrink-0 border-t border-border bg-background">
+        <div className="p-4">
+          <PromptInput onSubmit={handleSubmit} globalDrop multiple>
+            <PromptInputBody>
+              <PromptInputAttachments>
+                {(attachment) => <PromptInputAttachment data={attachment} />}
+              </PromptInputAttachments>
+              <PromptInputTextarea
+                onChange={(e) => setText(e.target.value)}
+                ref={textareaRef}
+                value={text}
+                className="bg-input border-border text-foreground placeholder:text-muted-foreground"
+              />
+            </PromptInputBody>
+            <PromptInputFooter>
+              <PromptInputTools>
+                <PromptInputActionMenu>
+                  <PromptInputActionMenuTrigger />
+                  <PromptInputActionMenuContent>
+                    <PromptInputActionAddAttachments />
+                  </PromptInputActionMenuContent>
+                </PromptInputActionMenu>
+                <PromptInputSpeechButton
+                  onTranscriptionChange={setText}
+                  textareaRef={textareaRef}
                 />
-              </PromptInputBody>
-              <PromptInputFooter>
-                <PromptInputTools>
-                  <PromptInputActionMenu>
-                    <PromptInputActionMenuTrigger />
-                    <PromptInputActionMenuContent>
-                      <PromptInputActionAddAttachments />
-                    </PromptInputActionMenuContent>
-                  </PromptInputActionMenu>
-                  <PromptInputSpeechButton
-                    onTranscriptionChange={setText}
-                    textareaRef={textareaRef}
-                  />
-                  {/* <PromptInputButton
-                    onClick={() => setUseWebSearch(!useWebSearch)}
-                    variant={useWebSearch ? "default" : "ghost"}
-                  >
-                    <GlobeIcon size={16} />
-                    <span>Search</span>
-                  </PromptInputButton>
-                  <PromptInputModelSelect
-                    onValueChange={(value) => {
-                      setModel(value);
-                    }}
-                    value={model}
-                  >
-                    <PromptInputModelSelectTrigger>
-                      <PromptInputModelSelectValue />
-                    </PromptInputModelSelectTrigger>
-                    <PromptInputModelSelectContent>
-                      {models.map((model) => (
-                        <PromptInputModelSelectItem
-                          key={model.id}
-                          value={model.id}
-                        >
-                          {model.name}
-                        </PromptInputModelSelectItem>
-                      ))}
-                    </PromptInputModelSelectContent>
-                  </PromptInputModelSelect> */}
-                </PromptInputTools>
-                <PromptInputSubmit
-                  disabled={!text && !status}
-                  status={status}
-                />
-              </PromptInputFooter>
-            </PromptInput>
-          </div>
+              </PromptInputTools>
+              <PromptInputSubmit
+                disabled={!text && !status}
+                status={status}
+                className="bg-[#5F96F1] hover:bg-[#5F96F1]/80 text-white"
+              />
+            </PromptInputFooter>
+          </PromptInput>
         </div>
       </div>
     </div>

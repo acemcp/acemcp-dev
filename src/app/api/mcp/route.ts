@@ -19,7 +19,7 @@ const mistral = createMistral({
 
 
 const google = createGoogleGenerativeAI({
-  apiKey: "AIzaSyD7qTXxvPibDvKhU_hduloMMap9B6YuHzM",
+  apiKey: "AIzaSyBAh9uhf8UYMdBH6YnFsqk6S4U3a38d8R0",
 });
 
 

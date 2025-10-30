@@ -238,12 +238,55 @@ function LandingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Typewriter animation state
+  const [typewriterText, setTypewriterText] = useState("");
+  const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
+  const [isTyping, setIsTyping] = useState(true);
+
+  const typewriterPhrases = [
+    "an ecommerce agent",
+    "a database agent",
+    "a customer service agent",
+    "a data analysis agent",
+    "a content creation agent",
+    "a workflow automation agent"
+  ];
+
   useEffect(() => {
     const interval = window.setInterval(() => {
       setActiveStage((current) => (current + 1) % pipelineStages.length);
     }, 3800);
     return () => window.clearInterval(interval);
   }, []);
+
+  // Typewriter animation effect
+  useEffect(() => {
+    const currentPhrase = typewriterPhrases[currentPhraseIndex];
+    let timeoutId: NodeJS.Timeout;
+
+    if (isTyping) {
+      if (typewriterText.length < currentPhrase.length) {
+        timeoutId = setTimeout(() => {
+          setTypewriterText(currentPhrase.slice(0, typewriterText.length + 1));
+        }, 100);
+      } else {
+        timeoutId = setTimeout(() => {
+          setIsTyping(false);
+        }, 2000);
+      }
+    } else {
+      if (typewriterText.length > 0) {
+        timeoutId = setTimeout(() => {
+          setTypewriterText(typewriterText.slice(0, -1));
+        }, 50);
+      } else {
+        setCurrentPhraseIndex((prev) => (prev + 1) % typewriterPhrases.length);
+        setIsTyping(true);
+      }
+    }
+
+    return () => clearTimeout(timeoutId);
+  }, [typewriterText, isTyping, currentPhraseIndex, typewriterPhrases]);
 
   // Populate prompt from URL when user returns from authentication
   useEffect(() => {
@@ -363,126 +406,110 @@ function LandingContent() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#0a0a0a] font-sans text-white">
-      {/* Full Screen Flowing Blue Gradient - Dark to Light */}
+    <div className="relative min-h-screen overflow-hidden bg-[#0c0c0c] font-sans text-white">
+      {/* Perplexity-style dark background with subtle gradients */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        {/* Base flowing gradient - Dark blue to lighter blue */}
+        {/* Base dark background similar to Perplexity */}
         <div
           className="absolute inset-0"
           style={{
             background: `
               linear-gradient(180deg, 
-                #0a0a0a 0%, 
-                #0f1419 15%, 
-                #1a1f2e 30%, 
-                #1e2a3a 45%, 
-                #243447 60%, 
-                #2a3f54 75%, 
-                #304a61 90%, 
-                #36556e 100%
+                #0c0c0c 0%, 
+                #111111 20%, 
+                #151515 40%, 
+                #181818 60%, 
+                #1a1a1a 80%, 
+                #1c1c1c 100%
               )
             `,
           }}
         />
 
-        {/* Complementary blue tone overlays for depth */}
+        {/* Subtle brand color accents */}
         <div
-          className="absolute inset-0 opacity-60"
+          className="absolute inset-0 opacity-20"
           style={{
             background: `
-              radial-gradient(ellipse at 20% 20%, rgba(30, 58, 138, 0.4) 0%, transparent 50%),
-              radial-gradient(ellipse at 80% 30%, rgba(37, 99, 235, 0.3) 0%, transparent 50%),
-              radial-gradient(ellipse at 40% 70%, rgba(29, 78, 216, 0.35) 0%, transparent 50%),
-              radial-gradient(ellipse at 70% 80%, rgba(30, 64, 175, 0.25) 0%, transparent 50%),
-              radial-gradient(ellipse at 10% 60%, rgba(31, 81, 194, 0.3) 0%, transparent 50%),
-              radial-gradient(ellipse at 90% 40%, rgba(28, 100, 242, 0.2) 0%, transparent 50%)
+              radial-gradient(ellipse at 10% 10%, rgba(95, 150, 241, 0.08) 0%, transparent 40%),
+              radial-gradient(ellipse at 90% 20%, rgba(95, 150, 241, 0.06) 0%, transparent 35%),
+              radial-gradient(ellipse at 30% 80%, rgba(95, 150, 241, 0.05) 0%, transparent 30%),
+              radial-gradient(ellipse at 80% 90%, rgba(95, 150, 241, 0.04) 0%, transparent 25%)
             `,
           }}
         />
 
-        {/* Gritty texture with blue tones only */}
-        <div
-          className="absolute inset-0 opacity-35 mix-blend-overlay"
-          style={{
-            backgroundImage: `
-              radial-gradient(circle at 1px 1px, rgba(30, 58, 138, 0.6) 1px, transparent 0),
-              radial-gradient(circle at 2px 2px, rgba(37, 99, 235, 0.4) 1px, transparent 0),
-              radial-gradient(circle at 3px 3px, rgba(29, 78, 216, 0.3) 1px, transparent 0),
-              radial-gradient(circle at 4px 4px, rgba(30, 64, 175, 0.2) 1px, transparent 0)
-            `,
-            backgroundSize: '20px 20px, 30px 30px, 40px 40px, 50px 50px',
-            backgroundPosition: '0 0, 10px 10px, 20px 20px, 30px 30px',
-          }}
-        />
+        {/* Clean margin lines system */}
+        <div className="absolute inset-0">
+          {/* Primary margin lines */}
+          <div className="absolute left-12 top-0 h-full w-px bg-gradient-to-b from-transparent via-white/[0.12] to-transparent" />
+          <div className="absolute right-12 top-0 h-full w-px bg-gradient-to-b from-transparent via-white/[0.12] to-transparent" />
+          <div className="absolute top-12 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/[0.12] to-transparent" />
+          <div className="absolute bottom-12 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/[0.12] to-transparent" />
 
-        {/* Large flowing orbs - Only blue tones */}
-        <div
-          className="absolute top-0 left-0 w-[100vh] h-[100vh] rounded-full opacity-12 animate-pulse"
-          style={{
-            background: 'radial-gradient(circle, rgba(30, 58, 138, 0.8) 0%, rgba(37, 99, 235, 0.3) 40%, transparent 70%)',
-            filter: 'blur(80px)',
-            animationDuration: '12s',
-            transform: 'translate(-40%, -40%)',
-          }}
-        />
+          {/* Secondary margin lines */}
+          <div className="absolute left-24 top-0 h-full w-px bg-gradient-to-b from-transparent via-white/[0.06] to-transparent" />
+          <div className="absolute right-24 top-0 h-full w-px bg-gradient-to-b from-transparent via-white/[0.06] to-transparent" />
+          <div className="absolute top-24 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+          <div className="absolute bottom-24 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
-        <div
-          className="absolute top-1/4 right-0 w-[90vh] h-[90vh] rounded-full opacity-15 animate-pulse"
-          style={{
-            background: 'radial-gradient(circle, rgba(29, 78, 216, 0.7) 0%, rgba(30, 64, 175, 0.4) 35%, transparent 65%)',
-            filter: 'blur(70px)',
-            animationDuration: '10s',
-            animationDelay: '4s',
-            transform: 'translate(40%, -20%)',
-          }}
-        />
+          {/* Corner accent lines with brand color */}
+          <div className="absolute top-12 left-12 w-20 h-px bg-gradient-to-r from-[#5F96F1]/60 to-transparent animate-margin-glow" />
+          <div className="absolute top-12 left-12 w-px h-20 bg-gradient-to-b from-[#5F96F1]/60 to-transparent animate-margin-glow" />
+          <div className="absolute top-12 right-12 w-20 h-px bg-gradient-to-l from-[#5F96F1]/60 to-transparent animate-margin-glow" style={{ animationDelay: '2s' }} />
+          <div className="absolute top-12 right-12 w-px h-20 bg-gradient-to-b from-[#5F96F1]/60 to-transparent animate-margin-glow" style={{ animationDelay: '2s' }} />
+          <div className="absolute bottom-12 left-12 w-20 h-px bg-gradient-to-r from-[#5F96F1]/60 to-transparent animate-margin-glow" style={{ animationDelay: '4s' }} />
+          <div className="absolute bottom-12 left-12 w-px h-20 bg-gradient-to-t from-[#5F96F1]/60 to-transparent animate-margin-glow" style={{ animationDelay: '4s' }} />
+          <div className="absolute bottom-12 right-12 w-20 h-px bg-gradient-to-l from-[#5F96F1]/60 to-transparent animate-margin-glow" style={{ animationDelay: '6s' }} />
+          <div className="absolute bottom-12 right-12 w-px h-20 bg-gradient-to-t from-[#5F96F1]/60 to-transparent animate-margin-glow" style={{ animationDelay: '6s' }} />
 
-        <div
-          className="absolute bottom-0 left-1/2 w-[120vh] h-[120vh] rounded-full opacity-10 animate-pulse"
-          style={{
-            background: 'radial-gradient(circle, rgba(31, 81, 194, 0.6) 0%, rgba(28, 100, 242, 0.3) 30%, transparent 60%)',
-            filter: 'blur(90px)',
-            animationDuration: '14s',
-            animationDelay: '2s',
-            transform: 'translate(-50%, 40%)',
-          }}
-        />
+          {/* Corner accent dots */}
+          <div className="absolute top-12 left-12 w-2 h-2 bg-[#5F96F1]/40 rounded-full animate-corner-glow" />
+          <div className="absolute top-12 right-12 w-2 h-2 bg-[#5F96F1]/40 rounded-full animate-corner-glow" style={{ animationDelay: '2s' }} />
+          <div className="absolute bottom-12 left-12 w-2 h-2 bg-[#5F96F1]/40 rounded-full animate-corner-glow" style={{ animationDelay: '4s' }} />
+          <div className="absolute bottom-12 right-12 w-2 h-2 bg-[#5F96F1]/40 rounded-full animate-corner-glow" style={{ animationDelay: '6s' }} />
+        </div>
 
-        {/* Additional mid-screen flowing orb */}
+        {/* Subtle floating orbs with brand color */}
         <div
-          className="absolute top-1/2 left-1/3 w-[80vh] h-[80vh] rounded-full opacity-8 animate-pulse"
+          className="absolute top-1/4 left-1/4 w-[60vh] h-[60vh] rounded-full opacity-[0.03] animate-pulse"
           style={{
-            background: 'radial-gradient(circle, rgba(37, 99, 235, 0.5) 0%, rgba(30, 58, 138, 0.2) 40%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(95, 150, 241, 0.4) 0%, transparent 70%)',
             filter: 'blur(60px)',
-            animationDuration: '16s',
-            animationDelay: '6s',
-            transform: 'translate(-30%, -50%)',
+            animationDuration: '15s',
           }}
         />
 
-        {/* Enhanced grain effect with blue noise */}
         <div
-          className="absolute inset-0 opacity-12"
+          className="absolute bottom-1/3 right-1/3 w-[50vh] h-[50vh] rounded-full opacity-[0.02] animate-pulse"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' fill='%231e3a8a' opacity='0.3'/%3E%3C/svg%3E")`,
-            mixBlendMode: 'overlay',
+            background: 'radial-gradient(circle, rgba(95, 150, 241, 0.3) 0%, transparent 70%)',
+            filter: 'blur(50px)',
+            animationDuration: '18s',
+            animationDelay: '5s',
           }}
         />
 
-        {/* Subtle blue-tinted grid */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(30,58,138,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(30,58,138,0.015)_1px,transparent_1px)] bg-[size:60px_60px] opacity-30" />
+
+
+        {/* Fine noise texture */}
+        <div
+          className="absolute inset-0 opacity-[0.015]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' fill='%23ffffff'/%3E%3C/svg%3E")`,
+          }}
+        />
       </div>
 
       <div className="relative">
-        <header className="relative border-b border-white/[0.08] backdrop-blur-xl">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 lg:px-8">
+        <header className="relative border-b border-white/[0.06] backdrop-blur-xl bg-black/20">
+          <div className="mx-auto flex max-w-6xl items-center justify-between px-8 py-4 lg:px-12">
             <div className="flex items-center gap-3">
-              <div className="relative flex h-8 w-8 items-center justify-center">
-                <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-[#5F96F1] to-[#2472eb] blur-sm" />
-                <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#5F96F1] to-[#2472eb]">
-                  <Zap className="h-4 w-4 text-white" strokeWidth={2.5} />
-                </div>
-              </div>
+              <img
+                src="/akronai.svg"
+                alt="Akron AI"
+                className="h-8 w-auto"
+              />
               <span className="text-lg font-semibold text-white">Akron</span>
             </div>
             <div className="flex items-center gap-3">
@@ -540,7 +567,7 @@ function LandingContent() {
           </div>
         </header>
 
-        <main className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+        <main className="mx-auto max-w-6xl px-8 py-16 lg:px-12">
           {/* Hero Section - Bolt.new inspired */}
           <div className="relative flex flex-col items-center text-center">
 
@@ -552,7 +579,7 @@ function LandingContent() {
             </div>
 
             {/* Badge */}
-            <div className="relative z-10 mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-white/80 backdrop-blur-sm">
+            <div className="relative z-10 mb-6 inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-black/30 px-3 py-1 text-sm text-white/80 backdrop-blur-sm">
               <Sparkles className="h-3 w-3" />
               Akron V1
             </div>
@@ -560,7 +587,7 @@ function LandingContent() {
             {/* Main Heading - Bolt.new style */}
             <h1 className="relative z-10 mb-6 text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
               What will you{" "}
-              <span className="bg-gradient-to-r from-[#5F96F1] to-[#2472eb] bg-clip-text text-transparent font-serif mb-1 italic">
+              <span className="bg-gradient-to-r from-[#5F96F1] to-[#2472eb] bg-clip-text text-transparent font-black tracking-tight">
                 build
               </span>{" "}
               today?
@@ -570,14 +597,22 @@ function LandingContent() {
               Create powerful MCP powered Agents by chatting with AI.
             </p>
 
-            {/* Main Input Area - Bolt.new style */}
+            {/* Main Input Area - Clean style */}
             <div className="relative z-10 w-full max-w-3xl">
-              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#1a1a1a]/80 backdrop-blur-xl">
-                <div className="flex items-start gap-3 p-4">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10">
-                    <Plus className="h-4 w-4 text-white/70" />
-                  </div>
-                  <div className="flex-1">
+              <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-black/40 backdrop-blur-xl shadow-2xl">
+                <div className="p-6">
+                  <div className="relative mb-4">
+                    {!prompt && (
+                      <div className="absolute inset-0 flex items-start pt-3 pointer-events-none">
+                        <span className="text-base text-white/50">
+                          Ask Akron to build{" "}
+                          <span className="text-[#5F96F1]">
+                            {typewriterText}
+                            <span className="animate-pulse">|</span>
+                          </span>
+                        </span>
+                      </div>
+                    )}
                     <textarea
                       value={prompt}
                       onChange={(event) => setPrompt(event.target.value)}
@@ -590,36 +625,30 @@ function LandingContent() {
                           handleGenerate();
                         }
                       }}
-                      placeholder="Let's build an AI agent..."
-                      className="w-full resize-none border-0 bg-transparent text-base text-white placeholder:text-white/40 focus:outline-none"
-                      rows={3}
+                      placeholder=""
+                      className="w-full resize-none border-0 bg-transparent text-base text-white focus:outline-none relative z-10 min-h-[80px]"
+                      rows={4}
                     />
                   </div>
-                  <div className="flex shrink-0 items-center gap-2">
-                    {/* Removed Figma and GitHub indicators */}
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={handleGenerate}
+                      disabled={isGenerating || !prompt.trim()}
+                      className="h-10 rounded-md bg-gradient-to-r from-[#5F96F1] to-[#2472eb] px-6 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
+                    >
+                      {isGenerating ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Building...
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          Build now
+                          <ArrowRight className="h-4 w-4" />
+                        </div>
+                      )}
+                    </Button>
                   </div>
-                </div>
-                <div className="flex items-center justify-between border-t border-white/10 px-4 py-3">
-                  <div className="flex items-center gap-2 text-xs text-white/40">
-                    {/* Removed import options */}
-                  </div>
-                  <Button
-                    onClick={handleGenerate}
-                    disabled={isGenerating || !prompt.trim()}
-                    className="h-8 rounded-md bg-gradient-to-r from-[#5F96F1] to-[#2472eb] px-4 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
-                  >
-                    {isGenerating ? (
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                        Building...
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        Build now
-                        <ArrowRight className="h-3 w-3" />
-                      </div>
-                    )}
-                  </Button>
                 </div>
               </div>
             </div>
@@ -631,7 +660,7 @@ function LandingContent() {
                   key={suggestion}
                   onClick={() => setPrompt(suggestion)}
                   type="button"
-                  className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white/70 backdrop-blur-sm transition hover:bg-white/10 hover:text-white"
+                  className="rounded-full border border-white/[0.08] bg-black/30 px-3 py-1.5 text-sm text-white/70 backdrop-blur-sm transition hover:bg-black/40 hover:text-white hover:border-[#5F96F1]/30"
                 >
                   {suggestion}
                 </button>
@@ -643,10 +672,10 @@ function LandingContent() {
               {heroHighlights.map((item) => (
                 <div
                   key={item.title}
-                  className="group relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/[0.06]"
+                  className="group relative overflow-hidden rounded-xl border border-white/[0.08] bg-black/20 p-5 backdrop-blur-sm transition-all duration-300 hover:border-[#5F96F1]/30 hover:bg-black/30"
                 >
                   <div className="flex flex-col items-start gap-3 text-left">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-white/80">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#5F96F1]/15 text-[#5F96F1] border border-[#5F96F1]/30">
                       <item.icon className="h-4 w-4" strokeWidth={2} />
                     </div>
                     <div className="space-y-1">
@@ -679,13 +708,13 @@ function LandingContent() {
               {featureClusters.map((feature) => (
                 <div
                   key={feature.title}
-                  className="group relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/[0.06]"
+                  className="group relative overflow-hidden rounded-xl border border-white/[0.08] bg-black/20 p-5 backdrop-blur-sm transition-all duration-300 hover:border-[#5F96F1]/30 hover:bg-black/30"
                 >
                   <div className="mb-4 flex items-center justify-between">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-white/80">
                       <feature.icon className="h-4 w-4" />
                     </div>
-                    <span className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-xs text-white/60">
+                    <span className="rounded-md border border-[#5F96F1]/30 bg-[#5F96F1]/10 px-2 py-1 text-xs text-[#5F96F1]">
                       {feature.tag}
                     </span>
                   </div>
@@ -711,7 +740,7 @@ function LandingContent() {
           {/* Pipeline Section - Simplified */}
           <section className="mt-24">
             <div className="grid gap-8 lg:grid-cols-2">
-              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-sm">
+              <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-black/20 p-6 backdrop-blur-sm">
                 <div className="flex flex-col gap-6">
                   <div>
                     <h3 className="text-2xl font-bold text-white">
@@ -731,8 +760,8 @@ function LandingContent() {
                           type="button"
                           onMouseEnter={() => setActiveStage(index)}
                           className={`group flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-all duration-300 ${isActive
-                            ? "border-[#5F96F1]/50 bg-[#5F96F1]/10"
-                            : "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10"
+                            ? "border-[#5F96F1]/50 bg-[#5F96F1]/15"
+                            : "border-white/[0.08] bg-black/20 hover:border-white/20 hover:bg-black/30"
                             }`}
                         >
                           <div className="flex items-center gap-3">
@@ -760,7 +789,7 @@ function LandingContent() {
                       );
                     })}
                   </div>
-                  <div className="rounded-xl border border-white/10 bg-white/[0.05] p-4">
+                  <div className="rounded-xl border border-white/[0.08] bg-black/30 p-4">
                     <div className="mb-3">
                       <h4 className="text-lg font-medium text-white">
                         {pipelineStages[activeStage].title}
@@ -773,7 +802,7 @@ function LandingContent() {
                       {metricsPulse.map((metric) => (
                         <div
                           key={metric.label}
-                          className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-left text-sm text-white/70"
+                          className="rounded-lg border border-white/[0.08] bg-black/40 px-3 py-2 text-left text-sm text-white/70"
                         >
                           <p className="text-xs uppercase tracking-wide text-white/45">
                             {metric.label}
@@ -791,7 +820,7 @@ function LandingContent() {
                 {capabilityShowcase.map((capability) => (
                   <div
                     key={capability.title}
-                    className="group overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] p-4 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/[0.06]"
+                    className="group overflow-hidden rounded-xl border border-white/[0.08] bg-black/20 p-4 backdrop-blur-sm transition-all duration-300 hover:border-[#5F96F1]/30 hover:bg-black/30"
                   >
                     <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-white/80">
                       <capability.icon className="h-4 w-4" />
@@ -802,7 +831,7 @@ function LandingContent() {
                     <p className="mb-3 text-sm text-white/60">
                       {capability.description}
                     </p>
-                    <div className="inline-flex items-center rounded-md border border-white/10 bg-white/5 px-2 py-1 text-xs text-white/70">
+                    <div className="inline-flex items-center rounded-md border border-white/[0.08] bg-black/40 px-2 py-1 text-xs text-white/70">
                       {capability.stat}
                     </div>
                   </div>
@@ -827,7 +856,7 @@ function LandingContent() {
               {customerSignals.map((signal) => (
                 <div
                   key={signal.title}
-                  className="group relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/[0.06]"
+                  className="group relative overflow-hidden rounded-xl border border-white/[0.08] bg-black/20 p-5 backdrop-blur-sm transition-all duration-300 hover:border-[#5F96F1]/30 hover:bg-black/30"
                 >
                   <div className="mb-4 flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-white/80">
                     <signal.icon className="h-4 w-4" />
@@ -862,13 +891,13 @@ function LandingContent() {
               {integrationHighlights.map((integration) => (
                 <div
                   key={integration.name}
-                  className="group rounded-xl border border-white/10 bg-white/[0.03] p-4 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/[0.06]"
+                  className="group rounded-xl border border-white/[0.08] bg-black/20 p-4 backdrop-blur-sm transition-all duration-300 hover:border-[#5F96F1]/30 hover:bg-black/30"
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-white">
                       {integration.name}
                     </span>
-                    <span className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-xs text-white/60">
+                    <span className="rounded-md border border-white/[0.08] bg-black/40 px-2 py-1 text-xs text-white/60">
                       {integration.category}
                     </span>
                   </div>
@@ -879,7 +908,7 @@ function LandingContent() {
 
           {/* CTA Section - Simplified */}
           <section className="mt-24">
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-sm">
+            <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-black/20 p-8 backdrop-blur-sm">
               <div className="flex flex-col items-center text-center">
                 <h2 className="text-3xl font-bold text-white sm:text-4xl">
                   Start building your agent today
@@ -909,16 +938,15 @@ function LandingContent() {
           </section>
         </main>
 
-        <footer className="border-t border-white/[0.08] backdrop-blur-xl">
-          <div className="mx-auto max-w-6xl px-6 py-8 lg:px-8">
+        <footer className="border-t border-white/[0.06] backdrop-blur-xl bg-black/20">
+          <div className="mx-auto max-w-6xl px-8 py-8 lg:px-12">
             <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
               <div className="flex items-center gap-2">
-                <div className="relative flex h-6 w-6 items-center justify-center">
-                  <div className="absolute inset-0 rounded-md bg-gradient-to-br from-[#5F96F1] to-[#2472eb] blur-sm" />
-                  <div className="relative flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-[#5F96F1] to-[#2472eb]">
-                    <Zap className="h-3 w-3 text-white" strokeWidth={2.5} />
-                  </div>
-                </div>
+                <img
+                  src="/akronai.svg"
+                  alt="Akron AI"
+                  className="h-6 w-auto"
+                />
                 <span className="text-sm font-medium text-white/80">
                   Akron
                 </span>

@@ -343,73 +343,66 @@ function OnboardingContent() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#0a0a0a] font-sans text-white">
-      {/* Background - Same as authentication page */}
+    <div className="relative min-h-screen overflow-hidden bg-[#0c0c0c] font-sans text-white">
+      {/* Perplexity-style dark background with subtle gradients */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        {/* Base flowing gradient - Dark blue to lighter blue */}
+        {/* Base dark background similar to Perplexity */}
         <div
           className="absolute inset-0"
           style={{
             background: `
               linear-gradient(180deg, 
-                #0a0a0a 0%, 
-                #0f1419 15%, 
-                #1a1f2e 30%, 
-                #1e2a3a 45%, 
-                #243447 60%, 
-                #2a3f54 75%, 
-                #304a61 90%, 
-                #36556e 100%
+                #0c0c0c 0%, 
+                #111111 20%, 
+                #151515 40%, 
+                #181818 60%, 
+                #1a1a1a 80%, 
+                #1c1c1c 100%
               )
             `,
           }}
         />
 
-        {/* Complementary blue tone overlays for depth */}
+        {/* Subtle brand color accents */}
         <div
-          className="absolute inset-0 opacity-60"
+          className="absolute inset-0 opacity-20"
           style={{
             background: `
-              radial-gradient(ellipse at 20% 20%, rgba(30, 58, 138, 0.4) 0%, transparent 50%),
-              radial-gradient(ellipse at 80% 30%, rgba(37, 99, 235, 0.3) 0%, transparent 50%),
-              radial-gradient(ellipse at 40% 70%, rgba(29, 78, 216, 0.35) 0%, transparent 50%),
-              radial-gradient(ellipse at 70% 80%, rgba(30, 64, 175, 0.25) 0%, transparent 50%),
-              radial-gradient(ellipse at 10% 60%, rgba(31, 81, 194, 0.3) 0%, transparent 50%),
-              radial-gradient(ellipse at 90% 40%, rgba(28, 100, 242, 0.2) 0%, transparent 50%)
+              radial-gradient(ellipse at 10% 10%, rgba(95, 150, 241, 0.08) 0%, transparent 40%),
+              radial-gradient(ellipse at 90% 20%, rgba(95, 150, 241, 0.06) 0%, transparent 35%),
+              radial-gradient(ellipse at 30% 80%, rgba(95, 150, 241, 0.05) 0%, transparent 30%),
+              radial-gradient(ellipse at 80% 90%, rgba(95, 150, 241, 0.04) 0%, transparent 25%)
             `,
           }}
         />
 
-        {/* Large flowing orbs - Only blue tones */}
+
+
+        {/* Subtle floating orbs with brand color */}
         <div
-          className="absolute top-0 left-0 w-[100vh] h-[100vh] rounded-full opacity-12 animate-pulse"
+          className="absolute top-1/4 left-1/4 w-[60vh] h-[60vh] rounded-full opacity-[0.03] animate-pulse"
           style={{
-            background: 'radial-gradient(circle, rgba(30, 58, 138, 0.8) 0%, rgba(37, 99, 235, 0.3) 40%, transparent 70%)',
-            filter: 'blur(80px)',
-            animationDuration: '12s',
-            transform: 'translate(-40%, -40%)',
+            background: 'radial-gradient(circle, rgba(95, 150, 241, 0.4) 0%, transparent 70%)',
+            filter: 'blur(60px)',
+            animationDuration: '15s',
           }}
         />
 
         <div
-          className="absolute top-1/4 right-0 w-[90vh] h-[90vh] rounded-full opacity-15 animate-pulse"
+          className="absolute bottom-1/3 right-1/3 w-[50vh] h-[50vh] rounded-full opacity-[0.02] animate-pulse"
           style={{
-            background: 'radial-gradient(circle, rgba(29, 78, 216, 0.7) 0%, rgba(30, 64, 175, 0.4) 35%, transparent 65%)',
-            filter: 'blur(70px)',
-            animationDuration: '10s',
-            animationDelay: '4s',
-            transform: 'translate(40%, -20%)',
+            background: 'radial-gradient(circle, rgba(95, 150, 241, 0.3) 0%, transparent 70%)',
+            filter: 'blur(50px)',
+            animationDuration: '18s',
+            animationDelay: '5s',
           }}
         />
 
+        {/* Fine noise texture */}
         <div
-          className="absolute bottom-0 left-1/2 w-[120vh] h-[120vh] rounded-full opacity-10 animate-pulse"
+          className="absolute inset-0 opacity-[0.015]"
           style={{
-            background: 'radial-gradient(circle, rgba(31, 81, 194, 0.6) 0%, rgba(28, 100, 242, 0.3) 30%, transparent 60%)',
-            filter: 'blur(90px)',
-            animationDuration: '14s',
-            animationDelay: '2s',
-            transform: 'translate(-50%, 40%)',
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' fill='%23ffffff'/%3E%3C/svg%3E")`,
           }}
         />
       </div>
@@ -418,12 +411,11 @@ function OnboardingContent() {
       <div className="relative flex min-h-screen flex-col items-center justify-center px-4 py-16">
         {/* AKRON Logo */}
         <div className="mb-8 flex items-center gap-3">
-          <div className="relative flex h-12 w-12 items-center justify-center">
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#5F96F1] to-[#2472eb] blur-sm" />
-            <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#5F96F1] to-[#2472eb]">
-              <Zap className="h-6 w-6 text-white" strokeWidth={2.5} />
-            </div>
-          </div>
+          <img 
+            src="/akronai.svg" 
+            alt="Akron AI" 
+            className="h-12 w-auto"
+          />
           <span className="text-3xl font-bold text-white">akron</span>
         </div>
 
