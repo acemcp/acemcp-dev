@@ -79,6 +79,10 @@ const InputDemo = ({ projectId }: any) => {
       return;
     }
 
+    if (error) {
+      setErrorMessage(`${error}`);
+    }
+
     sendMessage(
       {
         text: message.text || "Sent with attachments",
