@@ -182,19 +182,19 @@ export default function ProfilePage() {
 
   if (authLoading || isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-[#5F96F1]" />
       </div>
     );
   }
 
   if (!profile) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-        <Card className="border-red-900/50 bg-slate-900/90">
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Card className="border-red-500/20 bg-card">
           <CardHeader>
             <CardTitle className="text-red-400">Error</CardTitle>
-            <CardDescription className="text-slate-400">
+            <CardDescription className="text-muted-foreground">
               {error || "Failed to load profile"}
             </CardDescription>
           </CardHeader>
@@ -220,32 +220,32 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 py-12 px-4">
+    <div className="min-h-screen bg-background text-foreground font-sans py-12 px-4">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <Button
             onClick={() => router.push("/")}
             variant="ghost"
-            className="text-slate-400 hover:text-slate-100"
+            className="text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Dashboard
           </Button>
-          <Badge className="border-blue-500/50 bg-blue-500/10 text-blue-400 px-3 py-1">
+          <Badge className="border-[#5F96F1]/20 bg-[#5F96F1]/10 text-[#5F96F1] px-3 py-1">
             <User className="mr-1 h-3 w-3" />
             Profile Settings
           </Badge>
         </div>
 
         {successMessage && (
-          <div className="mb-6 rounded-lg border border-emerald-500/50 bg-emerald-500/10 p-4 flex items-center gap-3">
+          <div className="mb-6 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4 flex items-center gap-3">
             <CheckCircle2 className="h-5 w-5 text-emerald-400" />
             <p className="text-emerald-400">{successMessage}</p>
           </div>
         )}
         
         {error && (
-          <div className="mb-6 rounded-lg border border-red-500/50 bg-red-500/10 p-4 flex items-center gap-3">
+          <div className="mb-6 rounded-lg border border-red-500/20 bg-red-500/5 p-4 flex items-center gap-3">
             <AlertCircle className="h-5 w-5 text-red-400" />
             <p className="text-red-400">{error}</p>
           </div>
@@ -253,50 +253,50 @@ export default function ProfilePage() {
 
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-1 space-y-6">
-            <Card className="border-blue-900/50 bg-gradient-to-br from-slate-900/90 via-blue-950/30 to-slate-900/90 backdrop-blur-xl shadow-2xl">
+            <Card className="border-border bg-card">
               <CardHeader className="text-center">
                 <div className="flex justify-center mb-4">
-                  <Avatar className="h-24 w-24 border-4 border-blue-500/50">
+                  <Avatar className="h-24 w-24 border-4 border-[#5F96F1]/20">
                     <AvatarImage src={profile.image || undefined} alt={profile.name || "User"} />
-                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-2xl font-bold">
+                    <AvatarFallback className="bg-[#5F96F1] text-white text-2xl font-bold">
                       {getInitials(profile.name)}
                     </AvatarFallback>
                   </Avatar>
                 </div>
-                <CardTitle className="text-2xl text-white">{profile.name || "Anonymous User"}</CardTitle>
-                <CardDescription className="text-slate-400 flex items-center justify-center gap-2">
+                <CardTitle className="text-2xl text-foreground">{profile.name || "Anonymous User"}</CardTitle>
+                <CardDescription className="text-muted-foreground flex items-center justify-center gap-2">
                   <Mail className="h-4 w-4" />
                   {profile.email}
                 </CardDescription>
                 {isProUser && (
-                  <Badge className="mt-3 border-yellow-500/50 bg-yellow-500/10 text-yellow-400 px-3 py-1">
+                  <Badge className="mt-3 border-yellow-500/20 bg-yellow-500/10 text-yellow-400 px-3 py-1">
                     <Crown className="mr-1 h-3 w-3" />
                     Pro Member
                   </Badge>
                 )}
               </CardHeader>
               <CardContent className="space-y-4">
-                <Separator className="bg-slate-800" />
+                <Separator className="bg-border" />
                 <div className="space-y-3 text-sm">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-400 flex items-center gap-2">
+                    <span className="text-muted-foreground flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
                       Joined
                     </span>
-                    <span className="text-slate-200">{formatDate(profile.createdAt)}</span>
+                    <span className="text-foreground">{formatDate(profile.createdAt)}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-400 flex items-center gap-2">
+                    <span className="text-muted-foreground flex items-center gap-2">
                       <Shield className="h-4 w-4" />
                       Provider
                     </span>
-                    <span className="text-slate-200 capitalize">
+                    <span className="text-foreground capitalize">
                       {profile.accounts[0]?.provider || "Email"}
                     </span>
                   </div>
                   {profile.emailVerified && (
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-400">Email Verified</span>
+                      <span className="text-muted-foreground">Email Verified</span>
                       <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                     </div>
                   )}
@@ -304,38 +304,38 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
 
-            <Card className="border-slate-800/60 bg-slate-900/80 backdrop-blur-xl">
+            <Card className="border-border bg-card">
               <CardHeader>
-                <CardTitle className="text-lg text-white flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5 text-blue-400" />
+                <CardTitle className="text-lg text-foreground flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-[#5F96F1]" />
                   Activity Stats
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400 flex items-center gap-2">
+                  <span className="text-muted-foreground flex items-center gap-2">
                     <Bot className="h-4 w-4" />
                     Projects
                   </span>
-                  <Badge variant="outline" className="border-blue-500/50 text-blue-400">
+                  <Badge variant="outline" className="border-[#5F96F1]/20 text-[#5F96F1]">
                     {profile._count.projects}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400 flex items-center gap-2">
+                  <span className="text-muted-foreground flex items-center gap-2">
                     <MessageSquare className="h-4 w-4" />
                     Conversations
                   </span>
-                  <Badge variant="outline" className="border-blue-500/50 text-blue-400">
+                  <Badge variant="outline" className="border-[#5F96F1]/20 text-[#5F96F1]">
                     {profile._count.conversations}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400 flex items-center gap-2">
+                  <span className="text-muted-foreground flex items-center gap-2">
                     <Server className="h-4 w-4" />
                     MCP Configs
                   </span>
-                  <Badge variant="outline" className="border-blue-500/50 text-blue-400">
+                  <Badge variant="outline" className="border-[#5F96F1]/20 text-[#5F96F1]">
                     {profile._count.mcpConfigs}
                   </Badge>
                 </div>
@@ -343,18 +343,18 @@ export default function ProfilePage() {
             </Card>
 
             {!isProUser && (
-              <Card className="border-yellow-900/50 bg-gradient-to-br from-yellow-950/30 via-yellow-900/20 to-slate-900/80 backdrop-blur-xl">
+              <Card className="border-yellow-500/20 bg-yellow-500/5">
                 <CardHeader>
-                  <CardTitle className="text-lg text-white flex items-center gap-2">
+                  <CardTitle className="text-lg text-foreground flex items-center gap-2">
                     <Crown className="h-5 w-5 text-yellow-400" />
                     Upgrade to Pro
                   </CardTitle>
-                  <CardDescription className="text-slate-400">
+                  <CardDescription className="text-muted-foreground">
                     Unlock premium features and capabilities
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <ul className="space-y-2 text-sm text-slate-300">
+                  <ul className="space-y-2 text-sm text-foreground">
                     {proFeatures.map((feature, index) => (
                       <li key={index} className="flex items-center gap-2">
                         <Sparkles className="h-3 w-3 text-yellow-400" />
@@ -362,7 +362,7 @@ export default function ProfilePage() {
                       </li>
                     ))}
                   </ul>
-                  <Button className="w-full bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-white">
+                  <Button className="w-full bg-yellow-600 hover:bg-yellow-700 text-white">
                     <Crown className="mr-2 h-4 w-4" />
                     Upgrade Now
                   </Button>
@@ -372,48 +372,48 @@ export default function ProfilePage() {
           </div>
 
           <div className="lg:col-span-2 space-y-6">
-            <Card className="border-blue-900/50 bg-gradient-to-br from-slate-900/90 via-blue-950/30 to-slate-900/90 backdrop-blur-xl shadow-2xl">
+            <Card className="border-border bg-card">
               <CardHeader>
-                <CardTitle className="text-2xl text-white">Edit Profile</CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardTitle className="text-2xl text-foreground">Edit Profile</CardTitle>
+                <CardDescription className="text-muted-foreground">
                   Update your personal information and preferences
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-slate-200">Full Name *</Label>
+                  <Label htmlFor="name" className="text-foreground">Full Name *</Label>
                   <Input
                     id="name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Enter your full name"
-                    className="bg-slate-950 border-slate-700 text-white"
+                    className="bg-input border-border text-foreground focus:border-[#5F96F1] focus:ring-[#5F96F1]"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-slate-200">Email Address</Label>
+                  <Label htmlFor="email" className="text-foreground">Email Address</Label>
                   <Input
                     id="email"
                     value={profile.email || ""}
                     disabled
-                    className="bg-slate-950/50 border-slate-700 text-slate-400 cursor-not-allowed"
+                    className="bg-input/50 border-border text-muted-foreground cursor-not-allowed"
                   />
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-muted-foreground">
                     Email cannot be changed. Contact support if you need assistance.
                   </p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="imageUrl" className="text-slate-200">Profile Image URL</Label>
+                  <Label htmlFor="imageUrl" className="text-foreground">Profile Image URL</Label>
                   <Input
                     id="imageUrl"
                     value={imageUrl}
                     onChange={(e) => setImageUrl(e.target.value)}
                     placeholder="https://example.com/avatar.jpg"
-                    className="bg-slate-950 border-slate-700 text-white"
+                    className="bg-input border-border text-foreground focus:border-[#5F96F1] focus:ring-[#5F96F1]"
                   />
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-muted-foreground">
                     Enter a URL to your profile image
                   </p>
                 </div>
@@ -422,7 +422,7 @@ export default function ProfilePage() {
                   <Button
                     onClick={handleSave}
                     disabled={isSaving || !name.trim()}
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400"
+                    className="flex-1 bg-[#5F96F1] hover:bg-[#5F96F1]/80 text-white"
                   >
                     {isSaving ? (
                       <>
@@ -444,7 +444,7 @@ export default function ProfilePage() {
                       setSuccessMessage(null);
                     }}
                     variant="outline"
-                    className="border-slate-700 bg-slate-950 text-white hover:bg-slate-800"
+                    className="border-border bg-secondary text-secondary-foreground hover:bg-secondary/80"
                   >
                     Reset
                   </Button>
@@ -453,10 +453,10 @@ export default function ProfilePage() {
             </Card>
 
             {profile.projects.length > 0 && (
-              <Card className="border-slate-800/60 bg-slate-900/80 backdrop-blur-xl">
+              <Card className="border-border bg-card">
                 <CardHeader>
-                  <CardTitle className="text-lg text-white">Recent Projects</CardTitle>
-                  <CardDescription className="text-slate-400">
+                  <CardTitle className="text-lg text-foreground">Recent Projects</CardTitle>
+                  <CardDescription className="text-muted-foreground">
                     Your latest projects and agents
                   </CardDescription>
                 </CardHeader>
@@ -465,11 +465,11 @@ export default function ProfilePage() {
                     {profile.projects.map((project) => (
                       <div
                         key={project.id}
-                        className="flex items-center justify-between rounded-lg border border-slate-800/60 bg-slate-950/50 p-4"
+                        className="flex items-center justify-between rounded-lg border border-border bg-secondary/50 p-4"
                       >
                         <div>
-                          <p className="font-medium text-slate-200">{project.name}</p>
-                          <p className="text-xs text-slate-500">
+                          <p className="font-medium text-foreground">{project.name}</p>
+                          <p className="text-xs text-muted-foreground">
                             Created {formatDate(project.createdAt)}
                           </p>
                         </div>
@@ -477,7 +477,7 @@ export default function ProfilePage() {
                           size="sm"
                           variant="ghost"
                           onClick={() => router.push(`/project/${project.id}`)}
-                          className="text-blue-400 hover:text-blue-300"
+                          className="text-[#5F96F1] hover:text-[#5F96F1]/80"
                         >
                           View
                         </Button>
@@ -488,10 +488,10 @@ export default function ProfilePage() {
               </Card>
             )}
 
-            <Card className="border-red-900/50 bg-gradient-to-br from-red-950/30 via-red-900/20 to-slate-900/80 backdrop-blur-xl">
+            <Card className="border-red-500/20 bg-red-500/5">
               <CardHeader>
                 <CardTitle className="text-lg text-red-400">Danger Zone</CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardDescription className="text-muted-foreground">
                   Irreversible actions that affect your account
                 </CardDescription>
               </CardHeader>
@@ -502,7 +502,7 @@ export default function ProfilePage() {
                     router.push("/landing");
                   }}
                   variant="outline"
-                  className="w-full border-slate-700 bg-slate-950 text-white hover:bg-slate-800"
+                  className="w-full border-border bg-secondary text-secondary-foreground hover:bg-secondary/80"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Log Out
@@ -527,19 +527,19 @@ export default function ProfilePage() {
                       )}
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent className="bg-slate-900 border-red-900/50">
+                  <AlertDialogContent className="bg-card border-red-500/20">
                     <AlertDialogHeader>
                       <AlertDialogTitle className="text-red-400">
                         Are you absolutely sure?
                       </AlertDialogTitle>
-                      <AlertDialogDescription className="text-slate-400">
+                      <AlertDialogDescription className="text-muted-foreground">
                         This action cannot be undone. This will permanently delete your
                         account and remove all your data including projects, conversations,
                         and MCP configurations from our servers.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel className="bg-slate-800 text-white hover:bg-slate-700">
+                      <AlertDialogCancel className="bg-secondary text-secondary-foreground hover:bg-secondary/80">
                         Cancel
                       </AlertDialogCancel>
                       <AlertDialogAction

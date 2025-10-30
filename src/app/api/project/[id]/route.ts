@@ -26,6 +26,9 @@ export async function GET(
     // Await params before accessing properties
     const { id } = await params;
 
+
+
+    
     const project = await prisma.project.findUnique({
       where: { id },
       include: {

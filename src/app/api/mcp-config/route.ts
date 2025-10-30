@@ -22,6 +22,9 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { projectId, serverUrl, authHeader, authToken, configJson } = body;
 
+
+
+    
     if (!projectId || !serverUrl || !configJson) {
       return NextResponse.json(
         { error: "Missing required fields" },

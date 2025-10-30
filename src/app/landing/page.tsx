@@ -16,13 +16,15 @@ import {
   Check,
   Infinity,
   Github,
-  Twitter,
+  X,
   Rocket,
   Gauge,
   BarChart3,
   Shield,
   Cloud,
   Loader2,
+  Plus,
+  FileText,
 } from "lucide-react";
 import { IconBrandYoutubeFilled } from "@tabler/icons-react";
 import createGlobe from "cobe";
@@ -129,7 +131,8 @@ const pipelineStages = [
   {
     icon: Sparkles,
     title: "Blueprint",
-    description: "Capture requirements with natural language briefs and templates.",
+    description:
+      "Capture requirements with natural language briefs and templates.",
     detail:
       "Outline responsibilities, guardrails, and data connections in minutes with collaborative drafting.",
     metric: "3 min setup",
@@ -164,25 +167,29 @@ const capabilityShowcase = [
   {
     icon: BarChart3,
     title: "Realtime Monitoring",
-    description: "Live dashboards track latency, throughput, sentiment, and compliance in one view.",
+    description:
+      "Live dashboards track latency, throughput, sentiment, and compliance in one view.",
     stat: "Unified Ops Center",
   },
   {
     icon: Shield,
     title: "Adaptive Guardrails",
-    description: "Dynamic safety nets enforce policy, redact PII, and block escalation risks automatically.",
+    description:
+      "Dynamic safety nets enforce policy, redact PII, and block escalation risks automatically.",
     stat: "Policy Engine",
   },
   {
     icon: Cloud,
     title: "Global Footprint",
-    description: "Multi-cloud, multi-region distribution keeps workloads close to users with failover baked in.",
+    description:
+      "Multi-cloud, multi-region distribution keeps workloads close to users with failover baked in.",
     stat: "14 Regions",
   },
   {
     icon: Gauge,
     title: "Performance Automation",
-    description: "Autonomous tuning improves conversion and reduces manual prompt iteration over time.",
+    description:
+      "Autonomous tuning improves conversion and reduces manual prompt iteration over time.",
     stat: "Auto-Tuning",
   },
 ];
@@ -191,19 +198,22 @@ const customerSignals = [
   {
     icon: ShieldCheck,
     title: "Human-in-the-loop",
-    description: "Route high-risk actions for approval with contextual snapshots and replay history.",
+    description:
+      "Route high-risk actions for approval with contextual snapshots and replay history.",
     metric: "12k reviews synced",
   },
   {
     icon: Workflow,
     title: "Deterministic orchestration",
-    description: "Stateful flows, retries, and fallbacks so every task completes predictably.",
+    description:
+      "Stateful flows, retries, and fallbacks so every task completes predictably.",
     metric: "4.8M flows executed",
   },
   {
     icon: Infinity,
     title: "Continuous learning",
-    description: "Evaluation suites and telemetry loops keep experiences improving weekly.",
+    description:
+      "Evaluation suites and telemetry loops keep experiences improving weekly.",
     metric: "Continuous evaluation",
   },
 ];
@@ -228,6 +238,20 @@ function LandingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Typewriter animation state
+  const [typewriterText, setTypewriterText] = useState("");
+  const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
+  const [isTyping, setIsTyping] = useState(true);
+
+  const typewriterPhrases = [
+    "an ecommerce agent",
+    "a database agent",
+    "a customer service agent",
+    "a data analysis agent",
+    "a content creation agent",
+    "a workflow automation agent"
+  ];
+
   useEffect(() => {
     const interval = window.setInterval(() => {
       setActiveStage((current) => (current + 1) % pipelineStages.length);
@@ -235,9 +259,38 @@ function LandingContent() {
     return () => window.clearInterval(interval);
   }, []);
 
+  // Typewriter animation effect
+  useEffect(() => {
+    const currentPhrase = typewriterPhrases[currentPhraseIndex];
+    let timeoutId: NodeJS.Timeout;
+
+    if (isTyping) {
+      if (typewriterText.length < currentPhrase.length) {
+        timeoutId = setTimeout(() => {
+          setTypewriterText(currentPhrase.slice(0, typewriterText.length + 1));
+        }, 100);
+      } else {
+        timeoutId = setTimeout(() => {
+          setIsTyping(false);
+        }, 2000);
+      }
+    } else {
+      if (typewriterText.length > 0) {
+        timeoutId = setTimeout(() => {
+          setTypewriterText(typewriterText.slice(0, -1));
+        }, 50);
+      } else {
+        setCurrentPhraseIndex((prev) => (prev + 1) % typewriterPhrases.length);
+        setIsTyping(true);
+      }
+    }
+
+    return () => clearTimeout(timeoutId);
+  }, [typewriterText, isTyping, currentPhraseIndex, typewriterPhrases]);
+
   // Populate prompt from URL when user returns from authentication
   useEffect(() => {
-    const urlPrompt = searchParams.get('prompt');
+    const urlPrompt = searchParams.get("prompt");
     if (urlPrompt && !prompt) {
       setPrompt(urlPrompt);
     }
@@ -271,32 +324,35 @@ function LandingContent() {
     });
     const data = await CreateprojectResponse.json();
 
-    const { project: { id } } = data;
+    let { project: { id } } = data;
 
     const postData = {
       text: prompt,
-      projectId: id
+      projectId: id,
     };
-    await axios.post('https://acemcp-service.rushikeshpatil8208.workers.dev/template', postData).then(res => {
-      let { projectMetadata } = res.data
-      setPromptMetadata(projectMetadata[0])
-
-    }).catch(err => {
-
-    }).finally(() => {
-      setIsGenerating(false);
-    });
+    await axios
+      .post(
+        "https://acemcp-service.rushikeshpatil8208.workers.dev/template",
+        postData,
+      )
+      .then((res) => {
+        let { projectMetadata } = res.data;
+        setPromptMetadata(projectMetadata[0]);
+      })
+      .catch((err) => { })
+      .finally(() => {
+        setIsGenerating(false);
+      });
     //project id
     // const data = await response.json();
-    // console.log(data);
     // Authenticated user - redirect to onboarding with prompt
     const params = new URLSearchParams();
-    params.set("prompt", prompt);
-    router.push(`/onboarding?${params.toString()}`);
+    params.set("prompt", prompt)
+    // router.push(`/onboarding?projectId=${id}`);
+    router.push(`/onboarding?projectId=${id}&${params.toString()}`);
 
     // router.push(`/onboarding?${params.toString()}`);
   };
-
 
   const handlePrimaryCta = () => {
     if (session) {
@@ -331,7 +387,7 @@ function LandingContent() {
       // Fetch user's projects
       const response = await fetch("/api/user/projects");
       const data = await response.json();
-      
+
       if (data.success && data.projects && data.projects.length > 0) {
         // Redirect to the most recent project
         const latestProject = data.projects[0];
@@ -342,44 +398,124 @@ function LandingContent() {
         setIsDashboardLoading(false);
       }
     } catch (error) {
-      console.error("Error fetching projects:", error);
       alert("Failed to load your projects. Please try again.");
       setIsDashboardLoading(false);
     }
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-black font-sans text-white">
+    <div className="relative min-h-screen overflow-hidden bg-[#0c0c0c] font-sans text-white">
+      {/* Perplexity-style dark background with subtle gradients */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute left-1/2 top-0 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-500/12 blur-[150px]" />
-        <div className="absolute right-0 top-1/4 h-[460px] w-[460px] translate-x-1/4 rounded-full bg-sky-500/12 blur-[130px]" />
-        <div className="absolute bottom-0 left-1/3 h-[420px] w-[420px] -translate-x-1/4 translate-y-1/3 rounded-full bg-blue-600/25 blur-[120px]" />
+        {/* Base dark background similar to Perplexity */}
         <div
-          className="absolute left-1/3 top-1/3 h-[300px] w-[300px] animate-[pulse_4s_ease-in-out_infinite] rounded-full bg-gradient-to-br from-blue-500/25 to-cyan-500/25 blur-3xl"
+          className="absolute inset-0"
+          style={{
+            background: `
+              linear-gradient(180deg, 
+                #0c0c0c 0%, 
+                #111111 20%, 
+                #151515 40%, 
+                #181818 60%, 
+                #1a1a1a 80%, 
+                #1c1c1c 100%
+              )
+            `,
+          }}
         />
+
+        {/* Subtle brand color accents */}
         <div
-          className="absolute right-1/4 top-2/3 h-[260px] w-[260px] animate-[pulse_5s_ease-in-out_infinite] rounded-full bg-gradient-to-br from-sky-500/25 to-blue-500/25 blur-3xl"
+          className="absolute inset-0 opacity-20"
+          style={{
+            background: `
+              radial-gradient(ellipse at 10% 10%, rgba(95, 150, 241, 0.08) 0%, transparent 40%),
+              radial-gradient(ellipse at 90% 20%, rgba(95, 150, 241, 0.06) 0%, transparent 35%),
+              radial-gradient(ellipse at 30% 80%, rgba(95, 150, 241, 0.05) 0%, transparent 30%),
+              radial-gradient(ellipse at 80% 90%, rgba(95, 150, 241, 0.04) 0%, transparent 25%)
+            `,
+          }}
         />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.028)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.028)_1px,transparent_1px)] bg-[size:72px_72px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,black,transparent)]" />
+
+        {/* Clean margin lines system */}
+        <div className="absolute inset-0">
+          {/* Primary margin lines */}
+          <div className="absolute left-12 top-0 h-full w-px bg-gradient-to-b from-transparent via-white/[0.12] to-transparent" />
+          <div className="absolute right-12 top-0 h-full w-px bg-gradient-to-b from-transparent via-white/[0.12] to-transparent" />
+          <div className="absolute top-12 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/[0.12] to-transparent" />
+          <div className="absolute bottom-12 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/[0.12] to-transparent" />
+
+          {/* Secondary margin lines */}
+          <div className="absolute left-24 top-0 h-full w-px bg-gradient-to-b from-transparent via-white/[0.06] to-transparent" />
+          <div className="absolute right-24 top-0 h-full w-px bg-gradient-to-b from-transparent via-white/[0.06] to-transparent" />
+          <div className="absolute top-24 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+          <div className="absolute bottom-24 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+
+          {/* Corner accent lines with brand color */}
+          <div className="absolute top-12 left-12 w-20 h-px bg-gradient-to-r from-[#5F96F1]/60 to-transparent animate-margin-glow" />
+          <div className="absolute top-12 left-12 w-px h-20 bg-gradient-to-b from-[#5F96F1]/60 to-transparent animate-margin-glow" />
+          <div className="absolute top-12 right-12 w-20 h-px bg-gradient-to-l from-[#5F96F1]/60 to-transparent animate-margin-glow" style={{ animationDelay: '2s' }} />
+          <div className="absolute top-12 right-12 w-px h-20 bg-gradient-to-b from-[#5F96F1]/60 to-transparent animate-margin-glow" style={{ animationDelay: '2s' }} />
+          <div className="absolute bottom-12 left-12 w-20 h-px bg-gradient-to-r from-[#5F96F1]/60 to-transparent animate-margin-glow" style={{ animationDelay: '4s' }} />
+          <div className="absolute bottom-12 left-12 w-px h-20 bg-gradient-to-t from-[#5F96F1]/60 to-transparent animate-margin-glow" style={{ animationDelay: '4s' }} />
+          <div className="absolute bottom-12 right-12 w-20 h-px bg-gradient-to-l from-[#5F96F1]/60 to-transparent animate-margin-glow" style={{ animationDelay: '6s' }} />
+          <div className="absolute bottom-12 right-12 w-px h-20 bg-gradient-to-t from-[#5F96F1]/60 to-transparent animate-margin-glow" style={{ animationDelay: '6s' }} />
+
+          {/* Corner accent dots */}
+          <div className="absolute top-12 left-12 w-2 h-2 bg-[#5F96F1]/40 rounded-full animate-corner-glow" />
+          <div className="absolute top-12 right-12 w-2 h-2 bg-[#5F96F1]/40 rounded-full animate-corner-glow" style={{ animationDelay: '2s' }} />
+          <div className="absolute bottom-12 left-12 w-2 h-2 bg-[#5F96F1]/40 rounded-full animate-corner-glow" style={{ animationDelay: '4s' }} />
+          <div className="absolute bottom-12 right-12 w-2 h-2 bg-[#5F96F1]/40 rounded-full animate-corner-glow" style={{ animationDelay: '6s' }} />
+        </div>
+
+        {/* Subtle floating orbs with brand color */}
+        <div
+          className="absolute top-1/4 left-1/4 w-[60vh] h-[60vh] rounded-full opacity-[0.03] animate-pulse"
+          style={{
+            background: 'radial-gradient(circle, rgba(95, 150, 241, 0.4) 0%, transparent 70%)',
+            filter: 'blur(60px)',
+            animationDuration: '15s',
+          }}
+        />
+
+        <div
+          className="absolute bottom-1/3 right-1/3 w-[50vh] h-[50vh] rounded-full opacity-[0.02] animate-pulse"
+          style={{
+            background: 'radial-gradient(circle, rgba(95, 150, 241, 0.3) 0%, transparent 70%)',
+            filter: 'blur(50px)',
+            animationDuration: '18s',
+            animationDelay: '5s',
+          }}
+        />
+
+
+
+        {/* Fine noise texture */}
+        <div
+          className="absolute inset-0 opacity-[0.015]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' fill='%23ffffff'/%3E%3C/svg%3E")`,
+          }}
+        />
       </div>
 
       <div className="relative">
-        <header className="border-b border-white/5 backdrop-blur-xl">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-8">
+        <header className="relative border-b border-white/[0.06] backdrop-blur-xl bg-black/20">
+          <div className="mx-auto flex max-w-6xl items-center justify-between px-8 py-4 lg:px-12">
             <div className="flex items-center gap-3">
-              <div className="relative flex h-10 w-10 items-center justify-center">
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-500 via-sky-500 to-cyan-500 blur-md" />
-                <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 via-sky-500 to-cyan-500">
-                  <Zap className="h-5 w-5 text-white" strokeWidth={2.5} />
-                </div>
-              </div>
+              <img
+                src="/akronai.svg"
+                alt="Akron AI"
+                className="h-8 w-auto"
+              />
+              <span className="text-lg font-semibold text-white">Akron</span>
             </div>
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
-                className="hidden h-10 rounded-lg border border-white/10 bg-white/5 px-4 text-sm text-white/80 transition hover:border-white/20 hover:bg-white/10 hover:text-white md:inline-flex"
+                className="hidden h-9 rounded-md px-3 text-sm text-white/70 transition hover:text-white md:inline-flex"
               >
-                Documentation
+                Docs
               </Button>
               {session ? (
                 <>
@@ -387,11 +523,11 @@ function LandingContent() {
                     variant="ghost"
                     onClick={handleDashboardClick}
                     disabled={isDashboardLoading}
-                    className="h-10 rounded-lg px-4 text-sm text-white/80 transition hover:text-white disabled:opacity-50"
+                    className="h-9 rounded-md px-3 text-sm text-white/70 transition hover:text-white disabled:opacity-50"
                   >
                     {isDashboardLoading ? (
                       <div className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="h-3 w-3 animate-spin" />
                         Loading...
                       </div>
                     ) : (
@@ -401,7 +537,7 @@ function LandingContent() {
                   <Button
                     variant="ghost"
                     onClick={() => signOut()}
-                    className="h-10 rounded-lg px-4 text-sm text-white/80 transition hover:text-white"
+                    className="h-9 rounded-md px-3 text-sm text-white/70 transition hover:text-white"
                   >
                     Sign out
                   </Button>
@@ -409,15 +545,19 @@ function LandingContent() {
               ) : (
                 <Button
                   variant="ghost"
-                  onClick={() => router.push("/authentication?mode=signin&redirectTo=%2Flanding")}
-                  className="h-10 rounded-lg px-4 text-sm text-white/80 transition hover:text-white"
+                  onClick={() =>
+                    router.push(
+                      "/authentication?mode=signin&redirectTo=%2Flanding",
+                    )
+                  }
+                  className="h-9 rounded-md px-3 text-sm text-white/70 transition hover:text-white"
                 >
                   Sign in
                 </Button>
               )}
               <Button
                 onClick={handlePrimaryCta}
-                className="h-10 rounded-lg bg-white px-5 text-sm font-semibold text-slate-900 shadow-[0_24px_60px_-30px_rgba(59,130,246,0.85)] transition hover:bg-white/90"
+                className="h-9 rounded-md bg-gradient-to-r from-[#5F96F1] to-[#2472eb] px-4 text-sm font-medium text-white transition hover:opacity-90"
               >
                 {session ? "Continue building" : "Get started"}
               </Button>
@@ -425,64 +565,83 @@ function LandingContent() {
           </div>
         </header>
 
-        <main className="mx-auto max-w-7xl px-2 py-20 lg:px-8 lg:py-2">
-          <div className="relative z-2 flex flex-col items-center text-center pt-4 md:pt-20">
-            <div className="pointer-events-none absolute inset-x-0 -top-24 flex h-[520px] w-full items-center justify-center -z-10 md:-top-32">
-              <div className="h-full w-full max-w-6xl scale-100 mix-blend-screen opacity-100">
+        <main className="mx-auto max-w-6xl px-8 py-16 lg:px-12">
+          {/* Hero Section - Bolt.new inspired */}
+          <div className="relative flex flex-col items-center text-center">
+
+            {/* Background AKRON text effect */}
+            <div className="pointer-events-none absolute inset-x-0 -top-16 flex h-[400px] w-full items-center justify-center -z-10">
+              <div className="h-full w-full max-w-4xl scale-100 mix-blend-screen opacity-30">
                 <TextHoverEffect text="Akron" automatic duration={12} />
               </div>
             </div>
-            {/* <Badge className="flex items-center gap-2 border-white/10 bg-white/10 px-4 py-1.5 text-sm text-white/90 backdrop-blur-xl">
-              <Sparkles className="h-3.5 w-3.5" /> Powered by Model Context Protocol
-            </Badge> */}
 
-            <h1 className="mt-10 font-sans text-5xl font-bold leading-[1.08] tracking-tight text-white sm:text-6xl lg:text-7xl">
-              Generate MCP-powered
-              <br />
-              <span className="bg-gradient-to-r from-sky-300 via-blue-300 to-cyan-200 bg-clip-text text-transparent">
-                AI agents in seconds
-              </span>
+            {/* Badge */}
+            <div className="relative z-10 mb-6 inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-black/30 px-3 py-1 text-sm text-white/80 backdrop-blur-sm">
+              <Sparkles className="h-3 w-3" />
+              Akron V1
+            </div>
+
+            {/* Main Heading - Bolt.new style */}
+            <h1 className="relative z-10 mb-6 text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
+              What will you{" "}
+              <span className="bg-gradient-to-r from-[#5F96F1] to-[#2472eb] bg-clip-text text-transparent font-black tracking-tight">
+                build
+              </span>{" "}
+              today?
             </h1>
 
-            <p className="mt-8 max-w-2xl text-lg leading-relaxed text-white/65 sm:text-xl">
-              Describe your agent once. Get production-grade MCP servers with orchestration, monitoring, and enterprise security automatically.
+            <p className="relative z-10 mb-12 max-w-2xl text-lg text-white/60 sm:text-xl">
+              Create powerful MCP powered Agents by chatting with AI.
             </p>
 
-            <div className="relative mt-12 w-full max-w-5xl">
-              <div className="absolute -inset-[1px] animate-[pulse_3s_ease-in-out_infinite] rounded-2xl bg-gradient-to-r from-sky-500 via-blue-500 to-cyan-500 opacity-75 blur-sm" />
-              <div className="relative rounded-2xl border border-white/10 bg-black/50 p-1 shadow-2xl backdrop-blur-2xl">
-                <div className="flex flex-col gap-3 rounded-xl bg-gradient-to-br from-white/[0.07] to-white/[0.02] p-5">
-                  <textarea
-                    value={prompt}
-                    onChange={(event) => setPrompt(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
-                        event.preventDefault();
-                        handleGenerate();
-                      }
-                    }}
-                    placeholder="Describe your AI agent... e.g., 'Build a customer support agent that handles tickets, emails, and Slack messages with sentiment analysis'"
-                    className="min-h-[120px] resize-none border-0 bg-transparent text-base text-white/90 placeholder:text-white/45 focus:outline-none"
-                  />
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 text-xs text-white/45">
-                      <kbd className="rounded-md border border-white/10 bg-white/5 px-2 py-1 font-mono">⌘</kbd>
-                      <kbd className="rounded-md border border-white/10 bg-white/5 px-2 py-1 font-mono">Enter</kbd>
-                      <span>to generate</span>
-                    </div>
+            {/* Main Input Area - Clean style */}
+            <div className="relative z-10 w-full max-w-3xl">
+              <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-black/40 backdrop-blur-xl shadow-2xl">
+                <div className="p-6">
+                  <div className="relative mb-4">
+                    {!prompt && (
+                      <div className="absolute inset-0 flex items-start pt-3 pointer-events-none">
+                        <span className="text-base text-white/50">
+                          Ask Akron to build{" "}
+                          <span className="text-[#5F96F1]">
+                            {typewriterText}
+                            <span className="animate-pulse">|</span>
+                          </span>
+                        </span>
+                      </div>
+                    )}
+                    <textarea
+                      value={prompt}
+                      onChange={(event) => setPrompt(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (
+                          event.key === "Enter" &&
+                          (event.metaKey || event.ctrlKey)
+                        ) {
+                          event.preventDefault();
+                          handleGenerate();
+                        }
+                      }}
+                      placeholder=""
+                      className="w-full resize-none border-0 bg-transparent text-base text-white focus:outline-none relative z-10 min-h-[80px]"
+                      rows={4}
+                    />
+                  </div>
+                  <div className="flex justify-end">
                     <Button
                       onClick={handleGenerate}
                       disabled={isGenerating || !prompt.trim()}
-                      className="h-auto rounded-lg border border-white/10 bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white hover:bg-black disabled:opacity-50 disabled:hover:border-white/10"
+                      className="h-10 rounded-md bg-gradient-to-r from-[#5F96F1] to-[#2472eb] px-6 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
                     >
                       {isGenerating ? (
                         <div className="flex items-center gap-2">
-                          Generating...
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Building...
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
-                          Generate Agent
+                          Build now
                           <ArrowRight className="h-4 w-4" />
                         </div>
                       )}
@@ -492,32 +651,38 @@ function LandingContent() {
               </div>
             </div>
 
-            <div className="mt-8 flex flex-wrap justify-center gap-2">
+            {/* Suggestions */}
+            <div className="relative z-10 mt-6 flex flex-wrap justify-center gap-2">
               {suggestions.map((suggestion) => (
                 <button
                   key={suggestion}
                   onClick={() => setPrompt(suggestion)}
                   type="button"
-                  className="rounded-full border border-white/10 bg-black px-4 py-2 text-sm text-white backdrop-blur-xl transition hover:border-white"
+                  className="rounded-full border border-white/[0.08] bg-black/30 px-3 py-1.5 text-sm text-white/70 backdrop-blur-sm transition hover:bg-black/40 hover:text-white hover:border-[#5F96F1]/30"
                 >
                   {suggestion}
                 </button>
               ))}
             </div>
 
-            <div className="mt-20 grid w-full gap-4 sm:grid-cols-3">
+            {/* Feature highlights - simplified */}
+            <div className="mt-16 grid w-full gap-4 sm:grid-cols-3">
               {heroHighlights.map((item) => (
                 <div
                   key={item.title}
-                  className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-blue-400/60 hover:bg-white/[0.05] hover:shadow-[0_30px_90px_-50px_rgba(59,130,246,0.9)]"
+                  className="group relative overflow-hidden rounded-xl border border-white/[0.08] bg-black/20 p-5 backdrop-blur-sm transition-all duration-300 hover:border-[#5F96F1]/30 hover:bg-black/30"
                 >
-                  <div className="flex flex-col items-start gap-4 text-left">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/25 via-sky-500/20 to-cyan-500/25 text-white">
-                      <item.icon className="h-5 w-5" strokeWidth={2} />
+                  <div className="flex flex-col items-start gap-3 text-left">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#5F96F1]/15 text-[#5F96F1] border border-[#5F96F1]/30">
+                      <item.icon className="h-4 w-4" strokeWidth={2} />
                     </div>
-                    <div className="space-y-2">
-                      <h3 className="text-lg font-semibold text-white">{item.title}</h3>
-                      <p className="text-sm leading-relaxed text-white/60">{item.description}</p>
+                    <div className="space-y-1">
+                      <h3 className="text-base font-medium text-white">
+                        {item.title}
+                      </h3>
+                      <p className="text-sm leading-relaxed text-white/50">
+                        {item.description}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -525,217 +690,212 @@ function LandingContent() {
             </div>
           </div>
 
-
-
-          <section className="mt-32">
+          {/* Features Section - Simplified */}
+          <section className="mt-24">
             <div className="flex flex-col items-center text-center">
-              <Badge className="mb-6 flex items-center gap-2 border-white/10 bg-white/10 px-3 py-1 text-sm text-white/80 backdrop-blur-xl">
-                <Layers className="h-4 w-4" /> Features
-              </Badge>
-              <h2 className="text-4xl font-bold text-white sm:text-5xl">
+              <h2 className="text-3xl font-bold text-white sm:text-4xl">
                 Everything you need to build AI agents
               </h2>
-              <p className="mt-4 max-w-2xl text-lg text-white/65">
-                From natural language to production-ready infrastructure, Akron handles the entire agent lifecycle.
+              <p className="mt-4 max-w-2xl text-lg text-white/60">
+                From natural language to production-ready infrastructure, Akron
+                handles the entire agent lifecycle.
               </p>
             </div>
 
-            <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {featureClusters.map((feature) => (
-                <Card
+                <div
                   key={feature.title}
-                  className="group relative overflow-hidden border border-white/10 bg-white/[0.03] backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-blue-400/60 hover:bg-blue-500/10 hover:shadow-[0_30px_90px_-50px_rgba(59,130,246,0.85)]"
+                  className="group relative overflow-hidden rounded-xl border border-white/[0.08] bg-black/20 p-5 backdrop-blur-sm transition-all duration-300 hover:border-[#5F96F1]/30 hover:bg-black/30"
                 >
-                  <CardHeader className="gap-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white transition duration-500 group-hover:scale-105 group-hover:bg-gradient-to-br group-hover:from-blue-500 group-hover:via-sky-500 group-hover:to-cyan-500">
-                        <feature.icon className="h-5 w-5" />
-                      </div>
-                      <Badge className="border-white/10 bg-white/10 px-2 py-0.5 text-xs text-white/70">
-                        {feature.tag}
-                      </Badge>
+                  <div className="mb-4 flex items-center justify-between">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-white/80">
+                      <feature.icon className="h-4 w-4" />
                     </div>
-                    <CardTitle className="text-xl text-white">{feature.title}</CardTitle>
-                    <CardDescription className="text-base leading-relaxed text-white/65">
-                      {feature.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3 text-sm text-white/70">
-                      {feature.bullets.map((bullet) => (
-                        <li
-                          key={bullet}
-                          className="flex items-start gap-3"
-                        >
-                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-white/40" />
-                          <span>{bullet}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
+                    <span className="rounded-md border border-[#5F96F1]/30 bg-[#5F96F1]/10 px-2 py-1 text-xs text-[#5F96F1]">
+                      {feature.tag}
+                    </span>
+                  </div>
+                  <h3 className="mb-2 text-lg font-medium text-white">
+                    {feature.title}
+                  </h3>
+                  <p className="mb-4 text-sm leading-relaxed text-white/60">
+                    {feature.description}
+                  </p>
+                  <ul className="space-y-2 text-sm text-white/50">
+                    {feature.bullets.map((bullet) => (
+                      <li key={bullet} className="flex items-start gap-2">
+                        <Check className="mt-0.5 h-3 w-3 shrink-0 text-white/40" />
+                        <span>{bullet}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))}
             </div>
           </section>
 
-          <section className="mt-32 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-2xl">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-sky-500/5 to-cyan-500/10" />
-              <div className="relative flex flex-col gap-6">
-                <Badge className="w-fit border-white/10 bg-white/10 px-3 py-1 text-xs uppercase tracking-wide text-white/75">
-                  Animated pipeline
-                </Badge>
-                <h3 className="text-3xl font-bold text-white">From prompt to production</h3>
-                <p className="text-white/65">
-                  Follow the real-time journey as Akron assembles, deploys, and optimizes your agent across the stack.
-                </p>
-                <div className="space-y-4">
-                  {pipelineStages.map((stage, index) => {
-                    const isActive = index === activeStage;
-                    return (
-                      <button
-                        key={stage.title}
-                        type="button"
-                        onMouseEnter={() => setActiveStage(index)}
-                        className={`group flex w-full items-center justify-between rounded-2xl border px-5 py-4 text-left transition-all duration-500 ${isActive
-                            ? "border-blue-400/70 bg-blue-500/10 shadow-[0_30px_100px_-60px_rgba(59,130,246,0.9)]"
-                            : "border-white/10 bg-white/5 hover:border-blue-400/40 hover:bg-blue-500/10"
-                          }`}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div
-                            className={`flex size-11 items-center justify-center rounded-xl transition-all duration-500 ${isActive
-                                ? "bg-gradient-to-br from-blue-500 via-sky-500 to-cyan-500 text-white"
+          {/* Pipeline Section - Simplified */}
+          <section className="mt-24">
+            <div className="grid gap-8 lg:grid-cols-2">
+              <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-black/20 p-6 backdrop-blur-sm">
+                <div className="flex flex-col gap-6">
+                  <div>
+                    <h3 className="text-2xl font-bold text-white">
+                      From prompt to production
+                    </h3>
+                    <p className="mt-2 text-white/60">
+                      Follow the real-time journey as Akron assembles, deploys, and
+                      optimizes your agent across the stack.
+                    </p>
+                  </div>
+                  <div className="space-y-3">
+                    {pipelineStages.map((stage, index) => {
+                      const isActive = index === activeStage;
+                      return (
+                        <button
+                          key={stage.title}
+                          type="button"
+                          onMouseEnter={() => setActiveStage(index)}
+                          className={`group flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-all duration-300 ${isActive
+                            ? "border-[#5F96F1]/50 bg-[#5F96F1]/15"
+                            : "border-white/[0.08] bg-black/20 hover:border-white/20 hover:bg-black/30"
+                            }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300 ${isActive
+                                ? "bg-gradient-to-r from-[#5F96F1] to-[#2472eb] text-white"
                                 : "bg-white/10 text-white/70"
-                              }`}
-                          >
-                            <stage.icon className="h-5 w-5" />
+                                }`}
+                            >
+                              <stage.icon className="h-4 w-4" />
+                            </div>
+                            <div className="space-y-1">
+                              <p className="text-sm font-medium text-white">
+                                {stage.title}
+                              </p>
+                              <p className="text-xs text-white/50">
+                                {stage.description}
+                              </p>
+                            </div>
                           </div>
-                          <div className="space-y-1">
-                            <p className="text-sm font-semibold text-white">{stage.title}</p>
-                            <p className="text-xs text-white/55">{stage.description}</p>
-                          </div>
-                        </div>
-                        <span className="text-xs font-medium text-white/60">{stage.metric}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-                <Card className="relative border border-white/10 bg-white/[0.05] shadow-none">
-                  <CardHeader className="gap-3">
-                    <Badge className="w-fit border-white/15 bg-white/10 px-2 py-0.5 text-[11px] text-white/70">
-                      Live preview
-                    </Badge>
-                    <CardTitle className="text-2xl text-white">
-                      {pipelineStages[activeStage].title}
-                    </CardTitle>
-                    <CardDescription className="text-white/65">
-                      {pipelineStages[activeStage].detail}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="grid gap-4 sm:grid-cols-2">
-                    {metricsPulse.map((metric) => (
-                      <div
-                        key={metric.label}
-                        className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm text-white/70"
-                      >
-                        <p className="text-[11px] uppercase tracking-wide text-white/45">
-                          {metric.label}
-                        </p>
-                        <p className="mt-1 text-lg font-semibold text-white">
-                          {metric.value}
-                        </p>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {capabilityShowcase.map((capability) => (
-                <Card
-                  key={capability.title}
-                  className="group overflow-hidden border border-white/10 bg-white/[0.03] backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-blue-400/60 hover:bg-blue-500/10 hover:shadow-[0_30px_100px_-60px_rgba(59,130,246,0.8)]"
-                >
-                  <CardHeader className="gap-4">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white transition duration-500 group-hover:scale-105 group-hover:bg-gradient-to-br group-hover:from-blue-500 group-hover:via-sky-500 group-hover:to-cyan-500">
-                      <capability.icon className="h-5 w-5" />
+                          <span className="text-xs font-medium text-white/60">
+                            {stage.metric}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="rounded-xl border border-white/[0.08] bg-black/30 p-4">
+                    <div className="mb-3">
+                      <h4 className="text-lg font-medium text-white">
+                        {pipelineStages[activeStage].title}
+                      </h4>
+                      <p className="text-sm text-white/60">
+                        {pipelineStages[activeStage].detail}
+                      </p>
                     </div>
-                    <CardTitle className="text-xl text-white">{capability.title}</CardTitle>
-                    <CardDescription className="text-white/65">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {metricsPulse.map((metric) => (
+                        <div
+                          key={metric.label}
+                          className="rounded-lg border border-white/[0.08] bg-black/40 px-3 py-2 text-left text-sm text-white/70"
+                        >
+                          <p className="text-xs uppercase tracking-wide text-white/45">
+                            {metric.label}
+                          </p>
+                          <p className="mt-1 text-base font-medium text-white">
+                            {metric.value}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {capabilityShowcase.map((capability) => (
+                  <div
+                    key={capability.title}
+                    className="group overflow-hidden rounded-xl border border-white/[0.08] bg-black/20 p-4 backdrop-blur-sm transition-all duration-300 hover:border-[#5F96F1]/30 hover:bg-black/30"
+                  >
+                    <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-white/80">
+                      <capability.icon className="h-4 w-4" />
+                    </div>
+                    <h4 className="mb-2 text-base font-medium text-white">
+                      {capability.title}
+                    </h4>
+                    <p className="mb-3 text-sm text-white/60">
                       {capability.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70">
+                    </p>
+                    <div className="inline-flex items-center rounded-md border border-white/[0.08] bg-black/40 px-2 py-1 text-xs text-white/70">
                       {capability.stat}
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
 
-          <section className="mt-32 space-y-12">
+          {/* Outcomes Section - Simplified */}
+          <section className="mt-24">
             <div className="flex flex-col items-center text-center">
-              <Badge className="mb-6 flex items-center gap-2 border-white/10 bg-white/10 px-3 py-1 text-sm text-white/80 backdrop-blur-xl">
-                <Layers className="h-4 w-4" /> Outcomes
-              </Badge>
-              <h2 className="text-4xl font-bold text-white sm:text-5xl">
+              <h2 className="text-3xl font-bold text-white sm:text-4xl">
                 Modern teams rely on Akron
               </h2>
-              <p className="mt-4 max-w-2xl text-lg text-white/65">
-                Product, support, and operations teams deliver faster cycles with human-in-the-loop control and measurable gains.
+              <p className="mt-4 max-w-2xl text-lg text-white/60">
+                Product, support, and operations teams deliver faster cycles
+                with human-in-the-loop control and measurable gains.
               </p>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="mt-12 grid gap-4 md:grid-cols-3">
               {customerSignals.map((signal) => (
-                <Card
+                <div
                   key={signal.title}
-                  className="group relative overflow-hidden border border-white/10 bg-white/[0.03] backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-blue-400/60 hover:bg-blue-500/10 hover:shadow-[0_35px_110px_-60px_rgba(59,130,246,0.85)]"
+                  className="group relative overflow-hidden rounded-xl border border-white/[0.08] bg-black/20 p-5 backdrop-blur-sm transition-all duration-300 hover:border-[#5F96F1]/30 hover:bg-black/30"
                 >
-                  <CardHeader className="gap-5">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-white transition duration-500 group-hover:scale-105 group-hover:bg-gradient-to-br group-hover:from-blue-500 group-hover:via-sky-500 group-hover:to-cyan-500">
-                      <signal.icon className="h-5 w-5" />
-                    </div>
-                    <CardTitle className="text-xl text-white">{signal.title}</CardTitle>
-                    <CardDescription className="text-white/65">
-                      {signal.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-sm font-medium text-white/70">
-                      {signal.metric}
-                    </div>
-                  </CardContent>
-                </Card>
+                  <div className="mb-4 flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-white/80">
+                    <signal.icon className="h-4 w-4" />
+                  </div>
+                  <h3 className="mb-2 text-lg font-medium text-white">
+                    {signal.title}
+                  </h3>
+                  <p className="mb-3 text-sm text-white/60">
+                    {signal.description}
+                  </p>
+                  <div className="text-sm font-medium text-white/70">
+                    {signal.metric}
+                  </div>
+                </div>
               ))}
             </div>
           </section>
 
-          <section className="mt-32">
+          {/* Integrations Section - Simplified */}
+          <section className="mt-24">
             <div className="flex flex-col items-center text-center">
-              <Badge className="mb-6 flex items-center gap-2 border-white/10 bg-white/10 px-3 py-1 text-sm text-white/80 backdrop-blur-xl">
-                <Layers className="h-4 w-4" /> Integrations
-              </Badge>
-              <h2 className="text-4xl font-bold text-white sm:text-5xl">
+              <h2 className="text-3xl font-bold text-white sm:text-4xl">
                 Connect your entire stack
               </h2>
-              <p className="mt-4 max-w-2xl text-lg text-white/65">
-                Pre-built adapters for popular tools, with type-safe clients and automatic credential management.
+              <p className="mt-4 max-w-2xl text-lg text-white/60">
+                Pre-built adapters for popular tools, with type-safe clients and
+                automatic credential management.
               </p>
             </div>
 
-            <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {integrationHighlights.map((integration) => (
                 <div
                   key={integration.name}
-                  className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-blue-400/60 hover:bg-blue-500/10 hover:shadow-[0_30px_100px_-60px_rgba(59,130,246,0.85)]"
+                  className="group rounded-xl border border-white/[0.08] bg-black/20 p-4 backdrop-blur-sm transition-all duration-300 hover:border-[#5F96F1]/30 hover:bg-black/30"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-white">{integration.name}</span>
-                    <span className="rounded-lg border border-white/15 bg-white/10 px-2.5 py-1 text-xs text-white/70">
+                    <span className="font-medium text-white">
+                      {integration.name}
+                    </span>
+                    <span className="rounded-md border border-white/[0.08] bg-black/40 px-2 py-1 text-xs text-white/60">
                       {integration.category}
                     </span>
                   </div>
@@ -744,31 +904,29 @@ function LandingContent() {
             </div>
           </section>
 
-          <section className="mt-32">
-            <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.04] p-12 backdrop-blur-2xl">
-              <div className="absolute right-0 top-0 h-[380px] w-[380px] translate-x-1/4 -translate-y-1/4 rounded-full bg-sky-500/25 blur-3xl" />
-              <div className="relative flex flex-col items-center text-center">
-                <Badge className="mb-6 flex items-center gap-2 border-white/10 bg-white/10 px-3 py-1 text-sm text-white/80 backdrop-blur-xl">
-                  <Sparkles className="h-4 w-4" /> Ready to ship
-                </Badge>
-                <h2 className="text-4xl font-bold text-white sm:text-5xl">
+          {/* CTA Section - Simplified */}
+          <section className="mt-24">
+            <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-black/20 p-8 backdrop-blur-sm">
+              <div className="flex flex-col items-center text-center">
+                <h2 className="text-3xl font-bold text-white sm:text-4xl">
                   Start building your agent today
                 </h2>
-                <p className="mt-4 max-w-2xl text-lg text-white/70">
-                  Join teams shipping production AI agents with enterprise-grade infrastructure and security.
+                <p className="mt-4 max-w-2xl text-lg text-white/60">
+                  Join teams shipping production AI agents with enterprise-grade
+                  infrastructure and security.
                 </p>
                 <div className="mt-8 flex flex-wrap justify-center gap-3">
                   <Button
                     onClick={handlePrimaryCta}
-                    className="h-auto rounded-lg border border-white/10 bg-black px-6 py-3 text-sm font-semibold text-white transition hover:border-white"
+                    className="h-10 rounded-md bg-gradient-to-r from-[#5F96F1] to-[#2472eb] px-6 text-sm font-medium text-white transition hover:opacity-90"
                   >
                     {session ? "Resume your agents" : "Get started for free"}
-                    <ArrowRight className="h-4 w-4 ml-2" />
+                    <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                   <Button
                     onClick={handleSecondaryCta}
                     variant="ghost"
-                    className="h-auto rounded-lg border border-white/10 bg-black px-6 py-3 text-sm font-semibold text-white transition hover:border-white"
+                    className="h-10 rounded-md border border-white/10 bg-white/5 px-6 text-sm font-medium text-white transition hover:bg-white/10"
                   >
                     {session ? "Explore advanced flows" : "Schedule a demo"}
                   </Button>
@@ -778,25 +936,34 @@ function LandingContent() {
           </section>
         </main>
 
-        <footer className="border-t border-white/5 backdrop-blur-xl">
-          <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
-            <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-              <div className="flex items-center gap-3">
-                <div className="relative flex h-8 w-8 items-center justify-center">
-                  <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-blue-500 via-sky-500 to-cyan-500 blur-sm" />
-                  <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 via-sky-500 to-cyan-500">
-                    <Zap className="h-4 w-4 text-white" strokeWidth={2.5} />
-                  </div>
-                </div>
-                <span className="text-sm font-semibold text-white/85">Akron</span>
+        <footer className="border-t border-white/[0.06] backdrop-blur-xl bg-black/20">
+          <div className="mx-auto max-w-6xl px-8 py-8 lg:px-12">
+            <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+              <div className="flex items-center gap-2">
+                <img
+                  src="/akronai.svg"
+                  alt="Akron AI"
+                  className="h-6 w-auto"
+                />
+                <span className="text-sm font-medium text-white/80">
+                  Akron
+                </span>
               </div>
-              <p className="text-sm text-white/45">© 2025 Akron. All rights reserved.</p>
-              <div className="flex items-center gap-4">
-                <a href="#" className="text-white/45 transition-colors hover:text-white">
-                  <Github className="h-5 w-5" />
+              <p className="text-sm text-white/40">
+                © 2025 Akron. All rights reserved.
+              </p>
+              <div className="flex items-center gap-3">
+                <a
+                  href="#"
+                  className="text-white/40 transition-colors hover:text-white/70"
+                >
+                  <Github className="h-4 w-4" />
                 </a>
-                <a href="#" className="text-white/45 transition-colors hover:text-white">
-                  <Twitter className="h-5 w-5" />
+                <a
+                  href="#"
+                  className="text-white/40 transition-colors hover:text-white/70"
+                >
+                  <X className="h-4 w-4" />
                 </a>
               </div>
             </div>
@@ -811,8 +978,8 @@ export default function LandingPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-black">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-white/25 border-t-white" />
+        <div className="flex min-h-screen items-center justify-center bg-[#0a0a0a]">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-white" />
         </div>
       }
     >

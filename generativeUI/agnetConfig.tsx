@@ -178,23 +178,23 @@ export default function AgentConfig() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#5F96F1]" />
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="rounded-2xl border border-slate-800/60 bg-slate-900/80 p-6 text-center">
-        <AlertCircle className="mx-auto h-12 w-12 text-slate-400 mb-3" />
-        <p className="text-slate-400">Please sign in to configure your agent</p>
+      <div className="rounded-lg border border-border bg-card p-6 text-center">
+        <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
+        <p className="text-muted-foreground">Please sign in to configure your agent</p>
       </div>
     );
   }
 
   if (error && !projectData) {
     return (
-      <div className="rounded-2xl border border-red-900/50 bg-red-950/30 p-6 text-center">
+      <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-6 text-center">
         <AlertCircle className="mx-auto h-12 w-12 text-red-400 mb-3" />
         <p className="text-red-400 text-sm">{error}</p>
       </div>
@@ -202,49 +202,52 @@ export default function AgentConfig() {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500">
-            <Settings className="h-4 w-4 text-white" />
+    <div className="flex flex-col h-full space-y-4 font-sans">
+      {/* Header - Fixed */}
+      <div className="flex-shrink-0">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#5F96F1]">
+              <Settings className="h-4 w-4 text-white" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-foreground">Agent Configuration</h3>
+              <p className="text-xs text-muted-foreground">
+                {projectData?.name || "No project selected"}
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-sm font-semibold text-slate-50">Agent Configuration</h3>
-            <p className="text-xs text-slate-400">
-              {projectData?.name || "No project selected"}
-            </p>
-          </div>
+          <Badge className="border-[#5F96F1]/20 bg-[#5F96F1]/10 text-[#5F96F1] text-xs px-2 py-0.5">
+            <Bot className="h-3 w-3 mr-1" />
+            Active
+          </Badge>
         </div>
-        <Badge className="border-blue-500/50 bg-blue-500/10 text-blue-400 text-xs px-2 py-0.5">
-          <Bot className="h-3 w-3 mr-1" />
-          Active
-        </Badge>
+        <Separator className="bg-border mt-4" />
       </div>
 
-      <Separator className="bg-slate-800/60" />
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto space-y-4">
+        {/* Status Messages */}
+        {successMessage && (
+          <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3 flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+            <p className="text-xs text-emerald-400">{successMessage}</p>
+          </div>
+        )}
 
-      {/* Status Messages */}
-      {successMessage && (
-        <div className="rounded-lg border border-emerald-500/50 bg-emerald-500/10 p-3 flex items-center gap-2">
-          <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
-          <p className="text-xs text-emerald-400">{successMessage}</p>
-        </div>
-      )}
-
-      {error && (
-        <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-3 flex items-center gap-2">
-          <AlertCircle className="h-4 w-4 text-red-400 flex-shrink-0" />
-          <p className="text-xs text-red-400">{error}</p>
-        </div>
-      )}
+        {error && (
+          <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3 flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 text-red-400 flex-shrink-0" />
+            <p className="text-xs text-red-400">{error}</p>
+          </div>
+        )}
 
       {/* Configuration Form */}
       <div className="space-y-4">
         {/* Identity */}
         <div className="space-y-2">
-          <Label htmlFor="identity" className="text-xs text-slate-300 flex items-center gap-1.5">
-            <Sparkles className="h-3 w-3 text-blue-400" />
+          <Label htmlFor="identity" className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <Sparkles className="h-3 w-3 text-[#5F96F1]" />
             Agent Identity
           </Label>
           <Textarea
@@ -252,15 +255,15 @@ export default function AgentConfig() {
             value={identity}
             onChange={(e) => setIdentity(e.target.value)}
             placeholder="e.g., Helpful customer service assistant"
-            className="bg-slate-950 border-slate-700 text-white text-sm min-h-[60px] resize-none"
+            className="bg-input border-border text-foreground text-sm min-h-[60px] resize-none focus:border-[#5F96F1] focus:ring-[#5F96F1]"
             rows={2}
           />
         </div>
 
         {/* Tone */}
         <div className="space-y-2">
-          <Label htmlFor="tone" className="text-xs text-slate-300 flex items-center gap-1.5">
-            <MessageSquare className="h-3 w-3 text-blue-400" />
+          <Label htmlFor="tone" className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <MessageSquare className="h-3 w-3 text-[#5F96F1]" />
             Tone
           </Label>
           <Input
@@ -268,14 +271,14 @@ export default function AgentConfig() {
             value={tone}
             onChange={(e) => setTone(e.target.value)}
             placeholder="e.g., Professional and friendly"
-            className="bg-slate-950 border-slate-700 text-white text-sm h-9"
+            className="bg-input border-border text-foreground text-sm h-9 focus:border-[#5F96F1] focus:ring-[#5F96F1]"
           />
         </div>
 
         {/* Instructions */}
         <div className="space-y-2">
-          <Label htmlFor="instructions" className="text-xs text-slate-300 flex items-center gap-1.5">
-            <Bot className="h-3 w-3 text-blue-400" />
+          <Label htmlFor="instructions" className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <Bot className="h-3 w-3 text-[#5F96F1]" />
             Instructions
           </Label>
           <Textarea
@@ -283,15 +286,15 @@ export default function AgentConfig() {
             value={instructions}
             onChange={(e) => setInstructions(e.target.value)}
             placeholder="Specific instructions for the agent..."
-            className="bg-slate-950 border-slate-700 text-white text-sm min-h-[100px] resize-none"
+            className="bg-input border-border text-foreground text-sm min-h-[100px] resize-none focus:border-[#5F96F1] focus:ring-[#5F96F1]"
             rows={4}
           />
         </div>
 
         {/* Temperature */}
         <div className="space-y-2">
-          <Label htmlFor="temperature" className="text-xs text-slate-300 flex items-center gap-1.5">
-            <Thermometer className="h-3 w-3 text-blue-400" />
+          <Label htmlFor="temperature" className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <Thermometer className="h-3 w-3 text-[#5F96F1]" />
             Temperature
           </Label>
           <div className="flex items-center gap-3">
@@ -304,15 +307,15 @@ export default function AgentConfig() {
               onValueChange={(val) => setTemperature(val[0])}
               className="flex-1"
             />
-            <span className="w-12 text-center text-xs font-semibold text-slate-200 bg-slate-900/80 border border-slate-700 rounded px-2 py-1">
+            <span className="w-12 text-center text-xs font-semibold text-foreground bg-input border border-border rounded px-2 py-1">
               {temperature.toFixed(2)}
             </span>
           </div>
-          <p className="text-xs text-slate-500">Higher values make output more random</p>
+          <p className="text-xs text-muted-foreground">Higher values make output more random</p>
         </div>
       </div>
 
-      <Separator className="bg-slate-800/60" />
+      <Separator className="bg-border" />
 
       {/* Action Buttons */}
       <div className="flex gap-2">
@@ -320,7 +323,7 @@ export default function AgentConfig() {
           onClick={handleReset}
           variant="outline"
           size="sm"
-          className="flex-1 h-8 text-xs border-slate-700 bg-slate-950 text-white hover:bg-slate-800"
+          className="flex-1 h-8 text-xs border-border bg-secondary text-secondary-foreground hover:bg-secondary/80"
         >
           <RefreshCw className="h-3 w-3 mr-1.5" />
           Reset
@@ -329,7 +332,7 @@ export default function AgentConfig() {
           onClick={handleSave}
           disabled={isSaving || !projectData}
           size="sm"
-          className="flex-1 h-8 text-xs bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white shadow-lg shadow-blue-500/30"
+          className="flex-1 h-8 text-xs bg-[#5F96F1] hover:bg-[#5F96F1]/80 text-white"
         >
           {isSaving ? (
             <>
@@ -345,32 +348,33 @@ export default function AgentConfig() {
         </Button>
       </div>
 
-      {/* Project Info */}
-      {projectData && (
-        <div className="rounded-lg border border-slate-800/60 bg-slate-900/40 p-3 space-y-2">
-          <p className="text-xs font-medium text-slate-300">Project Details</p>
-          <div className="space-y-1 text-xs text-slate-400">
-            <div className="flex justify-between">
-              <span>Name:</span>
-              <span className="text-slate-300">{projectData.name}</span>
-            </div>
-            {projectData.description && (
+        {/* Project Info */}
+        {projectData && (
+          <div className="rounded-lg border border-border bg-card/50 p-3 space-y-2">
+            <p className="text-xs font-medium text-foreground">Project Details</p>
+            <div className="space-y-1 text-xs text-muted-foreground">
               <div className="flex justify-between">
-                <span>Description:</span>
-                <span className="text-slate-300 truncate max-w-[150px]" title={projectData.description}>
-                  {projectData.description}
+                <span>Name:</span>
+                <span className="text-foreground">{projectData.name}</span>
+              </div>
+              {projectData.description && (
+                <div className="flex justify-between">
+                  <span>Description:</span>
+                  <span className="text-foreground truncate max-w-[150px]" title={projectData.description}>
+                    {projectData.description}
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span>Last Updated:</span>
+                <span className="text-foreground">
+                  {new Date(projectData.updatedAt).toLocaleDateString()}
                 </span>
               </div>
-            )}
-            <div className="flex justify-between">
-              <span>Last Updated:</span>
-              <span className="text-slate-300">
-                {new Date(projectData.updatedAt).toLocaleDateString()}
-              </span>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
