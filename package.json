@@ -7,7 +7,8 @@
     "build": "cross-env NODE_OPTIONS=--max-old-space-size=8192 next build",
     "start": "next start",
     "lint": "biome check",
-    "format": "biome format --write"
+    "format": "biome format --write",
+    "vercel-build": "prisma generate && next build"
   },
   "dependencies": {
     "@ai-sdk-tools/devtools": "*",
