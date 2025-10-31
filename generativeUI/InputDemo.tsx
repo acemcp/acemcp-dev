@@ -58,7 +58,7 @@ const InputDemo = ({ projectId }: any) => {
 
   const { messages, status, sendMessage, error } = useChat({
     transport: new DefaultChatTransport({
-      api: "/api/mcp",
+      api: "https://acemcp-service.rushikeshpatil8208.workers.dev",
       body: {
         projectId: projectId,
       },
