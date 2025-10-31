@@ -46,6 +46,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "cobe": "^0.6.5",
+    "dotenv": "^17.2.3",
     "fastmcp": "^3.19.2",
     "lucide-react": "^0.545.0",
     "marked": "^16.4.0",
@@ -58,7 +59,8 @@
     "reactflow": "^11.11.4",
     "streamdown": "^1.4.0",
     "tailwind-merge": "^3.3.1",
-    "use-stick-to-bottom": "^1.1.1"
+    "use-stick-to-bottom": "^1.1.1",
+    "workers-ai-provider": "^2.0.0"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.0",

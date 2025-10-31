@@ -9,9 +9,8 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 import { createMistral } from "@ai-sdk/mistral";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
-
+import 'dotenv/config';
 import { NextApiRequest } from "next";
-import { log } from "console";
 
 const mistral = createMistral({
   apiKey: "cAdRTLCViAHCn0ddFFEe50ULu04MbUvZ",
@@ -83,25 +82,6 @@ async function getMCPTools(projectId: string) {
   return mcpToolsCache;
 }
 
-// export const maxDuration = 30;
-
-// export async function GET(req: NextApiRequest) {
-//   // const projectId = new URL(req.url).searchParams.get("projectId");
-//    const {projectId} = await req.body
-
-//   if (!projectId) {
-//     return new Response("Project ID required", { status: 400 });
-//   }
-//   try {
-//     const tools = await getMCPTools(projectId);
-//     return Response.json(tools);
-//   } catch (error) {
-//     return new Response(
-//       error instanceof Error ? error.message : "MCP config not found",
-//       { status: 404 },
-//     );
-//   }
-// }
 
 export async function POST(req: Request) {
   const { messages, projectId }: { messages: UIMessage[]; projectId: any } =
@@ -120,13 +100,8 @@ export async function POST(req: Request) {
 
     const result = streamText({
       system: "You are a helpful assistant with access to mcp tools",
-      model: google("gemini-2.5-pro"),
+        model: mistral("mistral-large-latest") , 
       tools,
-
-      // prepareStep: (steps: any, stepNumber: any) => {
-
-
-      // },
       toolChoice: "auto",
       stopWhen: [stepCountIs(10)],
       messages: convertToModelMessages(messages),
