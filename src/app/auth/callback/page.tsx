@@ -70,6 +70,8 @@ function AuthCallbackContent() {
           redirectUrl = `${redirectUrl}${separator}prompt=${encodeURIComponent(prompt)}`;
         }
 
+
+
         // Redirect to destination
         router.replace(redirectUrl);
         

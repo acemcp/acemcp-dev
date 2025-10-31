@@ -85,6 +85,11 @@ function AuthenticationContent() {
         // If sign-in fails with invalid credentials, proceed with sign-up
         if (signInError && signInError.message.includes("Invalid login credentials")) {
           // User doesn't exist, proceed with sign-up
+          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+          const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+          const baseUrl = isDevelopment ? window.location.origin : (siteUrl || window.location.origin);
+          const emailRedirectUrl = `${baseUrl}/auth/callback${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""}${prompt ? `&prompt=${encodeURIComponent(prompt)}` : ""}`;
+
           const { data, error } = await supabase.auth.signUp({
             email,
             password,
@@ -92,7 +97,7 @@ function AuthenticationContent() {
               data: {
                 username: email,
               },
-              emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""}${prompt ? `&prompt=${encodeURIComponent(prompt)}` : ""}`,
+              emailRedirectTo: emailRedirectUrl,
             },
           });
 
@@ -180,7 +185,10 @@ function AuthenticationContent() {
       if (redirectTo) callbackParams.set("redirectTo", redirectTo);
       if (prompt) callbackParams.set("prompt", prompt);
 
-      const callbackUrl = `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback${callbackParams.toString() ? `?${callbackParams.toString()}` : ""}`;
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+      const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const baseUrl = isDevelopment ? window.location.origin : (siteUrl || window.location.origin);
+      const callbackUrl = `${baseUrl}/auth/callback${callbackParams.toString() ? `?${callbackParams.toString()}` : ""}`;
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "github",
