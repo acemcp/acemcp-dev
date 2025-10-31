@@ -92,7 +92,7 @@ function AuthenticationContent() {
               data: {
                 username: email,
               },
-              emailRedirectTo: `${window.location.origin}/auth/callback${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""}${prompt ? `&prompt=${encodeURIComponent(prompt)}` : ""}`,
+              emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""}${prompt ? `&prompt=${encodeURIComponent(prompt)}` : ""}`,
             },
           });
 
@@ -180,7 +180,7 @@ function AuthenticationContent() {
       if (redirectTo) callbackParams.set("redirectTo", redirectTo);
       if (prompt) callbackParams.set("prompt", prompt);
 
-      const callbackUrl = `${window.location.origin}/auth/callback${callbackParams.toString() ? `?${callbackParams.toString()}` : ""}`;
+      const callbackUrl = `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback${callbackParams.toString() ? `?${callbackParams.toString()}` : ""}`;
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "github",
