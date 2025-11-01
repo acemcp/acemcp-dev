@@ -46,7 +46,7 @@ const models = [
 
 const USER_AVATAR = "https://github.com/haydenbleasel.png";
 const USER_NAME = "User";
-const ASSISTANT_AVATAR = "https://github.com/openai.png";
+const ASSISTANT_AVATAR = "/akronai.svg";
 const ASSISTANT_NAME = "Assistant";
 
 const InputDemo = ({ projectId }: any) => {
@@ -58,18 +58,12 @@ const InputDemo = ({ projectId }: any) => {
 
   const { messages, status, sendMessage, error } = useChat({
     transport: new DefaultChatTransport({
-      api: "https://acemcp-service.rushikeshpatil8208.workers.dev/mcp",
+      api: "https://acemcp-service.sahil3019.workers.dev/mcp",
       body: {
         projectId: projectId,
       },
     }),
   });
-
-  useEffect(() => {
-    if (error) {
-      setErrorMessage(`${error}`);
-    }
-  }, [error]);
 
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
