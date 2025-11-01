@@ -7,13 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 import {
   Loader2,
@@ -957,10 +950,11 @@ function OnboardingContent() {
 
 export default function OnboardingPage() {
 
-  let { projectId } = useParams()
+const searchParams = useSearchParams()
+ 
+  const search = searchParams.get('projectId')
 
-
-  console.log("projectId",projectId);
+  console.log("projectId",search);
   return (
     <Suspense
       fallback={
