@@ -8,12 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-import {
-  Loader2,
-  Zap,
-  CheckCircle2,
-  Server,
-} from "lucide-react";
+import { Loader2, Zap, CheckCircle2, Server } from "lucide-react";
 import { useMCP } from "@/context";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -22,21 +17,14 @@ type ProjectPageProps = {
 };
 
 function OnboardingContent() {
+  const searchParams = useSearchParams();
 
-  const searchParams = useSearchParams()
-  
-    const search  :any= searchParams.get('projectId')
-
-  console.log("projectId in ",search);
-
-  
-
+  const search: any = searchParams.get("projectId");
 
   const router = useRouter();
-  
+
   const { user, isLoading: authLoading } = useSupabaseAuth();
   const supabase = getSupabaseBrowserClient();
-
 
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -49,75 +37,64 @@ function OnboardingContent() {
   const [tone, setTone] = useState("");
   const [mcpServers, setMcpServers] = useState<MCPServerConfig[]>([]);
 
+  // useEffect(() => {
+  //   console.log("projectDescription in useEffect ", projectDescription);
+  //   console.log("identity", identity);
+  //   console.log("instructions", instructions);
+  //   console.log("tone", tone);
+  // }, [projectDescription, identity, instructions, tone]);
 
+  // useEffect(() => {
+  // const fetchMetaData = async() => {
+  //   let { data: ProjectMetadata, error } = await supabase
+  //   .from('ProjectMetadata')
+  //   .select('*')
+  //  .eq('id', search)
 
+  //  console.log("ProjectMetadata in effect ", ProjectMetadata);
+  //  return ProjectMetadata
+  // }
 
+  //   useEffect(() => {
+  //     if (!authLoading && !user) {
+  //       router.push("/authentication?redirectTo=/onboarding");
+  //     }
+  //   }, [user, authLoading, router]);
+  // ✅ Redirect if not logged in
   useEffect(() => {
-    console.log("projectDescription in useEffect ",projectDescription);
-  console.log("identity" , identity);
-  console.log("instructions" , instructions);
-  console.log("tone" , tone);
-    
-  }, [projectDescription, identity, instructions, tone])
-  
-// useEffect(() => {
-// const fetchMetaData = async() => {
-//   let { data: ProjectMetadata, error } = await supabase
-//   .from('ProjectMetadata')
-//   .select('*')
-//  .eq('id', search)
-
-
-//  console.log("ProjectMetadata in effect ", ProjectMetadata);
-//  return ProjectMetadata
-// }
-
-//   useEffect(() => {
-//     if (!authLoading && !user) {
-//       router.push("/authentication?redirectTo=/onboarding");
-//     }
-//   }, [user, authLoading, router]);
-// ✅ Redirect if not logged in
-useEffect(() => {
-  if (!authLoading && !user) {
-    router.push("/authentication?redirectTo=/onboarding");
-  }
-}, [user, authLoading, router]);
-
-// ✅ Fetch metadata for this project
-useEffect(() => {
-  const fetchMetaData = async () => {
-    if (!search) return;
-
-    const { data: ProjectMetadata, error } = await supabase
-      .from("ProjectMetadata")
-      .select("*")
-      .eq("id", search)
-      .single();
-
-    if (error) {
-      console.error("Error fetching metadata:", error);
-      return;
+    if (!authLoading && !user) {
+      router.push("/authentication?redirectTo=/onboarding");
     }
+  }, [user, authLoading, router]);
 
+  // ✅ Fetch metadata for this project
+  useEffect(() => {
+    const fetchProjectMetaData = async () => {
+      if (!search) return;
 
-    console.log("ProjectMetadata in useEffect ", ProjectMetadata);
-    
-    if (ProjectMetadata) {
-      console.log("Fetched metadata:", ProjectMetadata);
-      setIdentity(ProjectMetadata.identity || "");
-      setInstructions(ProjectMetadata.instructions || "");
-      setTone(ProjectMetadata.tone || "");
-    }
-  };
+      const { data: ProjectMetadata, error } = await supabase
+        .from("ProjectMetadata")
+        .select("*")
+        .eq("id", search)
+        .single();
 
-  fetchMetaData();
-}, [search, supabase]);
+      if (error) {
+        console.error("Error fetching ProjectMetadata:", error);
+        return;
+      }
 
+      console.log("ProjectMetadata in useEffect ", ProjectMetadata);
 
-  
+      if (ProjectMetadata) {
+        console.log("Fetched metadata:", ProjectMetadata);
+        setIdentity(ProjectMetadata.identity || "");
+        setInstructions(ProjectMetadata.instructions || "");
+        setTone(ProjectMetadata.tone || "");
+      }
+    };
 
-
+    fetchProjectMetaData();
+  }, [search, supabase]);
 
   useEffect(() => {
     // Get initial prompt from URL if available
@@ -126,7 +103,6 @@ useEffect(() => {
       setProjectDescription(prompt);
     }
   }, [searchParams]);
-
 
   // Add this helper function to validate MCP servers
   async function validateMCPServer(
@@ -295,7 +271,9 @@ useEffect(() => {
     }
 
     // Check for failed validations
-    const failedServers = mcpServers.filter((server) => server.isValid === false);
+    const failedServers = mcpServers.filter(
+      (server) => server.isValid === false
+    );
     if (failedServers.length > 0) {
       const proceed = confirm(
         `${failedServers.length} server(s) failed validation. Do you want to continue anyway?`
@@ -311,9 +289,9 @@ useEffect(() => {
           url: server.url,
           authentication: server.showAuth
             ? {
-              headerName: server.authHeader,
-              headerValue: server.authValue,
-            }
+                headerName: server.authHeader,
+                headerValue: server.authValue,
+              }
             : null,
           validationResult: {
             isValid: server.isValid,
@@ -360,19 +338,21 @@ useEffect(() => {
       const userDetails = await supabase.auth.getUser();
       const ownerId = userDetails.data.user?.id;
       const { data, error } = await supabase
-        .from('Project')
-        .upsert({ id: search, name: projectName, projectDesc: projectDescription, updatedAt: new Date().toISOString(), ownerId: ownerId })
+        .from("Project")
+        .upsert({
+          id: search,
+          name: projectName,
+          projectDesc: projectDescription,
+          updatedAt: new Date().toISOString(),
+          ownerId: ownerId,
+        })
         .eq("id", search)
-        .select()
-
-
-
+        .select();
 
       if (error || !data) {
         console.error("Supabase insert error:", error);
       }
       setStep(2);
-
     } catch (error) {
       console.error("Error Updating project:", error);
       alert("Failed to Update project");
@@ -384,7 +364,6 @@ useEffect(() => {
   const handleUpdateMetadata = async () => {
     setStep(3);
   };
-
 
   if (authLoading) {
     return (
@@ -428,25 +407,25 @@ useEffect(() => {
           }}
         />
 
-
-
         {/* Subtle floating orbs with brand color */}
         <div
           className="absolute top-1/4 left-1/4 w-[60vh] h-[60vh] rounded-full opacity-[0.03] animate-pulse"
           style={{
-            background: 'radial-gradient(circle, rgba(95, 150, 241, 0.4) 0%, transparent 70%)',
-            filter: 'blur(60px)',
-            animationDuration: '15s',
+            background:
+              "radial-gradient(circle, rgba(95, 150, 241, 0.4) 0%, transparent 70%)",
+            filter: "blur(60px)",
+            animationDuration: "15s",
           }}
         />
 
         <div
           className="absolute bottom-1/3 right-1/3 w-[50vh] h-[50vh] rounded-full opacity-[0.02] animate-pulse"
           style={{
-            background: 'radial-gradient(circle, rgba(95, 150, 241, 0.3) 0%, transparent 70%)',
-            filter: 'blur(50px)',
-            animationDuration: '18s',
-            animationDelay: '5s',
+            background:
+              "radial-gradient(circle, rgba(95, 150, 241, 0.3) 0%, transparent 70%)",
+            filter: "blur(50px)",
+            animationDuration: "18s",
+            animationDelay: "5s",
           }}
         />
 
@@ -463,11 +442,7 @@ useEffect(() => {
       <div className="relative flex min-h-screen flex-col items-center justify-center px-4 py-16">
         {/* AKRON Logo */}
         <div className="mb-8 flex items-center gap-3">
-          <img 
-            src="/akronai.svg" 
-            alt="Akron AI" 
-            className="h-12 w-auto"
-          />
+          <img src="/akronai.svg" alt="Akron AI" className="h-12 w-auto" />
           <span className="text-3xl font-bold text-white">akron</span>
         </div>
 
@@ -488,10 +463,11 @@ useEffect(() => {
               {[1, 2, 3].map((stepNum) => (
                 <div key={stepNum} className="flex items-center gap-4">
                   <div
-                    className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all font-semibold ${step >= stepNum
-                      ? "border-[#5F96F1] bg-[#5F96F1] text-white"
-                      : "border-white/20 bg-transparent text-white/40"
-                      }`}
+                    className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all font-semibold ${
+                      step >= stepNum
+                        ? "border-[#5F96F1] bg-[#5F96F1] text-white"
+                        : "border-white/20 bg-transparent text-white/40"
+                    }`}
                   >
                     {step > stepNum ? (
                       <CheckCircle2 className="h-6 w-6" />
@@ -501,8 +477,9 @@ useEffect(() => {
                   </div>
                   {stepNum < 3 && (
                     <div
-                      className={`w-16 h-0.5 transition-all ${step > stepNum ? "bg-[#5F96F1]" : "bg-white/20"
-                        }`}
+                      className={`w-16 h-0.5 transition-all ${
+                        step > stepNum ? "bg-[#5F96F1]" : "bg-white/20"
+                      }`}
                     />
                   )}
                 </div>
@@ -526,7 +503,9 @@ useEffect(() => {
               {/* Form Fields */}
               <div className="space-y-6">
                 <div className="space-y-3">
-                  <Label className="text-white/80 font-medium">Project Name *</Label>
+                  <Label className="text-white/80 font-medium">
+                    Project Name *
+                  </Label>
                   <Input
                     value={projectName}
                     onChange={(e) => setProjectName(e.target.value)}
@@ -536,7 +515,9 @@ useEffect(() => {
                 </div>
 
                 <div className="space-y-3">
-                  <Label className="text-white/80 font-medium">Description</Label>
+                  <Label className="text-white/80 font-medium">
+                    Description
+                  </Label>
                   <Textarea
                     value={projectDescription}
                     onChange={(e) => setProjectDescription(e.target.value)}
@@ -547,7 +528,9 @@ useEffect(() => {
 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-3">
-                    <Label className="text-white/80 font-medium">Agent Identity</Label>
+                    <Label className="text-white/80 font-medium">
+                      Agent Identity
+                    </Label>
                     <Input
                       value={identity}
                       onChange={(e) => setIdentity(e.target.value)}
@@ -568,7 +551,9 @@ useEffect(() => {
                 </div>
 
                 <div className="space-y-3">
-                  <Label className="text-white/80 font-medium">Instructions</Label>
+                  <Label className="text-white/80 font-medium">
+                    Instructions
+                  </Label>
                   <Textarea
                     value={instructions}
                     onChange={(e) => setInstructions(e.target.value)}
@@ -612,7 +597,9 @@ useEffect(() => {
               {/* Form Fields */}
               <div className="space-y-6">
                 <div className="space-y-3">
-                  <Label className="text-white/80 font-medium">Project Name</Label>
+                  <Label className="text-white/80 font-medium">
+                    Project Name
+                  </Label>
                   <Input
                     value={projectName}
                     onChange={(e) => setProjectName(e.target.value)}
@@ -622,7 +609,9 @@ useEffect(() => {
                 </div>
 
                 <div className="space-y-3">
-                  <Label className="text-white/80 font-medium">Description</Label>
+                  <Label className="text-white/80 font-medium">
+                    Description
+                  </Label>
                   <Textarea
                     value={projectDescription}
                     onChange={(e) => setProjectDescription(e.target.value)}
@@ -633,7 +622,9 @@ useEffect(() => {
 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-3">
-                    <Label className="text-white/80 font-medium">Agent Identity</Label>
+                    <Label className="text-white/80 font-medium">
+                      Agent Identity
+                    </Label>
                     <Input
                       value={identity}
                       onChange={(e) => setIdentity(e.target.value)}
@@ -654,7 +645,9 @@ useEffect(() => {
                 </div>
 
                 <div className="space-y-3">
-                  <Label className="text-white/80 font-medium">Instructions</Label>
+                  <Label className="text-white/80 font-medium">
+                    Instructions
+                  </Label>
                   <Textarea
                     value={instructions}
                     onChange={(e) => setInstructions(e.target.value)}
@@ -728,7 +721,7 @@ useEffect(() => {
                   </div>
                 )}
 
-            {/* // Replace the MCP Server Card JSX in your component */}
+                {/* // Replace the MCP Server Card JSX in your component */}
 
                 {mcpServers.map((server, index) => (
                   <div
@@ -769,8 +762,18 @@ useEffect(() => {
                         </div>
                       ) : server.isValid === false ? (
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
-                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          <svg
+                            className="h-3 w-3"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M6 18L18 6M6 6l12 12"
+                            />
                           </svg>
                           Invalid
                         </div>
@@ -783,7 +786,9 @@ useEffect(() => {
 
                     {/* Server URL Input */}
                     <div className="space-y-3 mb-4">
-                      <Label className="text-white/80 font-medium">MCP Server URL</Label>
+                      <Label className="text-white/80 font-medium">
+                        MCP Server URL
+                      </Label>
                       <div className="flex gap-3">
                         <Input
                           value={server.url}
@@ -816,7 +821,7 @@ useEffect(() => {
 
                     {/* Validation Error Message */}
                     {server.validationError && (
-                      <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-4">
+                      <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-4 mb-4">
                         <div className="flex items-start gap-3">
                           <svg
                             className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0"
@@ -845,7 +850,7 @@ useEffect(() => {
 
                     {/* Success Message with Tools */}
                     {server.isValid && server.tools && (
-                      <div className="rounded-xl bg-green-500/10 border border-green-500/30 p-4">
+                      <div className="rounded-xl bg-green-500/10 border border-green-500/30 p-4 mb-4">
                         <div className="flex items-start gap-3">
                           <CheckCircle2 className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
                           <div className="flex-1">
@@ -857,14 +862,16 @@ useEffect(() => {
                             </p>
                             {server.tools.length > 0 && (
                               <div className="mt-3 flex flex-wrap gap-2">
-                                {server.tools.slice(0, 5).map((tool: any, idx: number) => (
-                                  <span
-                                    key={idx}
-                                    className="inline-flex items-center px-2 py-1 rounded-md bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-medium"
-                                  >
-                                    {tool.name}
-                                  </span>
-                                ))}
+                                {server.tools
+                                  .slice(0, 5)
+                                  .map((tool: any, idx: number) => (
+                                    <span
+                                      key={idx}
+                                      className="inline-flex items-center px-2 py-1 rounded-md bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-medium"
+                                    >
+                                      {tool.name}
+                                    </span>
+                                  ))}
                                 {server.tools.length > 5 && (
                                   <span className="inline-flex items-center px-2 py-1 rounded-md bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-medium">
                                     +{server.tools.length - 5} more
@@ -906,8 +913,9 @@ useEffect(() => {
                           </span>
                         </div>
                         <svg
-                          className={`h-5 w-5 text-white/60 transition-transform ${server.showAuth ? "rotate-180" : ""
-                            }`}
+                          className={`h-5 w-5 text-white/60 transition-transform ${
+                            server.showAuth ? "rotate-180" : ""
+                          }`}
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -924,7 +932,9 @@ useEffect(() => {
                       {server.showAuth && (
                         <div className="px-4 pb-4 space-y-4 animate-in slide-in-from-top-2 duration-300">
                           <div className="space-y-3">
-                            <Label className="text-white/80 font-medium">Header Name</Label>
+                            <Label className="text-white/80 font-medium">
+                              Header Name
+                            </Label>
                             <Input
                               value={server.authHeader}
                               onChange={(e) => {
@@ -938,7 +948,9 @@ useEffect(() => {
                             />
                           </div>
                           <div className="space-y-3">
-                            <Label className="text-white/80 font-medium">Bearer Value</Label>
+                            <Label className="text-white/80 font-medium">
+                              Bearer Value
+                            </Label>
                             <Input
                               type="password"
                               value={server.authValue}
@@ -953,7 +965,9 @@ useEffect(() => {
                             />
                             <p className="text-xs text-white/50">
                               Token will be sent as: {server.authHeader}:{" "}
-                              {server.authValue ? "Bearer ***" : "Bearer <token>"}
+                              {server.authValue
+                                ? "Bearer ***"
+                                : "Bearer <token>"}
                             </p>
                           </div>
                         </div>
@@ -1010,16 +1024,10 @@ useEffect(() => {
   );
 }
 
-  export default function OnboardingPage() {
-
-
+export default function OnboardingPage() {
   return (
-    
-
-     <Suspense>
-  <OnboardingContent />
+    <Suspense>
+      <OnboardingContent />
     </Suspense>
-    
-  
   );
 }
