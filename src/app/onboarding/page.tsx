@@ -22,10 +22,11 @@ type ProjectPageProps = {
 };
 
 function OnboardingContent({ projectId }: ProjectPageProps) {
+     
 
 
-
-          
+  console.log(" goyt projectId" ,  projectId);
+  
   const { promptMetadata } = useMCP();
 
   const router = useRouter();
@@ -47,18 +48,25 @@ function OnboardingContent({ projectId }: ProjectPageProps) {
 
 
 useEffect(() => {
-const fetchMetaData =async() => {
+const fetchMetaData = async() => {
 
   let { data: ProjectMetadata, error } = await supabase
   .from('ProjectMetadata')
   .select('*')
-  return ProjectMetadata
+ .eq('id', projectId)
+
+
+
+ console.log("ProjectMetadata in effect ", ProjectMetadata);
+ return ProjectMetadata
 }
 
-const metaData = await fetchMetaData()
+
+let metaData  :any= fetchMetaData()
 setIdentity(metaData?.identity || "")
 setInstructions(metaData?.instructions || "")
 setTone(metaData?.tone || "")
+
 
 
 }, []);
