@@ -60,32 +60,61 @@ function OnboardingContent() {
     
   }, [projectDescription, identity, instructions, tone])
   
+// useEffect(() => {
+// const fetchMetaData = async() => {
+//   let { data: ProjectMetadata, error } = await supabase
+//   .from('ProjectMetadata')
+//   .select('*')
+//  .eq('id', search)
+
+
+//  console.log("ProjectMetadata in effect ", ProjectMetadata);
+//  return ProjectMetadata
+// }
+
+//   useEffect(() => {
+//     if (!authLoading && !user) {
+//       router.push("/authentication?redirectTo=/onboarding");
+//     }
+//   }, [user, authLoading, router]);
+// ✅ Redirect if not logged in
 useEffect(() => {
-const fetchMetaData = async() => {
-  let { data: ProjectMetadata, error } = await supabase
-  .from('ProjectMetadata')
-  .select('*')
- .eq('id', search)
+  if (!authLoading && !user) {
+    router.push("/authentication?redirectTo=/onboarding");
+  }
+}, [user, authLoading, router]);
 
+// ✅ Fetch metadata for this project
+useEffect(() => {
+  const fetchMetaData = async () => {
+    if (!search) return;
 
- console.log("ProjectMetadata in effect ", ProjectMetadata);
- return ProjectMetadata
-}
+    const { data: ProjectMetadata, error } = await supabase
+      .from("ProjectMetadata")
+      .select("*")
+      .eq("id", search)
+      .single();
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/authentication?redirectTo=/onboarding");
+    if (error) {
+      console.error("Error fetching metadata:", error);
+      return;
     }
-  }, [user, authLoading, router]);
 
 
+    console.log("ProjectMetadata in useEffect ", ProjectMetadata);
+    
+    if (ProjectMetadata) {
+      console.log("Fetched metadata:", ProjectMetadata);
+      setIdentity(ProjectMetadata.identity || "");
+      setInstructions(ProjectMetadata.instructions || "");
+      setTone(ProjectMetadata.tone || "");
+    }
+  };
 
-let [metaData]  :any= fetchMetaData()
-setIdentity(metaData[0]?.identity || "")
-setInstructions(metaData[0]?.instructions || "")
-setTone(metaData[0]?.tone || "")
+  fetchMetaData();
+}, [search, supabase]);
 
-}, [search]);
+
   
 
 
