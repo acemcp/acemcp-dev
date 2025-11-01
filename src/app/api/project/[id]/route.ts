@@ -80,10 +80,12 @@ export async function GET(
  * PATCH /api/project/[id]
  * Updates project metadata
  */
-export async function PATCH(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+
+
+
+  console.log("id in params",params);
+  
   try {
     const supabase = await getSupabaseServerClient();
     

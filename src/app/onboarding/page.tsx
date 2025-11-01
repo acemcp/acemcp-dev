@@ -326,8 +326,8 @@ setTone(metaData[0]?.tone || "")
       const ownerId = userDetails.data.user?.id;
       const { data, error } = await supabase
         .from('Project')
-        .upsert({ id: promptMetadata?.id, name: projectName, projectDesc: projectDescription, updatedAt: new Date().toISOString(), ownerId: ownerId })
-        .eq("id", promptMetadata?.id)
+        .upsert({ id: search, name: projectName, projectDesc: projectDescription, updatedAt: new Date().toISOString(), ownerId: ownerId })
+        .eq("id", search)
         .select()
 
 
