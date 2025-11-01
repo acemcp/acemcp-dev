@@ -25,7 +25,6 @@ function OnboardingContent({ projectId }: ProjectPageProps) {
 
 
 
-})
           
   const { promptMetadata } = useMCP();
 
