@@ -58,18 +58,14 @@ const fetchMetaData = async() => {
  .eq('id', search)
 
 
-
  console.log("ProjectMetadata in effect ", ProjectMetadata);
  return ProjectMetadata
 }
 
-
-let [metaData]  :any= fetchMetaData()
-setIdentity(metaData?.identity || "")
-setInstructions(metaData?.instructions || "")
-setTone(metaData?.tone || "")
-
-
+let metaData  :any= fetchMetaData()
+setIdentity(metaData[0]?.identity || "")
+setInstructions(metaData[0]?.instructions || "")
+setTone(metaData[0]?.tone || "")
 
 }, []);
   
