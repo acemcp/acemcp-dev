@@ -30,7 +30,7 @@ function OnboardingContent() {
   console.log("projectId in ",search);
 
   
-  const { promptMetadata } = useMCP();
+
 
   const router = useRouter();
   
@@ -50,6 +50,16 @@ function OnboardingContent() {
   const [mcpServers, setMcpServers] = useState<MCPServerConfig[]>([]);
 
 
+
+
+  useEffect(() => {
+    console.log("projectDescription in useEffect ",projectDescription);
+  console.log("identity" , identity);
+  console.log("instructions" , instructions);
+  console.log("tone" , tone);
+    
+  }, [projectDescription, identity, instructions, tone])
+  
 useEffect(() => {
 const fetchMetaData = async() => {
   let { data: ProjectMetadata, error } = await supabase
@@ -62,26 +72,22 @@ const fetchMetaData = async() => {
  return ProjectMetadata
 }
 
-let metaData  :any= fetchMetaData()
-setIdentity(metaData[0]?.identity || "")
-setInstructions(metaData[0]?.instructions || "")
-setTone(metaData[0]?.tone || "")
-
-}, []);
-  
   useEffect(() => {
     if (!authLoading && !user) {
       router.push("/authentication?redirectTo=/onboarding");
     }
   }, [user, authLoading, router]);
 
-  useEffect(() => {
-    if (promptMetadata) {
-      setIdentity(promptMetadata.identity || "");
-      setInstructions(promptMetadata.instructions || "");
-      setTone(promptMetadata.tone || "");
-    }
-  }, [promptMetadata]);
+
+
+let [metaData]  :any= fetchMetaData()
+setIdentity(metaData[0]?.identity || "")
+setInstructions(metaData[0]?.instructions || "")
+setTone(metaData[0]?.tone || "")
+
+}, [search]);
+  
+
 
 
   useEffect(() => {
@@ -291,7 +297,7 @@ setTone(metaData[0]?.tone || "")
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            projectId: promptMetadata?.id,
+            projectId: search,
             serverUrl: server.url,
             authHeader: server.showAuth ? server.authHeader : null,
             authToken: server.showAuth ? server.authValue : null,
@@ -301,7 +307,7 @@ setTone(metaData[0]?.tone || "")
       }
 
       // Redirect to main dashboard
-      router.replace(`project/${promptMetadata?.id}`);
+      router.replace(`project/${search}`);
     } catch (error) {
       console.error("Error deploying:", error);
       alert("Failed to deploy");
