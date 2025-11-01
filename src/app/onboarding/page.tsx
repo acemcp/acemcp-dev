@@ -17,11 +17,16 @@ import {
 import { useMCP } from "@/context";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
+type ProjectPageProps = {
+  projectId: string | null;
+};
+
+function OnboardingContent({ projectId }: ProjectPageProps) {
 
 
-function OnboardingContent() {
 
-
+})
+          
   const { promptMetadata } = useMCP();
 
   const router = useRouter();
@@ -42,6 +47,23 @@ function OnboardingContent() {
   const [mcpServers, setMcpServers] = useState<MCPServerConfig[]>([]);
 
 
+useEffect(() => {
+const fetchMetaData =async() => {
+
+  let { data: ProjectMetadata, error } = await supabase
+  .from('ProjectMetadata')
+  .select('*')
+  return ProjectMetadata
+}
+
+const metaData = await fetchMetaData()
+setIdentity(metaData?.identity || "")
+setInstructions(metaData?.instructions || "")
+setTone(metaData?.tone || "")
+
+
+}, []);
+  
   useEffect(() => {
     if (!authLoading && !user) {
       router.push("/authentication?redirectTo=/onboarding");
@@ -948,22 +970,16 @@ function OnboardingContent() {
   );
 }
 
-export default function OnboardingPage() {
+  export default function OnboardingPage() {
 
-const searchParams = useSearchParams()
- 
-  const search = searchParams.get('projectId')
+  const searchParams = useSearchParams()
+  
+    const search  :any= searchParams.get('projectId')
 
-  console.log("projectId",search);
+  console.log("projectId in ",search);
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-        </div>
-      }
-    >
-      <OnboardingContent />
-    </Suspense>
+    <>
+    <OnboardingContent projectId={search} />
+    </>
   );
 }
