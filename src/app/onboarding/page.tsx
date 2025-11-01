@@ -27,11 +27,10 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 
 function OnboardingContent() {
+
+
   const { promptMetadata } = useMCP();
 
-
-
-  let { projectId } = useParams()
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading: authLoading } = useSupabaseAuth();
@@ -957,6 +956,11 @@ function OnboardingContent() {
 }
 
 export default function OnboardingPage() {
+
+  let { projectId } = useParams()
+
+
+  console.log("projectId",projectId);
   return (
     <Suspense
       fallback={
